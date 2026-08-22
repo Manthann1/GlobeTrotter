@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import SearchFilterToolbar from '../components/ui/SearchFilterToolbar';
 import { Heart, MessageCircle, MapPin, Loader } from 'lucide-react';
 import { api } from '../services/api';
-import { MOCK_TRIPS } from '../data/mockData';
+import { INITIAL_TRIPS } from '../data/mockData';
 import { Link } from 'react-router-dom';
 
 export default function CommunityPage() {
@@ -18,11 +18,11 @@ export default function CommunityPage() {
         if (Array.isArray(data) && data.length > 0) {
           setPublicTrips(data);
         } else {
-          setPublicTrips(MOCK_TRIPS.filter(t => t.isPublic !== false));
+          setPublicTrips(INITIAL_TRIPS.filter(t => t.isPublic !== false));
         }
       } catch (error) {
         console.error('Failed to fetch public trips, using mock fallback:', error);
-        setPublicTrips(MOCK_TRIPS.filter(t => t.isPublic !== false));
+        setPublicTrips(INITIAL_TRIPS.filter(t => t.isPublic !== false));
       } finally {
         setIsLoading(false);
       }

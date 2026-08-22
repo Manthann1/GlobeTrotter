@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useAuth } from './AuthContext';
-import { MOCK_TRIPS, CITIES_DATA } from '../data/mockData';
+import { INITIAL_TRIPS, CITIES_DATA } from '../data/mockData';
 import confetti from 'canvas-confetti';
 
 const TripContext = createContext();
@@ -157,12 +157,12 @@ export function TripProvider({ children }) {
 
         let normalized = (Array.isArray(loadedTrips) ? loadedTrips : []).map(normalizeTrip);
         if (normalized.length === 0) {
-          normalized = MOCK_TRIPS.map(normalizeTrip);
+          normalized = INITIAL_TRIPS.map(normalizeTrip);
         }
         setTrips(normalized);
       } catch (err) {
         console.error("Failed to load initial data:", err);
-        setTrips(MOCK_TRIPS.map(normalizeTrip));
+        setTrips(INITIAL_TRIPS.map(normalizeTrip));
       } finally {
         setLoading(false);
       }
