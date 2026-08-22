@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTrip } from '../context/TripContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -10,7 +9,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   
   const { login } = useAuth();
-  const { showToast } = useTrip(); // Assuming TripContext has showToast or similar
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -21,7 +19,6 @@ export default function LoginPage() {
     try {
       const result = await login(email, password);
       if (result.success) {
-        // showToast('Welcome back!', 'success');
         navigate('/'); // Redirect to dashboard
       } else {
         setError(result.message || 'Failed to log in');

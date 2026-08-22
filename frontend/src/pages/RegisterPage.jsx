@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useTrip } from '../context/TripContext';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    password: '', // Needed for API, even though not in HTML design
+    password: '',
     phone: '',
     city: '',
     country: '',
@@ -34,7 +33,7 @@ export default function RegisterPage() {
       const userData = {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
-        password: formData.password || 'password123', // Default if user doesn't enter it (as per HTML design lacking password)
+        password: formData.password || 'password123',
         phone: formData.phone,
         bio: formData.additionalInfo,
         currencyPref: 'INR',

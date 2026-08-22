@@ -68,11 +68,11 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  function logout() {
     localStorage.removeItem('globetrotter_token');
     setToken(null);
     setUser(null);
-  };
+  }
 
   const value = {
     user,
