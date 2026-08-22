@@ -1,0 +1,33 @@
+{
+  "name": "globetrotter-backend",
+  "version": "1.0.0",
+  "description": "Backend service for GlobeTrotter Hackathon project",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": [
+    "globetrotter",
+    "backend",
+    "express",
+    "prisma",
+    "nodejs"
+  ],
+  "author": "Siddhant",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^7.9.1",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "prisma": "^7.9.1"
+  }
+}
