@@ -106,3 +106,21 @@ export const deleteTrip = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Get a public trip by its share token
+ */
+export const getTripByShareToken = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    const trip = await tripService.getTripByShareToken(token);
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: 'Shared trip retrieved successfully',
+      data: { trip },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
