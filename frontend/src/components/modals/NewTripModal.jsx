@@ -18,8 +18,8 @@ export default function NewTripModal({ isOpen, onClose }) {
   const [name, setName] = useState('');
   const [destination, setDestination] = useState('');
   const [selectedCity, setSelectedCity] = useState(null);
-  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
-  const [endDate, setEndDate] = useState(new Date(Date.now() + 8 * 86400000).toISOString().slice(0, 10));
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState(() => new Date(Date.now() + 8 * 86400000).toISOString().slice(0, 10));
   const [totalBudget, setTotalBudget] = useState('65000');
   const [dailyCap, setDailyCap] = useState('7500');
   const [description, setDescription] = useState('');

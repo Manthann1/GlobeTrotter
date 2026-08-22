@@ -9,14 +9,6 @@ export default function ExplorePage({ onOpenNewTrip }) {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
-  
-  // Update URL if search term changes (optional, but good for shareability)
-  useEffect(() => {
-    const q = searchParams.get('q');
-    if (q !== searchTerm) {
-      setSearchTerm(q || '');
-    }
-  }, [searchParams]);
 
   // Derived data
   const publicTrips = trips.filter(t => t.isPublic || t.status === 'COMPLETED');
