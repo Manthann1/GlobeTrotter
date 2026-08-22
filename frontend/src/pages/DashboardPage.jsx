@@ -10,15 +10,13 @@ export default function DashboardPage({ onOpenNewTrip }) {
 
   const now = new Date();
   
-  const upcomingTrips = trips.filter((t) => {
-    const start = new Date(t.startDate);
-    return start > now;
-  }).map(t => ({...t, status: 'upcoming', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
+  const upcomingTrips = trips
+    .filter((t) => t.status === 'PLANNED' || !t.status || new Date(t.endDate) >= now || new Date(t.startDate) >= now)
+    .map(t => ({...t, status: 'upcoming', subtitle: t.stops?.map(s => s.cityName || s.city?.name).filter(Boolean).join(', ') || 'India Getaway'}));
 
-  const pastTrips = trips.filter((t) => {
-    const end = new Date(t.endDate);
-    return end < now;
-  }).map(t => ({...t, status: 'past', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
+  const pastTrips = trips
+    .filter((t) => t.status === 'COMPLETED' || (t.status !== 'PLANNED' && new Date(t.endDate) < now))
+    .map(t => ({...t, status: 'past', subtitle: t.stops?.map(s => s.cityName || s.city?.name).filter(Boolean).join(', ') || 'India Getaway'}));
 
   return (
     <div className="flex-grow w-full px-4 md:px-10 max-w-[1280px] mx-auto py-8">

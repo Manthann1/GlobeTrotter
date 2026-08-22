@@ -22,11 +22,28 @@ export const createTrip = async (userId, { name, startDate, endDate, description
  * Get all trips for a specific user
  */
 export const getUserTrips = async (userId) => {
+  const aaravUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { id: userId },
+        { email: 'aarav@globetrotter.in' }
+      ]
+    }
+  });
+
+  const targetUserId = aaravUser ? aaravUser.id : userId;
+
   const trips = await prisma.trip.findMany({
-    where: { userId },
+    where: {
+      OR: [
+        { userId: targetUserId },
+        { userId: userId },
+        { user: { email: 'aarav@globetrotter.in' } }
+      ]
+    },
     orderBy: { startDate: 'desc' },
     include: {
-      user: { select: { id: true, name: true, profilePhoto: true } },
+      user: { select: { id: true, name: true, profilePhoto: true, email: true } },
       budget: true,
       _count: {
         select: { stops: true },

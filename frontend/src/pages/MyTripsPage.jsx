@@ -50,18 +50,19 @@ export default function MyTripsPage() {
   const ongoingTrips = filteredTrips.filter(t => {
     const start = new Date(t.startDate);
     const end = new Date(t.endDate);
-    return start <= now && end >= now;
-  }).map(t => ({...t, status: 'ongoing', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
+    return (start <= now && end >= now) || t.status === 'ONGOING';
+  }).map(t => ({...t, status: 'ongoing', subtitle: t.stops?.map(s => s.cityName || s.city?.name).filter(Boolean).join(', ') || 'India Getaway'}));
 
   const upcomingTrips = filteredTrips.filter(t => {
     const start = new Date(t.startDate);
-    return start > now;
-  }).map(t => ({...t, status: 'upcoming', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
+    const end = new Date(t.endDate);
+    return start > now || (t.status === 'PLANNED' && end >= now);
+  }).map(t => ({...t, status: 'upcoming', subtitle: t.stops?.map(s => s.cityName || s.city?.name).filter(Boolean).join(', ') || 'India Getaway'}));
 
   const completedTrips = filteredTrips.filter(t => {
     const end = new Date(t.endDate);
-    return end < now;
-  }).map(t => ({...t, status: 'completed', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
+    return t.status === 'COMPLETED' || (end < now && t.status !== 'PLANNED' && t.status !== 'ONGOING');
+  }).map(t => ({...t, status: 'completed', subtitle: t.stops?.map(s => s.cityName || s.city?.name).filter(Boolean).join(', ') || 'India Getaway'}));
 
   const Section = ({ title, data }) => (
     <div className="mb-8">

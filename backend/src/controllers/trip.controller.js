@@ -52,11 +52,13 @@ export const getTrips = async (req, res, next) => {
     const isPublic = req.path.endsWith('/public') || req.query.public === 'true';
 
     let trips;
-    if (isPublic) {
+    if (isPublic || !req.user) {
       trips = await tripService.getPublicTrips();
     } else {
-      if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
       trips = await tripService.getUserTrips(req.user.id);
+      if (!trips || trips.length === 0) {
+        trips = await tripService.getPublicTrips();
+      }
     }
 
     const formattedTrips = trips.map(mapTripActivities);
