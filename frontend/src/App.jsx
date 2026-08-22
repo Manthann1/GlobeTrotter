@@ -48,6 +48,21 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+// Admin Route wrapper
+function AdminRoute({ children }) {
+  const { isAuthenticated, user, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!isAuthenticated || user?.role !== 'ADMIN') {
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+}
+
 function App() {
   const [newTripModalOpen, setNewTripModalOpen] = useState(false);
 
@@ -170,11 +185,11 @@ function App() {
             <Route
               path="/admin"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
                     <AdminPage />
                   </StandardLayout>
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             <Route

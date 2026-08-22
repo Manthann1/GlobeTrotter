@@ -1,5 +1,3 @@
-// GlobeTrotter Pre-seeded Database & Mock Data (India-Centric & Global)
-
 export const INITIAL_USER = {
   id: 'u-101-aarav',
   name: 'Aarav Sharma',
@@ -16,12 +14,11 @@ export const INITIAL_USER = {
   stats: {
     totalTrips: 6,
     upcomingTrips: 3,
-    budgetSavings: 38500, // in INR
+    budgetSavings: 38500,
   }
 };
 
 export const CITIES_DATA = [
-  // --- INDIAN DESTINATIONS ---
   {
     id: 'c-jaipur',
     name: 'Jaipur',
@@ -53,7 +50,7 @@ export const CITIES_DATA = [
         durationMins: 180,
         timeSlot: '09:00',
         description: 'Explore the majestic 16th-century fortress, mirror palace (Sheesh Mahal), and breathtaking Maota Lake views with an expert historian.',
-        imageUrl: 'https://images.unsplash.com/photo-1603262110263-fb010d6e59d4?auto=format&fit=crop&w=800&q=80'
+        imageUrl: 'https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=800&q=80'
       },
       {
         id: 'act-jpr-3',
@@ -108,7 +105,7 @@ export const CITIES_DATA = [
         durationMins: 90,
         timeSlot: '17:00',
         description: 'Glide along tranquil waters past Jag Niwas (Lake Palace) and Jag Mandir island under golden twilight skies.',
-        imageUrl: 'https://images.unsplash.com/photo-1595815771614-ade9d652a65d?auto=format&fit=crop&w=800&q=80'
+        imageUrl: 'https://images.unsplash.com/photo-1588096344356-9b2767098485?auto=format&fit=crop&w=800&q=80'
       },
       {
         id: 'act-udp-2',
@@ -163,7 +160,7 @@ export const CITIES_DATA = [
         durationMins: 720,
         timeSlot: '12:30',
         description: 'Overnight journey on a handcrafted Kettuvallam through Vembanad Lake backwaters with fresh Karimeen Pollichathu dinner.',
-        imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80'
+        imageUrl: 'https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=800&q=80'
       },
       {
         id: 'act-ker-2',
@@ -208,7 +205,7 @@ export const CITIES_DATA = [
         durationMins: 60,
         timeSlot: '14:00',
         description: 'Stay in colorful Latin Quarter Portuguese heritage mansions in Panjim.',
-        imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80'
+        imageUrl: 'https://images.unsplash.com/photo-1580837119756-563d608dd119?auto=format&fit=crop&w=800&q=80'
       },
       {
         id: 'act-goa-2',

@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { Search, SlidersHorizontal, ArrowUpDown, LayoutGrid } from 'lucide-react';
 
-/**
- * Reusable SearchFilterToolbar — matches the wireframe pattern
- * (Search bar + Group by + Filter + Sort by) used across multiple screens.
- */
 export default function SearchFilterToolbar({
   searchValue = '',
   onSearchChange,

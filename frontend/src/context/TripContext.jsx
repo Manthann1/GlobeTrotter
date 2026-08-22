@@ -15,7 +15,6 @@ export function TripProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch initial data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -27,8 +26,7 @@ export function TripProvider({ children }) {
           const tripsData = await api.getTrips();
           setTrips(Array.isArray(tripsData) ? tripsData : []);
         } else {
-          // If not authenticated, we could just clear trips or load public ones
-          const publicTrips = await api.getTrips(); // Our backend might return public trips if no token
+          const publicTrips = await api.getTrips();
           setTrips(Array.isArray(publicTrips) ? publicTrips : []);
         }
       } catch (err) {
@@ -45,18 +43,13 @@ export function TripProvider({ children }) {
     localStorage.setItem('globetrotter_currency', currency);
   }, [currency]);
 
-  // Currency formatting helper
   const formatPrice = (amount) => {
     const num = Number(amount || 0);
-    if (currency === 'INR') {
-      return `₹${num.toLocaleString('en-IN')}`;
-    }
-    const usd = Math.round(num / 85);
-    return `$${usd.toLocaleString('en-US')}`;
+    return `Rs. ${num.toLocaleString('en-IN')}`;
   };
 
   const toggleCurrency = () => {
-    setCurrency((prev) => (prev === 'INR' ? 'USD' : 'INR'));
+    setCurrency('INR');
   };
 
   const showToast = (message, type = 'success') => {

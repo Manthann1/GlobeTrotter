@@ -16,13 +16,11 @@ export default function ExplorePage({ onOpenNewTrip }) {
     api.getPublicTrips().then(setPublicTrips).catch(console.error);
   }, []);
 
-  // Derived data
   const topRegions = cities.filter(c => c.imageUrl).slice(0, 5);
 
   return (
     <div className="flex-grow w-full px-4 md:px-6 max-w-5xl mx-auto py-8 flex flex-col gap-8 relative font-['Montserrat']">
       
-      {/* HeroBanner */}
       <section className="w-full rounded-2xl overflow-hidden relative aspect-[16/7] md:aspect-[21/9] bg-[#e1e3e4] flex items-center justify-center shadow-sm border border-[#c5c5d3]" data-purpose="hero-banner">
         <img 
           src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80" 
@@ -36,7 +34,6 @@ export default function ExplorePage({ onOpenNewTrip }) {
         </div>
       </section>
 
-      {/* SearchAndFilters */}
       <section className="flex flex-col md:flex-row gap-3 w-full font-['Inter']" data-purpose="search-filters">
         <div className="flex-grow relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

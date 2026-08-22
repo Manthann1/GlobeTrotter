@@ -8,13 +8,12 @@ export default function ProfilePage() {
   const { user, trips } = useTrip();
   const [isEditing, setIsEditing] = useState(false);
   
-  // Local state for edits
   const [editForm, setEditForm] = useState({
-    name: user?.name || 'Jane Doe',
-    email: user?.email || 'jane@example.com',
-    location: user?.location || 'New York, USA',
-    phone: user?.phone || '+1 234 567 8900',
-    bio: user?.bio || 'Love traveling and exploring new cultures.'
+    name: user?.name || 'Aarav Sharma',
+    email: user?.email || 'aarav@globetrotter.in',
+    location: user?.location || 'Mumbai, India',
+    phone: user?.phone || '+91 98201 23456',
+    bio: user?.bio || 'Travel photographer & heritage explorer based in Mumbai.'
   });
 
   const handleEditChange = (e) => {
@@ -23,12 +22,11 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     try {
-      const updatedUser = await api.updateUser({
+      await api.updateUser({
         name: editForm.name,
         email: editForm.email,
         profilePhoto: editForm.profilePhoto
       });
-      // In a real app we'd also update auth context, but for now we'll just reload or assume it worked
       setIsEditing(false);
       window.location.reload();
     } catch (error) {
@@ -37,13 +35,12 @@ export default function ProfilePage() {
   };
 
   const handleCancel = () => {
-    // Revert changes
     setEditForm({
-      name: user?.name || 'Jane Doe',
-      email: user?.email || 'jane@example.com',
-      location: user?.location || 'New York, USA',
-      phone: user?.phone || '+1 234 567 8900',
-      bio: user?.bio || 'Love traveling and exploring new cultures.'
+      name: user?.name || 'Aarav Sharma',
+      email: user?.email || 'aarav@globetrotter.in',
+      location: user?.location || 'Mumbai, India',
+      phone: user?.phone || '+91 98201 23456',
+      bio: user?.bio || 'Travel photographer & heritage explorer based in Mumbai.'
     });
     setIsEditing(false);
   };
@@ -53,18 +50,17 @@ export default function ProfilePage() {
   const upcomingTrips = (trips || []).filter(t => {
     const start = new Date(t.startDate);
     return start > now;
-  }).map(t => ({...t, status: 'upcoming', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
+  }).map(t => ({...t, status: 'upcoming', subtitle: t.stops?.map(s => s.cityName || s.city?.name).join(', ') || 'No destinations'}));
 
   const previousTrips = (trips || []).filter(t => {
     const end = new Date(t.endDate);
-    return end < now;
-  }).map(t => ({...t, status: 'past', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
+    return end <= now;
+  }).map(t => ({...t, status: 'past', subtitle: t.stops?.map(s => s.cityName || s.city?.name).join(', ') || 'No destinations'}));
 
-  const avatarUrl = user?.avatarUrl || "https://ui-avatars.com/api/?name=Jane+Doe&background=00236f&color=fff";
+  const avatarUrl = user?.profilePhoto || user?.avatarUrl || "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80";
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 py-8">
-      {/* Top Section: Avatar & Basic Info */}
       <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-10 bg-white p-8 rounded-xl border border-[#e1e3e4] shadow-sm">
         <img 
           src={avatarUrl} 
@@ -77,7 +73,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* User Details Section */}
       <div className="mb-10 bg-white p-8 rounded-xl border border-[#e1e3e4] shadow-sm">
         <div className="flex justify-between items-center mb-6 border-b border-[#edeeef] pb-4">
           <h2 className="text-xl font-['Montserrat'] font-bold text-[#191c1d]">User Details</h2>
@@ -178,7 +173,6 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Preplanned Trips Section */}
       <div className="mb-10">
         <h2 className="text-xl font-['Montserrat'] font-bold text-[#191c1d] mb-6">Preplanned Trips</h2>
         {upcomingTrips.length > 0 ? (
@@ -194,7 +188,6 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Previous Trips Section */}
       <div className="mb-10">
         <h2 className="text-xl font-['Montserrat'] font-bold text-[#191c1d] mb-6">Previous Trips</h2>
         {previousTrips.length > 0 ? (

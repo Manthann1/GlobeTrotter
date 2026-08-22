@@ -164,7 +164,7 @@ export default function NewTripModal({ isOpen, onClose }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold font-['Inter'] uppercase tracking-wider text-[#444651] mb-1.5 flex items-center gap-1.5">
-                  <DollarSign className="w-3.5 h-3.5 text-[#006c49]" /> Target Budget ({currency === 'INR' ? '₹ INR' : '$ USD'})
+                  <IndianRupee className="w-3.5 h-3.5 text-[#006c49]" /> Target Budget (Rs.)
                 </label>
                 <input
                   type="number"
@@ -178,7 +178,7 @@ export default function NewTripModal({ isOpen, onClose }) {
               </div>
               <div>
                 <label className="block text-xs font-bold font-['Inter'] uppercase tracking-wider text-[#444651] mb-1.5 flex items-center gap-1.5">
-                  <DollarSign className="w-3.5 h-3.5 text-[#006c49]" /> Daily Cap ({currency === 'INR' ? '₹ INR' : '$ USD'})
+                  <IndianRupee className="w-3.5 h-3.5 text-[#006c49]" /> Daily Cap (Rs.)
                 </label>
                 <input
                   type="number"

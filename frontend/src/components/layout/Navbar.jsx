@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTrip } from '../../context/TripContext';
 import { useAuth } from '../../context/AuthContext';
-import { Search, Bell, Settings, Plus, Compass, Calendar, LayoutDashboard, Menu, X, Globe, IndianRupee, LogOut } from 'lucide-react';
+import { Search, Bell, Settings, Plus, Compass, Calendar, LayoutDashboard, Menu, X, Globe, IndianRupee, LogOut, User } from 'lucide-react';
 
 export default function Navbar({ onOpenNewTrip }) {
   const { user, searchQuery, setSearchQuery, currency, toggleCurrency } = useTrip();
@@ -28,7 +28,6 @@ export default function Navbar({ onOpenNewTrip }) {
   return (
     <header className="bg-white dark:bg-[#f8f9fa] docked full-width top-0 border-b border-[#c5c5d3] shadow-xs z-50 sticky transition-all">
       <div className="flex justify-between items-center w-full px-4 md:px-10 max-w-[1280px] mx-auto h-16">
-        {/* Brand Logo & Search */}
         <div className="flex items-center gap-6">
           <Link to="/" className="text-xl md:text-2xl font-bold font-['Montserrat'] text-[#00236f] flex items-center gap-2 tracking-tight hover:opacity-90 transition-opacity">
             <span className="material-symbols-outlined text-[#00236f] text-28px fill">explore</span>
@@ -38,7 +37,6 @@ export default function Navbar({ onOpenNewTrip }) {
             </span>
           </Link>
 
-          {/* Search Bar (desktop) */}
           <form onSubmit={handleSearchSubmit} className="hidden md:flex relative ml-2">
             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#757682] text-sm pointer-events-none">
               search
@@ -53,7 +51,6 @@ export default function Navbar({ onOpenNewTrip }) {
           </form>
         </div>
 
-        {/* Navigation Links (desktop) */}
         <nav className="hidden md:flex items-center gap-8 h-full">
           <Link
             to="/dashboard"
@@ -95,27 +92,27 @@ export default function Navbar({ onOpenNewTrip }) {
           >
             Community
           </Link>
-          <Link
-            to="/admin"
-            className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
-              isActive('/admin')
-                ? 'text-[#00236f] border-b-2 border-[#00236f] pb-0.5'
-                : 'text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] px-2 rounded-t'
-            }`}
-          >
-            Admin
-          </Link>
+          {user?.role === 'ADMIN' && (
+            <Link
+              to="/admin"
+              className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
+                isActive('/admin')
+                  ? 'text-[#00236f] border-b-2 border-[#00236f] pb-0.5'
+                  : 'text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] px-2 rounded-t'
+              }`}
+            >
+              Admin
+            </Link>
+          )}
         </nav>
 
-        {/* Trailing Actions */}
         <div className="flex items-center gap-2.5">
-          {/* Currency Switcher (INR / USD) */}
           <button
             onClick={toggleCurrency}
-            title={`Switch currency (Current: ${currency})`}
-            className="flex items-center gap-1 px-2.5 py-1 bg-[#f3f4f5] hover:bg-[#e1e3e4] border border-[#c5c5d3] rounded-full text-xs font-bold font-['JetBrains Mono'] text-[#00236f] transition-colors"
+            title="Currency: Rs. (Rupees)"
+            className="flex items-center gap-1 px-2.5 py-1 bg-[#f3f4f5] border border-[#c5c5d3] rounded-full text-xs font-bold font-['JetBrains Mono'] text-[#00236f]"
           >
-            {currency === 'INR' ? '₹ INR' : '$ USD'}
+            Rs.
           </button>
           {user ? (
             <>
@@ -136,7 +133,6 @@ export default function Navbar({ onOpenNewTrip }) {
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF5722] rounded-full ring-2 ring-white"></span>
                 </button>
 
-                {/* Profile Avatar & Dropdown */}
                 <div className="relative ml-1">
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
@@ -156,6 +152,13 @@ export default function Navbar({ onOpenNewTrip }) {
                         <p className="text-xs text-[#757682] truncate">{user.location || 'Mumbai, India'}</p>
                       </div>
                       <Link
+                        to="/profile"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#00236f] hover:bg-[#f3f4f5]"
+                      >
+                        <User className="w-4 h-4 text-[#00236f]" /> My Profile
+                      </Link>
+                      <Link
                         to="/dashboard"
                         onClick={() => setProfileDropdownOpen(false)}
                         className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#444651] hover:bg-[#f3f4f5] hover:text-[#00236f]"
@@ -169,16 +172,6 @@ export default function Navbar({ onOpenNewTrip }) {
                       >
                         <Compass className="w-4 h-4" /> Explore Destinations
                       </Link>
-                      <button
-                        onClick={() => {
-                          toggleCurrency();
-                          setProfileDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold text-[#444651] hover:bg-[#f3f4f5]"
-                      >
-                        <span>Currency</span>
-                        <span className="font-bold text-[#00236f]">{currency}</span>
-                      </button>
                       <button
                         onClick={() => {
                           setProfileDropdownOpen(false);
@@ -209,17 +202,15 @@ export default function Navbar({ onOpenNewTrip }) {
             </div>
           )}
 
-          {/* Mobile menu toggle */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-[#444651] hover:bg-[#f3f4f5] rounded-full transition-colors ml-1"
-            >
-              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-            </button>
-          </div>
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-[#444651] hover:bg-[#f3f4f5] rounded-full transition-colors ml-1"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
+      </div>
 
-      {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-[#c5c5d3] px-4 py-4 space-y-3 shadow-lg">
           <form onSubmit={handleSearchSubmit} className="relative mb-3">
@@ -236,28 +227,25 @@ export default function Navbar({ onOpenNewTrip }) {
           </form>
           <div className="flex justify-between items-center px-2 py-1">
             <span className="text-xs font-bold text-[#444651]">Currency</span>
-            <button
-              onClick={toggleCurrency}
-              className="px-3 py-1 bg-[#f3f4f5] border border-[#c5c5d3] rounded-full text-xs font-bold text-[#00236f]"
-            >
-              {currency === 'INR' ? '₹ INR (India)' : '$ USD (Intl)'}
-            </button>
+            <span className="px-3 py-1 bg-[#f3f4f5] border border-[#c5c5d3] rounded-full text-xs font-bold text-[#00236f]">
+              Rs.
+            </span>
           </div>
           {user ? (
             <>
               <Link
-                to="/dashboard"
+                to="/profile"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg font-bold text-sm text-[#00236f] bg-[#dce1ff]/40"
               >
-                <LayoutDashboard className="w-4 h-4" /> Dashboard
+                <User className="w-4 h-4" /> My Profile
               </Link>
               <Link
-                to="/trips/trip-royal-rajasthan/edit"
+                to="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm text-[#444651] hover:bg-[#f3f4f5]"
               >
-                <Calendar className="w-4 h-4" /> Trip Planner
+                <LayoutDashboard className="w-4 h-4" /> Dashboard
               </Link>
               <Link
                 to="/explore"

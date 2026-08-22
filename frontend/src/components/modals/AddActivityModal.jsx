@@ -104,7 +104,7 @@ export default function AddActivityModal({ isOpen, onClose, tripId, stopId, stop
           <div className="grid grid-cols-3 gap-3">
             <div>
               <label className="block text-xs font-bold font-['Inter'] uppercase tracking-wider text-[#444651] mb-1.5 flex items-center gap-1">
-                <DollarSign className="w-3 h-3 text-[#006c49]" /> Cost ({currency === 'INR' ? '₹' : '$'})
+                <IndianRupee className="w-3 h-3 text-[#006c49]" /> Cost (Rs.)
               </label>
               <input
                 type="number"

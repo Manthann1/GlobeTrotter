@@ -32,7 +32,12 @@ export const getUserTrips = async (userId) => {
         select: { stops: true },
       },
       stops: {
-        include: { city: true }
+        include: { 
+          city: true,
+          tripActivities: {
+            orderBy: { sortOrder: 'asc' }
+          }
+        }
       }
     },
   });
@@ -53,7 +58,12 @@ export const getPublicTrips = async () => {
         select: { stops: true, sharedLinks: true },
       },
       stops: {
-        include: { city: true }
+        include: { 
+          city: true,
+          tripActivities: {
+            orderBy: { sortOrder: 'asc' }
+          }
+        }
       }
     },
   });

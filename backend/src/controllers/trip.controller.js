@@ -3,6 +3,20 @@ import * as tripService from '../services/trip.service.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
 
 /**
+ * Helper to map tripActivities to activities for frontend compatibility
+ */
+const mapTripActivities = (trip) => {
+  if (!trip) return trip;
+  if (trip.stops) {
+    trip.stops = trip.stops.map(stop => ({
+      ...stop,
+      activities: stop.tripActivities || []
+    }));
+  }
+  return trip;
+};
+
+/**
  * Create a new trip
  */
 export const createTrip = async (req, res, next) => {
@@ -22,7 +36,7 @@ export const createTrip = async (req, res, next) => {
     return successResponse(res, {
       statusCode: 201,
       message: 'Trip created successfully',
-      data: { trip },
+      data: { trip: mapTripActivities(trip) },
     });
   } catch (error) {
     next(error);
@@ -45,10 +59,12 @@ export const getTrips = async (req, res, next) => {
       trips = await tripService.getUserTrips(req.user.id);
     }
 
+    const formattedTrips = trips.map(mapTripActivities);
+
     return successResponse(res, {
       statusCode: 200,
       message: 'Trips retrieved successfully',
-      data: { trips },
+      data: { trips: formattedTrips },
     });
   } catch (error) {
     next(error);
@@ -65,7 +81,7 @@ export const getTripById = async (req, res, next) => {
     return successResponse(res, {
       statusCode: 200,
       message: 'Trip retrieved successfully',
-      data: { trip },
+      data: { trip: mapTripActivities(trip) },
     });
   } catch (error) {
     next(error);
@@ -92,7 +108,7 @@ export const updateTrip = async (req, res, next) => {
     return successResponse(res, {
       statusCode: 200,
       message: 'Trip updated successfully',
-      data: { trip },
+      data: { trip: mapTripActivities(trip) },
     });
   } catch (error) {
     next(error);
@@ -127,7 +143,7 @@ export const getTripByShareToken = async (req, res, next) => {
     return successResponse(res, {
       statusCode: 200,
       message: 'Shared trip retrieved successfully',
-      data: { trip },
+      data: { trip: mapTripActivities(trip) },
     });
   } catch (error) {
     next(error);

@@ -22,7 +22,6 @@ export default function DashboardPage({ onOpenNewTrip }) {
 
   return (
     <div className="flex-grow w-full px-4 md:px-10 max-w-[1280px] mx-auto py-8">
-      {/* Welcome & Stats Section */}
       <section className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
@@ -47,9 +46,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
           </button>
         </div>
 
-        {/* 3 Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Stat Card 1 */}
           <div className="bg-white border border-[#c5c5d3] rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow flex flex-col justify-center">
             <span className="text-[#444651] font-['Inter'] text-xs font-bold uppercase tracking-wider mb-2">
               Total Trips Planned
@@ -59,7 +56,6 @@ export default function DashboardPage({ onOpenNewTrip }) {
             </span>
           </div>
 
-          {/* Stat Card 2 */}
           <div className="bg-white border border-[#c5c5d3] rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow flex flex-col justify-center">
             <span className="text-[#444651] font-['Inter'] text-xs font-bold uppercase tracking-wider mb-2">
               Upcoming Journeys
@@ -69,8 +65,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
             </span>
           </div>
 
-          {/* Stat Card 3 */}
-          <div className="bg-white border border-[#c5c5d3] rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow flex flex-col justify-center">
+          <div className="bg-[#f8f9fa] border border-[#c5c5d3] rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow flex flex-col justify-center">
             <span className="text-[#444651] font-['Inter'] text-xs font-bold uppercase tracking-wider mb-2">
               Estimated Budget Savings
             </span>

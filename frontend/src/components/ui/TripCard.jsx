@@ -2,10 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Eye } from 'lucide-react';
 
-/**
- * TripCard — "Short Over View of the Trip" card from the wireframe.
- * Used in MyTripsPage (Screen 6) and ProfilePage (Screen 7).
- */
 export default function TripCard({ trip, showViewButton = false, compact = false }) {
   const navigate = useNavigate();
 
