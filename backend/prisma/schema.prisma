@@ -1,0 +1,138 @@
+// GlobeTrotter Prisma Schema
+// PostgreSQL (PERN Stack)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String   @db.VarChar(100)
+  email        String   @unique @db.VarChar(255)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  profilePhoto String?  @map("profile_photo") @db.Text
+  languagePref String   @default("en") @map("language_pref") @db.VarChar(10)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  trips Trip[]
+
+  @@map("users")
+}
+
+model Trip {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  name        String   @db.VarChar(200)
+  startDate   DateTime @map("start_date") @db.Date
+  endDate     DateTime @map("end_date") @db.Date
+  description String?  @db.Text
+  coverPhoto  String?  @map("cover_photo") @db.Text
+  isPublic    Boolean  @default(false) @map("is_public")
+  shareToken  String?  @unique @map("share_token") @db.VarChar(100)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stops       Stop[]
+  budget      Budget?
+  sharedLinks SharedLink[]
+
+  @@map("trips")
+}
+
+model City {
+  id              String  @id @default(uuid()) @db.Uuid
+  name            String  @db.VarChar(100)
+  country         String  @db.VarChar(100)
+  costIndex       Decimal @default(1.00) @map("cost_index") @db.Decimal(5, 2)
+  popularityScore Decimal @default(0.00) @map("popularity_score") @db.Decimal(5, 2)
+  imageUrl        String? @map("image_url") @db.Text
+
+  activities Activity[]
+  stops      Stop[]
+
+  @@unique([name, country])
+  @@index([country])
+  @@index([name])
+  @@map("cities")
+}
+
+model Activity {
+  id           String  @id @default(uuid()) @db.Uuid
+  cityId       String  @map("city_id") @db.Uuid
+  name         String  @db.VarChar(200)
+  category     String  @db.VarChar(50)
+  cost         Decimal @default(0.00) @db.Decimal(10, 2)
+  durationMins Int     @default(60) @map("duration_mins")
+  description  String? @db.Text
+  imageUrl     String? @map("image_url") @db.Text
+
+  city           City           @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  tripActivities TripActivity[]
+
+  @@index([cityId, category])
+  @@index([category])
+  @@map("activities")
+}
+
+model Stop {
+  id            String   @id @default(uuid()) @db.Uuid
+  tripId        String   @map("trip_id") @db.Uuid
+  cityId        String   @map("city_id") @db.Uuid
+  arrivalDate   DateTime @map("arrival_date") @db.Date
+  departureDate DateTime @map("departure_date") @db.Date
+  sortOrder     Int      @default(0) @map("sort_order")
+
+  trip           Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  city           City           @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  tripActivities TripActivity[]
+
+  @@index([tripId, sortOrder])
+  @@map("stops")
+}
+
+model TripActivity {
+  id               String    @id @default(uuid()) @db.Uuid
+  stopId           String    @map("stop_id") @db.Uuid
+  activityId       String?   @map("activity_id") @db.Uuid
+  nameSnapshot     String    @map("name_snapshot") @db.VarChar(200)
+  costSnapshot     Decimal   @default(0.00) @map("cost_snapshot") @db.Decimal(10, 2)
+  categorySnapshot String    @map("category_snapshot") @db.VarChar(50)
+  scheduledDate    DateTime? @map("scheduled_date") @db.Date
+  timeSlot         String?   @map("time_slot") @db.VarChar(50)
+  sortOrder        Int       @default(0) @map("sort_order")
+
+  stop     Stop      @relation(fields: [stopId], references: [id], onDelete: Cascade)
+  activity Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+
+  @@index([stopId, sortOrder])
+  @@map("trip_activities")
+}
+
+model Budget {
+  id           String   @id @default(uuid()) @db.Uuid
+  tripId       String   @unique @map("trip_id") @db.Uuid
+  dailyCap     Decimal? @map("daily_cap") @db.Decimal(10, 2)
+  categoryCaps Json     @default("{}") @map("category_caps")
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@map("budgets")
+}
+
+model SharedLink {
+  id         String   @id @default(uuid()) @db.Uuid
+  tripId     String   @map("trip_id") @db.Uuid
+  shareToken String   @unique @map("share_token") @db.VarChar(100)
+  viewCount  Int      @default(0) @map("view_count")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([shareToken])
+  @@map("shared_links")
+}
