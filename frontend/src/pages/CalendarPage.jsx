@@ -44,6 +44,17 @@ export default function CalendarPage() {
     return days;
   }, [currentYear, currentMonth, firstDayOfMonth, daysInMonth]);
 
+  const parseLocalDate = (dateInput) => {
+    if (!dateInput) return null;
+    let str = String(dateInput).trim();
+    if (str.includes('T')) str = str.split('T')[0];
+    const parts = str.split('-');
+    if (parts.length === 3) {
+      return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    }
+    return new Date(dateInput);
+  };
+
   const getTripsForDay = (date) => {
     if (!date) return [];
     
@@ -53,9 +64,12 @@ export default function CalendarPage() {
     
     return (trips || []).filter(trip => {
       if (!trip.startDate || !trip.endDate) return false;
-      const start = new Date(trip.startDate);
+      const start = parseLocalDate(trip.startDate);
+      if (!start || isNaN(start.getTime())) return false;
       start.setHours(0, 0, 0, 0);
-      const end = new Date(trip.endDate);
+      
+      const end = parseLocalDate(trip.endDate);
+      if (!end || isNaN(end.getTime())) return false;
       end.setHours(23, 59, 59, 999);
       
       return compareTime >= start.getTime() && compareTime <= end.getTime();

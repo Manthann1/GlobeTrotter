@@ -111,6 +111,26 @@ export default function TripViewPage() {
   const lodgingPercent = totalSpent > 0 ? Math.round((breakdown.lodging / totalSpent) * 100) : 0;
   const foodPercent = totalSpent > 0 ? Math.round((breakdown.food / totalSpent) * 100) : 0;
   const activitiesPercent = totalSpent > 0 ? Math.round((breakdown.activities / totalSpent) * 100) : 0;
+  const formatDate = (dateInput) => {
+    if (!dateInput) return '';
+    let str = String(dateInput).trim();
+    if (str.includes('T')) {
+      str = str.split('T')[0];
+    }
+    const parts = str.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+        const d = new Date(year, month, day);
+        return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+      }
+    }
+    const d = new Date(dateInput);
+    if (isNaN(d.getTime())) return str;
+    return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
 
   return (
     <div className="bg-[#f8f9fa] text-[#191c1d] font-['Inter'] antialiased min-h-screen pb-24">
@@ -124,46 +144,47 @@ export default function TripViewPage() {
         </Link>
         <Link
           to={`/trips/${trip.id}/edit`}
-          className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-[#00236f]/10 text-[#00236f] hover:bg-[#00236f] hover:text-white font-['Inter'] text-xs font-bold uppercase tracking-wider transition-all"
+          className="inline-flex items-center gap-1.5 bg-[#00236f] text-white hover:bg-[#1e3a8a] transition-all px-4 py-2 rounded-full font-['Inter'] text-xs font-bold uppercase tracking-wider shadow-sm"
         >
-          <Edit className="w-3.5 h-3.5" /> Edit in Planner
+          <Edit3 className="w-3.5 h-3.5" /> Edit Trip
         </Link>
       </div>
 
-      {/* Hero Section */}
-      <section className="relative h-[55vh] min-h-[360px] w-full max-w-[1280px] mx-auto mt-3 overflow-hidden rounded-2xl shadow-xl">
-        <div
-          className="absolute inset-0 bg-cover bg-center w-full h-full transform hover:scale-105 transition-transform duration-700"
-          style={{ backgroundImage: `url('${trip.coverPhoto}')` }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
+      {/* Hero Banner */}
+      <div className="max-w-[1280px] mx-auto px-4 md:px-10 mt-4">
+        <div className="relative rounded-3xl overflow-hidden h-[340px] md:h-[420px] shadow-lg border border-[#c5c5d3]">
+          <div
+            className="absolute inset-0 bg-cover bg-center w-full h-full transform hover:scale-105 transition-transform duration-700"
+            style={{ backgroundImage: `url('${trip.coverPhoto}')` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
 
-        {/* Hero Content */}
-        <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full text-white">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="bg-[#FF5722] text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider font-['Inter'] shadow-sm">
-              🇮🇳 Featured Indian Itinerary
-            </span>
-            <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-['Inter']">
-              {trip.startDate} — {trip.endDate}
-            </span>
-          </div>
-
-          <h1 className="text-3xl md:text-5xl font-bold font-['Montserrat'] text-white mb-2 tracking-tight">
-            {trip.name}
-          </h1>
-
-          <div className="flex flex-wrap items-center gap-4 text-white/90 text-sm">
-            <div className="flex items-center gap-1.5 font-medium">
-              <User className="w-4 h-4" />
-              <span>Planned by {trip.author?.name || 'Aarav Sharma'}</span>
+          {/* Hero Content */}
+          <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full text-white">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <span className="bg-[#FF5722] text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider font-['Inter'] shadow-sm">
+                🇮🇳 Featured Indian Itinerary
+              </span>
+              <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-['Inter'] font-semibold">
+                {formatDate(trip.startDate)} — {formatDate(trip.endDate)}
+              </span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-[#ef9900]" />
-              <span>{trip.subtitle || (trip.stops && trip.stops.map((s) => s.cityName).join(', '))}</span>
+
+            <h1 className="text-3xl md:text-5xl font-bold font-['Montserrat'] text-white mb-2 tracking-tight">
+              {trip.name}
+            </h1>
+
+            <div className="flex flex-wrap items-center gap-4 text-white/90 text-sm">
+              <div className="flex items-center gap-1.5 font-medium">
+                <User className="w-4 h-4" />
+                <span>Planned by {trip.author?.name || 'Aarav Sharma'}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-[#ef9900]" />
+                <span>{trip.subtitle || (trip.stops && trip.stops.map((s) => s.cityName).join(', '))}</span>
+              </div>
             </div>
           </div>
-        </div>
 
         {/* Floating Share Actions on Hero (Top Right) */}
         <div className="absolute top-6 right-6 flex gap-2">
@@ -182,7 +203,8 @@ export default function TripViewPage() {
             <Share2 className="w-4 h-4" />
           </button>
         </div>
-      </section>
+      </div>
+    </div>
 
       {/* Main Content: 8 cols Itinerary + 4 cols Sidebar */}
       <main className="max-w-[1280px] mx-auto px-4 md:px-10 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">

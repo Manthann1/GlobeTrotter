@@ -102,8 +102,29 @@ export default function DashboardPage({ onOpenNewTrip }) {
             const spentPercent = Math.min(100, Math.round((totalSpent / totalBudget) * 100)) || 0;
             const inBudget = totalSpent <= totalBudget;
 
+            const formatDate = (dateInput) => {
+              if (!dateInput) return '';
+              let str = String(dateInput).trim();
+              if (str.includes('T')) {
+                str = str.split('T')[0];
+              }
+              const parts = str.split('-');
+              if (parts.length === 3) {
+                const year = parseInt(parts[0], 10);
+                const month = parseInt(parts[1], 10) - 1;
+                const day = parseInt(parts[2], 10);
+                if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+                  const d = new Date(year, month, day);
+                  return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
+              }
+              const d = new Date(dateInput);
+              if (isNaN(d.getTime())) return str;
+              return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+            };
+
             // Formatted date
-            const dateStr = trip.dateLabel || `${trip.startDate || '2024-10-15'} - ${trip.endDate || '2024-10-25'}`;
+            const dateStr = trip.dateLabel || `${formatDate(trip.startDate)} — ${formatDate(trip.endDate)}`;
 
             return (
               <div
