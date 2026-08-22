@@ -13,6 +13,7 @@ import TripCopiedPage from './pages/TripCopiedPage';
 import ExplorePage from './pages/ExplorePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import LandingPage from './pages/LandingPage';
 import NewTripModal from './components/modals/NewTripModal';
 import ToastContainer from './components/ui/Toast';
 
@@ -60,9 +61,19 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Dashboard Route (Protected) */}
+            {/* Landing Page (Public / Home) */}
             <Route
               path="/"
+              element={
+                <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                  <LandingPage />
+                </StandardLayout>
+              }
+            />
+
+            {/* Dashboard Route (Protected) */}
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
@@ -70,10 +81,6 @@ function App() {
                   </StandardLayout>
                 </ProtectedRoute>
               }
-            />
-            <Route
-              path="/dashboard"
-              element={<Navigate to="/" replace />}
             />
 
             {/* Public / Share Trip View */}

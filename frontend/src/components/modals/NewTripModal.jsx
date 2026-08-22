@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { X, MapPin, Calendar, DollarSign, Sparkles, Image as ImageIcon, IndianRupee } from 'lucide-react';
 
 const COVER_PHOTOS = [
-  { label: 'Rajasthan Fort', url: 'https://images.unsplash.com/photo-1603262110263-fb010d6e59d4?auto=format&fit=crop&w=1200&q=80' },
-  { label: 'Kerala Backwaters', url: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1200&q=80' },
+  { label: 'Rajasthan Fort', url: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=1200&q=80' },
+  { label: 'Kerala Backwaters', url: 'https://images.unsplash.com/photo-1596716035787-84eaf9c1e7d2?auto=format&fit=crop&w=1200&q=80' },
   { label: 'Goa Beaches', url: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1200&q=80' },
   { label: 'Varanasi Ghats', url: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80' },
   { label: 'Ladakh Mountains', url: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=1200&q=80' },
@@ -37,11 +37,11 @@ export default function NewTripModal({ isOpen, onClose }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    const newTrip = createTrip({
+    const newTrip = await createTrip({
       name,
       destination: destination || (selectedCity ? `${selectedCity.name}, ${selectedCity.state || selectedCity.country}` : 'Incredible India'),
       startDate,
@@ -54,7 +54,11 @@ export default function NewTripModal({ isOpen, onClose }) {
     });
 
     onClose();
-    navigate(`/trips/${newTrip.id}/edit`);
+    if (newTrip && newTrip.id) {
+      navigate(`/trips/${newTrip.id}/edit`);
+    } else {
+      navigate('/');
+    }
   };
 
   return (

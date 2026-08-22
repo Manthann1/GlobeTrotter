@@ -42,7 +42,7 @@ export default function RegisterPage() {
 
       const result = await register(userData);
       if (result.success) {
-        navigate('/'); // Redirect to dashboard
+        navigate('/dashboard'); // Redirect to dashboard
       } else {
         setError(result.message || 'Failed to register');
       }

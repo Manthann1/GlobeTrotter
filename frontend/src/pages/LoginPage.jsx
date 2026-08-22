@@ -19,7 +19,7 @@ export default function LoginPage() {
     try {
       const result = await login(email, password);
       if (result.success) {
-        navigate('/'); // Redirect to dashboard
+        navigate('/dashboard'); // Redirect to dashboard
       } else {
         setError(result.message || 'Failed to log in');
       }

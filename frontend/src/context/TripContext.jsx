@@ -21,15 +21,15 @@ export function TripProvider({ children }) {
       setLoading(true);
       try {
         const citiesData = await api.getCities();
-        setCities(citiesData.data || []);
+        setCities(Array.isArray(citiesData) ? citiesData : []);
         
         if (isAuthenticated) {
           const tripsData = await api.getTrips();
-          setTrips(tripsData.data || []);
+          setTrips(Array.isArray(tripsData) ? tripsData : []);
         } else {
           // If not authenticated, we could just clear trips or load public ones
           const publicTrips = await api.getTrips(); // Our backend might return public trips if no token
-          setTrips(publicTrips.data || []);
+          setTrips(Array.isArray(publicTrips) ? publicTrips : []);
         }
       } catch (err) {
         console.error("Failed to load initial data:", err);

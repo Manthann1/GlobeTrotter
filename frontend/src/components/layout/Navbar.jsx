@@ -56,9 +56,9 @@ export default function Navbar({ onOpenNewTrip }) {
         {/* Navigation Links (desktop) */}
         <nav className="hidden md:flex items-center gap-8 h-full">
           <Link
-            to="/"
+            to="/dashboard"
             className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
-              isActive('/') && location.pathname !== '/explore'
+              isActive('/dashboard')
                 ? 'text-[#00236f] border-b-2 border-[#00236f] pb-0.5'
                 : 'text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] px-2 rounded-t'
             }`}
@@ -107,90 +107,99 @@ export default function Navbar({ onOpenNewTrip }) {
           >
             {currency === 'INR' ? '₹ INR' : '$ USD'}
           </button>
-
-          <button
-            onClick={onOpenNewTrip}
-            className="hidden sm:inline-flex items-center gap-1.5 bg-[#5c3800] text-[#ef9900] hover:bg-[#3e2400] hover:text-[#ffddb8] transition-all px-4 py-2 rounded-full font-['Inter'] text-xs font-bold uppercase tracking-wider shadow-xs hover:shadow-md"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            New Trip
-          </button>
-
-          <div className="flex items-center gap-1">
-            <button
-              title="Notifications"
-              className="p-2 text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] rounded-full transition-colors relative"
-            >
-              <span className="material-symbols-outlined text-[20px]">notifications</span>
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF5722] rounded-full ring-2 ring-white"></span>
-            </button>
-
-            {/* Profile Avatar & Dropdown */}
-            <div className="relative ml-1">
+          {user ? (
+            <>
               <button
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center rounded-full ring-2 ring-transparent hover:ring-[#00236f] transition-all"
+                onClick={onOpenNewTrip}
+                className="hidden sm:inline-flex items-center gap-1.5 bg-[#5c3800] text-[#ef9900] hover:bg-[#3e2400] hover:text-[#ffddb8] transition-all px-4 py-2 rounded-full font-['Inter'] text-xs font-bold uppercase tracking-wider shadow-xs hover:shadow-md"
               >
-                <img
-                  src={user.profilePhoto || "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80"}
-                  alt={user.name}
-                  className="w-8 h-8 rounded-full border border-[#c5c5d3] object-cover"
-                />
+                <Plus className="w-3.5 h-3.5" />
+                New Trip
               </button>
 
-              {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-60 bg-white border border-[#c5c5d3] rounded-xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="px-4 py-2 border-b border-[#edeeef]">
-                    <p className="text-sm font-bold text-[#191c1d]">{user.name}</p>
-                    <p className="text-xs text-[#757682] truncate">{user.location || 'Mumbai, India'}</p>
-                  </div>
-                  <Link
-                    to="/"
-                    onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#444651] hover:bg-[#f3f4f5] hover:text-[#00236f]"
-                  >
-                    <LayoutDashboard className="w-4 h-4" /> My Dashboard
-                  </Link>
-                  <Link
-                    to="/explore"
-                    onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#444651] hover:bg-[#f3f4f5] hover:text-[#00236f]"
-                  >
-                    <Compass className="w-4 h-4" /> Explore Destinations
-                  </Link>
-                  <button
-                    onClick={() => {
-                      toggleCurrency();
-                      setProfileDropdownOpen(false);
-                    }}
-                    className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold text-[#444651] hover:bg-[#f3f4f5]"
-                  >
-                    <span>Currency</span>
-                    <span className="font-bold text-[#00236f]">{currency}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                      onOpenNewTrip();
-                    }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#5c3800] hover:bg-[#f3f4f5]"
-                  >
-                    <Plus className="w-4 h-4" /> Plan a New Trip
-                  </button>
-                  <button
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                      logout();
-                    }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 border-t border-[#edeeef] mt-1 pt-2"
-                  >
-                    <LogOut className="w-4 h-4" /> Logout
-                  </button>
-                </div>
-              )}
-            </div>
+              <div className="flex items-center gap-1">
+                <button
+                  title="Notifications"
+                  className="p-2 text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] rounded-full transition-colors relative"
+                >
+                  <span className="material-symbols-outlined text-[20px]">notifications</span>
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF5722] rounded-full ring-2 ring-white"></span>
+                </button>
 
-            {/* Mobile menu toggle */}
+                {/* Profile Avatar & Dropdown */}
+                <div className="relative ml-1">
+                  <button
+                    onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+                    className="flex items-center rounded-full ring-2 ring-transparent hover:ring-[#00236f] transition-all"
+                  >
+                    <img
+                      src={user.profilePhoto || "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80"}
+                      alt={user.name}
+                      className="w-8 h-8 rounded-full border border-[#c5c5d3] object-cover"
+                    />
+                  </button>
+
+                  {profileDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-60 bg-white border border-[#c5c5d3] rounded-xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                      <div className="px-4 py-2 border-b border-[#edeeef]">
+                        <p className="text-sm font-bold text-[#191c1d]">{user.name}</p>
+                        <p className="text-xs text-[#757682] truncate">{user.location || 'Mumbai, India'}</p>
+                      </div>
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#444651] hover:bg-[#f3f4f5] hover:text-[#00236f]"
+                      >
+                        <LayoutDashboard className="w-4 h-4" /> My Dashboard
+                      </Link>
+                      <Link
+                        to="/explore"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#444651] hover:bg-[#f3f4f5] hover:text-[#00236f]"
+                      >
+                        <Compass className="w-4 h-4" /> Explore Destinations
+                      </Link>
+                      <button
+                        onClick={() => {
+                          toggleCurrency();
+                          setProfileDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold text-[#444651] hover:bg-[#f3f4f5]"
+                      >
+                        <span>Currency</span>
+                        <span className="font-bold text-[#00236f]">{currency}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          onOpenNewTrip();
+                        }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#5c3800] hover:bg-[#f3f4f5]"
+                      >
+                        <Plus className="w-4 h-4" /> Plan a New Trip
+                      </button>
+                      <button
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          logout();
+                        }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 border-t border-[#edeeef] mt-1 pt-2"
+                      >
+                        <LogOut className="w-4 h-4" /> Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 ml-2 hidden sm:flex">
+              <Link to="/login" className="px-4 py-1.5 text-xs font-bold font-['Inter'] text-[#00236f] hover:bg-[#f3f4f5] rounded-full transition-colors uppercase tracking-wider">Login</Link>
+              <Link to="/register" className="px-4 py-1.5 bg-[#00236f] text-white rounded-full text-xs font-bold font-['Inter'] hover:bg-[#1e3a8a] transition-colors uppercase tracking-wider shadow-sm">Sign Up</Link>
+            </div>
+          )}
+
+          {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 text-[#444651] hover:bg-[#f3f4f5] rounded-full transition-colors ml-1"
@@ -199,7 +208,6 @@ export default function Navbar({ onOpenNewTrip }) {
             </button>
           </div>
         </div>
-      </div>
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
@@ -225,36 +233,66 @@ export default function Navbar({ onOpenNewTrip }) {
               {currency === 'INR' ? '₹ INR (India)' : '$ USD (Intl)'}
             </button>
           </div>
-          <Link
-            to="/"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg font-bold text-sm text-[#00236f] bg-[#dce1ff]/40"
-          >
-            <LayoutDashboard className="w-4 h-4" /> Dashboard
-          </Link>
-          <Link
-            to="/trips/trip-royal-rajasthan/edit"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm text-[#444651] hover:bg-[#f3f4f5]"
-          >
-            <Calendar className="w-4 h-4" /> Trip Planner
-          </Link>
-          <Link
-            to="/explore"
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm text-[#444651] hover:bg-[#f3f4f5]"
-          >
-            <Compass className="w-4 h-4" /> Explore
-          </Link>
-          <button
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onOpenNewTrip();
-            }}
-            className="w-full mt-2 py-2.5 bg-[#5c3800] text-[#ef9900] rounded-lg font-bold text-sm text-center flex items-center justify-center gap-2"
-          >
-            <Plus className="w-4 h-4" /> New Trip
-          </button>
+          {user ? (
+            <>
+              <Link
+                to="/dashboard"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg font-bold text-sm text-[#00236f] bg-[#dce1ff]/40"
+              >
+                <LayoutDashboard className="w-4 h-4" /> Dashboard
+              </Link>
+              <Link
+                to="/trips/trip-royal-rajasthan/edit"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm text-[#444651] hover:bg-[#f3f4f5]"
+              >
+                <Calendar className="w-4 h-4" /> Trip Planner
+              </Link>
+              <Link
+                to="/explore"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm text-[#444651] hover:bg-[#f3f4f5]"
+              >
+                <Compass className="w-4 h-4" /> Explore
+              </Link>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenNewTrip();
+                }}
+                className="w-full mt-2 py-2.5 bg-[#5c3800] text-[#ef9900] rounded-lg font-bold text-sm text-center flex items-center justify-center gap-2"
+              >
+                <Plus className="w-4 h-4" /> New Trip
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/explore"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm text-[#444651] hover:bg-[#f3f4f5]"
+              >
+                <Compass className="w-4 h-4" /> Explore
+              </Link>
+              <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-[#c5c5d3]">
+                <Link
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-2.5 border border-[#c5c5d3] text-[#00236f] rounded-lg font-bold text-sm text-center"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full py-2.5 bg-[#00236f] text-white rounded-lg font-bold text-sm text-center"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       )}
     </header>

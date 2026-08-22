@@ -23,7 +23,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
               </span>
             </div>
             <h1 className="text-3xl md:text-4xl font-bold font-['Montserrat'] text-[#00236f] tracking-tight">
-              Namaste, {user.name.split(' ')[0]}!
+              Namaste, {user?.name ? user.name.split(' ')[0] : 'Explorer'}!
             </h1>
             <p className="text-sm text-[#444651] font-['Inter'] mt-1">
               Ready to plan your next Indian getaway or manage your upcoming royal itineraries?

@@ -38,18 +38,18 @@ export const api = {
 
   async getUser() {
     const res = await apiClient.get('/auth/me');
-    return res.data.data;
+    return res.data.data.user;
   },
 
   // Trips
   async getTrips() {
     const res = await apiClient.get('/trips');
-    return res.data;
+    return res.data?.data?.trips || res.data || [];
   },
 
   async getTripById(id) {
     const res = await apiClient.get(`/trips/${id}`);
-    return res.data;
+    return res.data?.data?.trip || res.data;
   },
 
   async getTripByShareToken(token) {
@@ -59,7 +59,7 @@ export const api = {
 
   async createTrip(tripData) {
     const res = await apiClient.post('/trips', tripData);
-    return res.data;
+    return res.data?.data?.trip || res.data;
   },
 
   async updateTrip(id, tripData) {
@@ -75,7 +75,7 @@ export const api = {
   // Cities & Search
   async getCities(query = '') {
     const res = await apiClient.get('/cities', { params: { q: query } });
-    return res.data;
+    return res.data?.data?.cities || res.data || [];
   },
 
   async getCityActivities(cityId) {
