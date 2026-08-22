@@ -68,8 +68,26 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const updateUser = async (updatedFields) => {
+    try {
+      setUser((prev) => {
+        const newUser = { ...prev, ...updatedFields };
+        localStorage.setItem('globetrotter_user', JSON.stringify(newUser));
+        return newUser;
+      });
+      if (token) {
+        await api.updateUser(updatedFields).catch(() => {});
+      }
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to update user:', error);
+      return { success: false };
+    }
+  };
+
   function logout() {
     localStorage.removeItem('globetrotter_token');
+    localStorage.removeItem('globetrotter_user');
     setToken(null);
     setUser(null);
   }
@@ -81,6 +99,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    updateUser,
     isAuthenticated: !!user
   };
 

@@ -5,8 +5,9 @@ import { useAuth } from '../../context/AuthContext';
 import { Search, Bell, Settings, Plus, Compass, Calendar, LayoutDashboard, Menu, X, Globe, IndianRupee, LogOut, User } from 'lucide-react';
 
 export default function Navbar({ onOpenNewTrip }) {
-  const { user, searchQuery, setSearchQuery, currency, toggleCurrency } = useTrip();
-  const { logout } = useAuth();
+  const { user: tripUser, searchQuery, setSearchQuery, currency, toggleCurrency } = useTrip();
+  const { user: authUser, logout } = useAuth();
+  const user = authUser || tripUser;
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

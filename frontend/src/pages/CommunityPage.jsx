@@ -97,8 +97,10 @@ export default function CommunityPage() {
                       <span className="text-xs font-semibold">{trip._count?.sharedLinks || 0}</span>
                     </button>
                     <button className="flex items-center gap-1.5 hover:text-[#00236f] transition-colors">
-                      <MapPin className="w-4 h-4" />
-                      <span className="text-xs font-semibold">{trip._count?.stops || 0} Stops</span>
+                      <MapPin className="w-4 h-4 text-[#00236f]" />
+                      <span className="text-xs font-semibold font-['Inter'] text-[#191c1d]">
+                        {trip._count?.stops || (trip.stops ? trip.stops.length : 1)} Stops
+                      </span>
                     </button>
                   </div>
                   <Link 

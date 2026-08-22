@@ -23,6 +23,7 @@ import {
   Download,
   FileText,
   Printer,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 export default function TripViewPage() {
@@ -34,6 +35,7 @@ export default function TripViewPage() {
   const [mapActive, setMapActive] = useState(false);
   const [fetchedTrip, setFetchedTrip] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('timeline');
 
   // Retrieve local trip or fetch directly from backend API
   const localTrip = getTrip(tripId);
@@ -252,98 +254,270 @@ export default function TripViewPage() {
       <main className="max-w-[1280px] mx-auto px-4 md:px-10 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Itinerary Overview (8 cols) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
-          <div className="flex justify-between items-center border-b border-[#c5c5d3] pb-3">
+          {/* Header & Tab Switcher */}
+          <div className="bg-white p-4 md:p-6 rounded-2xl border border-[#c5c5d3] shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h2 className="text-2xl font-bold font-['Montserrat'] text-[#191c1d]">
+              <h2 className="text-xl md:text-2xl font-bold font-['Montserrat'] text-[#191c1d]">
                 Itinerary Overview
               </h2>
-              <p className="text-xs text-[#757682]">Day-by-day curated experiences, stays, and heritage tours</p>
+              <p className="text-xs text-[#757682]">Day-by-day curated experiences, stays, and budget breakdown</p>
             </div>
-            <span className="text-xs font-bold font-['Inter'] text-[#00236f] bg-[#00236f]/10 px-3 py-1 rounded-full uppercase tracking-wider">
-              {timelineDays.length} Days Planned
-            </span>
+            
+            <div className="flex gap-1 bg-[#f8f9fa] p-1.5 rounded-xl border border-[#c5c5d3] self-stretch sm:self-auto no-print">
+              <button
+                onClick={() => setActiveTab('timeline')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold font-['Inter'] transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === 'timeline'
+                    ? 'bg-[#00236f] text-white shadow-sm'
+                    : 'text-[#444651] hover:bg-[#e1e3e4]'
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5" /> Timeline
+              </button>
+              <button
+                onClick={() => setActiveTab('budget')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold font-['Inter'] transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === 'budget'
+                    ? 'bg-[#00236f] text-white shadow-sm'
+                    : 'text-[#444651] hover:bg-[#e1e3e4]'
+                }`}
+              >
+                <PieChart className="w-3.5 h-3.5" /> Budget Analysis
+              </button>
+              <button
+                onClick={() => setActiveTab('gallery')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold font-['Inter'] transition-all flex items-center gap-1.5 cursor-pointer ${
+                  activeTab === 'gallery'
+                    ? 'bg-[#00236f] text-white shadow-sm'
+                    : 'text-[#444651] hover:bg-[#e1e3e4]'
+                }`}
+              >
+                <ImageIcon className="w-3.5 h-3.5" /> Photos Gallery
+              </button>
+            </div>
           </div>
 
-          {/* Days Timeline */}
-          <div className="space-y-8">
-            {timelineDays.map((dayItem, idx) => (
-              <div
-                key={idx}
-                className="relative pl-8 before:content-[''] before:absolute before:left-3 before:top-3 before:bottom-[-36px] before:w-[2px] before:bg-[#c5c5d3] last:before:hidden"
-              >
-                {/* Day Marker Circle */}
-                <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-[#00236f] text-white flex items-center justify-center z-10 font-bold font-['Inter'] text-[11px] shadow-sm">
-                  {dayItem.dayNum}
-                </div>
+          {/* Tab Content 1: Days Timeline */}
+          {activeTab === 'timeline' && (
+            <div className="space-y-8">
+              {timelineDays.map((dayItem, idx) => (
+                <div
+                  key={idx}
+                  className="relative pl-8 before:content-[''] before:absolute before:left-3 before:top-3 before:bottom-[-36px] before:w-[2px] before:bg-[#c5c5d3] last:before:hidden"
+                >
+                  {/* Day Marker Circle */}
+                  <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-[#00236f] text-white flex items-center justify-center z-10 font-bold font-['Inter'] text-[11px] shadow-sm">
+                    {dayItem.dayNum}
+                  </div>
 
-                {/* Day Header */}
-                <h3 className="text-lg md:text-xl font-bold font-['Montserrat'] text-[#00236f] mb-3">
-                  {dayItem.title}
-                </h3>
+                  {/* Day Header */}
+                  <h3 className="text-lg md:text-xl font-bold font-['Montserrat'] text-[#00236f] mb-3">
+                    {dayItem.title}
+                  </h3>
 
-                {/* Activity Cards for this day */}
-                <div className="space-y-4">
-                  {dayItem.activities.length === 0 ? (
-                    <div className="p-4 bg-white border border-[#c5c5d3] rounded-xl text-xs text-[#757682] italic">
-                      Explore the city bazaars, ghats, and local eateries at your own leisure.
-                    </div>
-                  ) : (
-                    dayItem.activities.map((act) => {
-                      const style = CATEGORY_COLORS[act.category] || CATEGORY_COLORS['Culture & History'] || { border: 'border-l-[#00236f]', badgeBg: 'bg-[#00236f]/10', badgeText: 'text-[#00236f]', label: act.category || 'Sightseeing' };
-                      const actImg = act.imageUrl || dayItem.stop?.city?.imageUrl || trip.coverPhoto || 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=800&q=80';
+                  {/* Activity Cards for this day */}
+                  <div className="space-y-4">
+                    {dayItem.activities.length === 0 ? (
+                      <div className="p-4 bg-white border border-[#c5c5d3] rounded-xl text-xs text-[#757682] italic">
+                        Explore the city bazaars, ghats, and local eateries at your own leisure.
+                      </div>
+                    ) : (
+                      dayItem.activities.map((act) => {
+                        const style = CATEGORY_COLORS[act.category] || CATEGORY_COLORS['Culture & History'] || { border: 'border-l-[#00236f]', badgeBg: 'bg-[#00236f]/10', badgeText: 'text-[#00236f]', label: act.category || 'Sightseeing' };
+                        const actImg = act.imageUrl || dayItem.stop?.city?.imageUrl || trip.coverPhoto || 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=800&q=80';
 
-                      return (
-                        <div
-                          key={act.id}
-                          className={`bg-white border border-[#c5c5d3] rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border-l-4 ${style.border || 'border-l-[#00236f]'}`}
-                        >
-                          <div className="flex flex-col md:flex-row gap-4">
-                            {/* Thumbnail */}
-                            <div className="w-full md:w-48 h-32 rounded-lg overflow-hidden shrink-0 bg-[#e1e3e4]">
-                              <img
-                                src={actImg}
-                                alt={act.name}
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                              />
-                            </div>
-
-                            {/* Details */}
-                            <div className="flex-1 flex flex-col justify-between">
-                              <div>
-                                <div className="flex justify-between items-start gap-2 mb-1.5">
-                                  <h4 className="text-base font-bold font-['Montserrat'] text-[#191c1d]">
-                                    {act.name}
-                                  </h4>
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-['Inter'] uppercase tracking-wider shrink-0 ${style.badgeBg || 'bg-[#00236f]/10'} ${style.badgeText || 'text-[#00236f]'}`}>
-                                    {act.category || 'Experience'}
-                                  </span>
-                                </div>
-                                <p className="text-xs font-['Inter'] text-[#444651] leading-relaxed mb-3">
-                                  {act.description || 'Authentic regional experience with local guide and priority admission.'}
-                                </p>
+                        return (
+                          <div
+                            key={act.id}
+                            className={`bg-white border border-[#c5c5d3] rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border-l-4 ${style.border || 'border-l-[#00236f]'}`}
+                          >
+                            <div className="flex flex-col md:flex-row gap-4">
+                              {/* Thumbnail */}
+                              <div className="w-full md:w-48 h-32 rounded-lg overflow-hidden shrink-0 bg-[#e1e3e4]">
+                                <img
+                                  src={actImg}
+                                  alt={act.name}
+                                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                                />
                               </div>
 
-                              <div className="flex items-center justify-between pt-2 border-t border-[#edeeef] text-xs">
-                                <div className="flex items-center gap-1.5 text-[#757682]">
-                                  <Clock className="w-3.5 h-3.5 text-[#00236f]" />
-                                  <span className="font-['JetBrains Mono'] font-semibold">
-                                    {act.timeSlot || '10:00 AM'}
-                                  </span>
+                              {/* Details */}
+                              <div className="flex-1 flex flex-col justify-between">
+                                <div>
+                                  <div className="flex justify-between items-start gap-2 mb-1.5">
+                                    <h4 className="text-base font-bold font-['Montserrat'] text-[#191c1d]">
+                                      {act.name}
+                                    </h4>
+                                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-['Inter'] uppercase tracking-wider shrink-0 ${style.badgeBg || 'bg-[#00236f]/10'} ${style.badgeText || 'text-[#00236f]'}`}>
+                                      {act.category || 'Experience'}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs font-['Inter'] text-[#444651] leading-relaxed mb-3">
+                                    {act.description || 'Authentic regional experience with local guide and priority admission.'}
+                                  </p>
                                 </div>
-                                <div className="font-['JetBrains Mono'] font-bold text-[#00236f] text-sm bg-[#00236f]/10 px-2.5 py-0.5 rounded-full">
-                                  {formatPrice(act.cost)}
+
+                                <div className="flex items-center justify-between pt-2 border-t border-[#edeeef] text-xs">
+                                  <div className="flex items-center gap-1.5 text-[#757682]">
+                                    <Clock className="w-3.5 h-3.5 text-[#00236f]" />
+                                    <span className="font-['JetBrains Mono'] font-semibold">
+                                      {act.timeSlot || '10:00 AM'}
+                                    </span>
+                                  </div>
+                                  <div className="font-['JetBrains Mono'] font-bold text-[#00236f] text-sm bg-[#00236f]/10 px-2.5 py-0.5 rounded-full">
+                                    {formatPrice(act.cost)}
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })
-                  )}
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Tab Content 2: Budget Analysis */}
+          {activeTab === 'budget' && (
+            <div className="bg-white p-6 rounded-2xl border border-[#c5c5d3] shadow-sm space-y-6">
+              <div className="flex justify-between items-center border-b border-[#edeeef] pb-4">
+                <div>
+                  <h3 className="text-lg font-bold font-['Montserrat'] text-[#00236f] flex items-center gap-2">
+                    <PieChart className="w-5 h-5 text-[#00236f]" /> Detailed Budget & Expense Analysis
+                  </h3>
+                  <p className="text-xs text-[#757682]">Comprehensive financial report across stays, thali dining, tours & transport</p>
+                </div>
+                <button
+                  onClick={() => window.print()}
+                  className="px-3.5 py-2 bg-[#00236f] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 hover:bg-[#1e3a8a] transition-all no-print cursor-pointer"
+                >
+                  <FileText className="w-3.5 h-3.5" /> Save PDF Report
+                </button>
+              </div>
+
+              {/* Financial Metrics */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl bg-[#00236f]/5 border border-[#00236f]/20">
+                  <span className="text-[11px] font-bold font-['Inter'] uppercase tracking-wider text-[#00236f]">Total Trip Budget</span>
+                  <p className="text-2xl font-bold font-['JetBrains Mono'] text-[#00236f] mt-1">{formatPrice(totalSpent)}</p>
+                  <span className="text-[10px] text-[#757682]">{timelineDays.length} days total duration</span>
+                </div>
+                <div className="p-4 rounded-xl bg-[#006c49]/5 border border-[#006c49]/20">
+                  <span className="text-[11px] font-bold font-['Inter'] uppercase tracking-wider text-[#006c49]">Average Daily Spend</span>
+                  <p className="text-2xl font-bold font-['JetBrains Mono'] text-[#006c49] mt-1">{formatPrice(timelineDays.length > 0 ? Math.round(totalSpent / timelineDays.length) : totalSpent)}</p>
+                  <span className="text-[10px] text-[#757682]">Cost per day</span>
+                </div>
+                <div className="p-4 rounded-xl bg-[#FF5722]/5 border border-[#FF5722]/20">
+                  <span className="text-[11px] font-bold font-['Inter'] uppercase tracking-wider text-[#FF5722]">Estimated / Person</span>
+                  <p className="text-2xl font-bold font-['JetBrains Mono'] text-[#FF5722] mt-1">{formatPrice(Math.round(totalSpent / 2))}</p>
+                  <span className="text-[10px] text-[#757682]">Assuming 2 travelers</span>
                 </div>
               </div>
-            ))}
-          </div>
+
+              {/* Expense Category Distribution */}
+              <div className="space-y-4 pt-2">
+                <h4 className="text-sm font-bold font-['Montserrat'] text-[#191c1d] uppercase tracking-wider">Expense Distribution by Category</h4>
+                
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-xs font-bold font-['Inter'] mb-1">
+                      <span className="text-[#444651]">🏨 Luxury Havelis & Resort Stays</span>
+                      <span className="font-['JetBrains Mono'] text-[#00236f]">{formatPrice(breakdown.lodging)} ({lodgingPercent}%)</span>
+                    </div>
+                    <div className="w-full bg-[#e1e3e4] rounded-full h-3">
+                      <div className="bg-[#4CAF50] h-3 rounded-full transition-all duration-500" style={{ width: `${lodgingPercent}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs font-bold font-['Inter'] mb-1">
+                      <span className="text-[#444651]">🍲 Thalis, Food & Gourmet Dining</span>
+                      <span className="font-['JetBrains Mono'] text-[#00236f]">{formatPrice(breakdown.food)} ({foodPercent}%)</span>
+                    </div>
+                    <div className="w-full bg-[#e1e3e4] rounded-full h-3">
+                      <div className="bg-[#FFC107] h-3 rounded-full transition-all duration-500" style={{ width: `${foodPercent}%` }}></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-xs font-bold font-['Inter'] mb-1">
+                      <span className="text-[#444651]">🏰 Forts, Sightseeing & Heritage Experiences</span>
+                      <span className="font-['JetBrains Mono'] text-[#00236f]">{formatPrice(breakdown.activities)} ({activitiesPercent}%)</span>
+                    </div>
+                    <div className="w-full bg-[#e1e3e4] rounded-full h-3">
+                      <div className="bg-[#2196F3] h-3 rounded-full transition-all duration-500" style={{ width: `${activitiesPercent}%` }}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Day-by-Day Expenditure Table */}
+              <div className="pt-4 border-t border-[#edeeef]">
+                <h4 className="text-sm font-bold font-['Montserrat'] text-[#191c1d] uppercase tracking-wider mb-3">Day-by-Day Expenditure Breakdown</h4>
+                <div className="overflow-x-auto border border-[#c5c5d3] rounded-xl">
+                  <table className="w-full text-left text-xs font-['Inter']">
+                    <thead className="bg-[#f8f9fa] border-b border-[#c5c5d3] text-[#00236f] uppercase font-bold text-[11px]">
+                      <tr>
+                        <th className="p-3">Day</th>
+                        <th className="p-3">Title / Schedule</th>
+                        <th className="p-3 text-center">Activities</th>
+                        <th className="p-3 text-right">Day Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#edeeef]">
+                      {timelineDays.map((day, dIdx) => {
+                        const dayCost = day.activities.reduce((sum, a) => sum + (Number(a.cost) || 0), 0);
+                        return (
+                          <tr key={dIdx} className="hover:bg-[#f8f9fa]">
+                            <td className="p-3 font-bold text-[#00236f]">Day {day.dayNum}</td>
+                            <td className="p-3 font-medium text-[#191c1d]">{day.title}</td>
+                            <td className="p-3 text-center text-[#757682]">{day.activities.length} items</td>
+                            <td className="p-3 text-right font-['JetBrains Mono'] font-bold text-[#00236f]">
+                              {formatPrice(dayCost)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tab Content 3: Photos Gallery */}
+          {activeTab === 'gallery' && (
+            <div className="bg-white p-6 rounded-2xl border border-[#c5c5d3] shadow-sm space-y-6">
+              <div className="border-b border-[#edeeef] pb-3">
+                <h3 className="text-lg font-bold font-['Montserrat'] text-[#00236f]">
+                  Places & Photos Gallery
+                </h3>
+                <p className="text-xs text-[#757682]">High-res imagery of hotels, sightseeing places, thalis & heritage monuments</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {timelineDays.flatMap((day) => day.activities).map((act, pIdx) => (
+                  <div key={pIdx} className="group relative rounded-xl overflow-hidden border border-[#c5c5d3] shadow-sm h-48 bg-[#e1e3e4]">
+                    <img
+                      src={act.imageUrl || trip.coverPhoto}
+                      alt={act.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent p-3 flex flex-col justify-end text-white">
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-[#FF5722] px-2 py-0.5 rounded w-fit mb-1 shadow-xs">
+                        {act.category || 'Sightseeing'}
+                      </span>
+                      <h5 className="text-xs font-bold font-['Montserrat'] line-clamp-1">{act.name}</h5>
+                      <p className="text-[11px] font-['JetBrains Mono'] font-semibold text-[#ef9900]">{formatPrice(act.cost)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Sidebar: Budget Breakdown & Map Widget (4 cols) */}

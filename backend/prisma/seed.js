@@ -788,29 +788,83 @@ async function main() {
     data: { name: 'Rohan Gupta', email: 'rohan@globetrotter.in', passwordHash: 'hashed_password' }
   });
   
-  await prisma.trip.create({
+  const tripVaranasiPriya = await prisma.trip.create({
     data: {
       userId: user3.id,
       name: 'Spiritual Retreat in Varanasi',
       startDate: new Date('2026-09-01'),
       endDate: new Date('2026-09-05'),
-      description: 'A 5-day journey through the ancient ghats.',
+      description: 'A 5-day journey through the ancient ghats of Varanasi — Ganga Aarti, sunrise boat cruises, and silk weaving.',
       coverPhoto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Varanasi%2C_India%2C_Ghats%2C_Cremation_ceremony_in_progress.jpg/960px-Varanasi%2C_India%2C_Ghats%2C_Cremation_ceremony_in_progress.jpg',
-      isPublic: true
+      isPublic: true,
+      totalBudget: 28000
     }
   });
+
+  const varanasiStopPriya = await prisma.stop.create({
+    data: {
+      tripId: tripVaranasiPriya.id,
+      cityId: cityMap['Varanasi'].id,
+      arrivalDate: new Date('2026-09-01'),
+      departureDate: new Date('2026-09-05'),
+      sortOrder: 0
+    }
+  });
+
+  const varanasiActsPriya = cityMap['Varanasi'].activities;
+  for (let i = 0; i < varanasiActsPriya.length; i++) {
+    await prisma.tripActivity.create({
+      data: {
+        stopId: varanasiStopPriya.id,
+        activityId: varanasiActsPriya[i].id,
+        nameSnapshot: varanasiActsPriya[i].name,
+        costSnapshot: varanasiActsPriya[i].cost,
+        categorySnapshot: varanasiActsPriya[i].category,
+        scheduledDate: new Date(`2026-09-0${1 + i}`),
+        timeSlot: '09:00 AM',
+        sortOrder: i
+      }
+    });
+  }
   
-  await prisma.trip.create({
+  const tripDubaiRohan = await prisma.trip.create({
     data: {
       userId: user4.id,
       name: 'Dubai Luxury Escape',
       startDate: new Date('2026-11-01'),
       endDate: new Date('2026-11-08'),
-      description: 'Shopping and skyscrapers in the UAE.',
-      coverPhoto: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/Burj_Khalifa_2021.jpg/960px-Burj_Khalifa_2021.jpg',
-      isPublic: true
+      description: 'Shopping and skyscrapers in the UAE — Burj Khalifa VIP Sky, Desert Safari, Marina Cruise, and Burj Al Arab High Tea.',
+      coverPhoto: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80',
+      isPublic: true,
+      totalBudget: 145000
     }
   });
+
+  const dubaiStopRohan = await prisma.stop.create({
+    data: {
+      tripId: tripDubaiRohan.id,
+      cityId: cityMap['Dubai'].id,
+      arrivalDate: new Date('2026-11-01'),
+      departureDate: new Date('2026-11-08'),
+      sortOrder: 0
+    }
+  });
+
+  const dubaiActsRohan = cityMap['Dubai'].activities;
+  for (let i = 0; i < dubaiActsRohan.length; i++) {
+    await prisma.tripActivity.create({
+      data: {
+        stopId: dubaiStopRohan.id,
+        activityId: dubaiActsRohan[i].id,
+        nameSnapshot: dubaiActsRohan[i].name,
+        costSnapshot: dubaiActsRohan[i].cost,
+        categorySnapshot: dubaiActsRohan[i].category,
+        scheduledDate: new Date(`2026-11-0${1 + i}`),
+        timeSlot: '10:00 AM',
+        sortOrder: i
+      }
+    });
+  }
 
   // 6. Create shared links
   // ────────────────────────────────

@@ -1,6 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { Camera, Upload, Sparkles } from 'lucide-react';
+
+const PRESET_AVATARS = [
+  { name: 'Explorer', url: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80' },
+  { name: 'Wanderer', url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80' },
+  { name: 'Hiker', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80' },
+  { name: 'Nomad', url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80' },
+];
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -13,8 +21,10 @@ export default function RegisterPage() {
     country: '',
     additionalInfo: ''
   });
+  const [profilePhoto, setProfilePhoto] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef(null);
   
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -23,26 +33,36 @@ export default function RegisterPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setProfilePhoto(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
-      // API expects name as a single string
       const userData = {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
         password: formData.password || 'password123',
         phone: formData.phone,
         bio: formData.additionalInfo,
+        profilePhoto: profilePhoto || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
         currencyPref: 'INR',
         languagePref: 'en',
       };
 
       const result = await register(userData);
       if (result.success) {
-        navigate('/dashboard'); // Redirect to dashboard
+        navigate('/dashboard');
       } else {
         setError(result.message || 'Failed to register');
       }
@@ -73,11 +93,53 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* Photo Upload Placeholder */}
-          <div className="flex justify-center mb-8" data-purpose="photo-upload">
-            <div className="w-24 h-24 rounded-full bg-[#edeeef] flex items-center justify-center border-2 border-dashed border-[#c5c5d3] cursor-pointer hover:bg-gray-100 transition-colors">
-              <span className="text-sm text-[#757682] font-medium font-['Inter']">Photo</span>
+          {/* Photo Upload Section */}
+          <div className="flex flex-col items-center mb-8" data-purpose="photo-upload">
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="relative w-28 h-28 rounded-full overflow-hidden bg-[#f3f4f5] border-2 border-dashed border-[#00236f]/40 hover:border-[#00236f] cursor-pointer flex flex-col items-center justify-center group transition-all shadow-xs"
+            >
+              {profilePhoto ? (
+                <img src={profilePhoto} alt="Avatar preview" className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-[#757682]">
+                  <Camera className="w-6 h-6 mb-1 text-[#00236f]" />
+                  <span className="text-xs font-bold text-[#00236f] font-['Inter']">Upload Photo</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity">
+                <Upload className="w-5 h-5 mb-0.5" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">Choose File</span>
+              </div>
             </div>
+
+            {/* Quick Avatar Presets */}
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-[11px] text-[#757682] font-semibold flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-[#ef9900]" /> Or choose avatar:
+              </span>
+              {PRESET_AVATARS.map((avatar, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setProfilePhoto(avatar.url)}
+                  className={`w-7 h-7 rounded-full overflow-hidden border transition-all cursor-pointer ${
+                    profilePhoto === avatar.url ? 'border-2 border-[#00236f] ring-2 ring-[#00236f]/30' : 'border-gray-200 hover:border-[#00236f]'
+                  }`}
+                  title={avatar.name}
+                >
+                  <img src={avatar.url} alt={avatar.name} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept="image/*"
+              className="hidden"
+            />
           </div>
 
           {/* Registration Form */}
