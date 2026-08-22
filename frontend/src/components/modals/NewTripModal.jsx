@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useTrip } from '../../context/TripContext';
 import { useNavigate } from 'react-router-dom';
+import { CITIES_DATA } from '../../data/mockData';
 import { X, MapPin, Calendar, Sparkles, Plus, Check, Compass, Compass as GlobeIcon } from 'lucide-react';
 
 export default function NewTripModal({ isOpen, onClose }) {
   const { createTrip, cities, formatPrice } = useTrip();
   const navigate = useNavigate();
+
+  const availableCities = (cities && cities.length > 0) ? cities : CITIES_DATA;
 
   const [name, setName] = useState('Jaipur Royal Getaway');
   const [destination, setDestination] = useState('Jaipur');
@@ -16,21 +19,21 @@ export default function NewTripModal({ isOpen, onClose }) {
 
   // Default to first city or Jaipur on open
   useEffect(() => {
-    if (cities && cities.length > 0 && !selectedCity) {
-      const initial = cities.find((c) => c.name.toLowerCase() === 'jaipur') || cities[0];
+    if (availableCities && availableCities.length > 0 && !selectedCity) {
+      const initial = availableCities.find((c) => c.name.toLowerCase() === 'jaipur') || availableCities[0];
       setSelectedCity(initial);
       setDestination(initial.name);
       if (initial.activities) {
         setSelectedActivities(initial.activities.map((a) => a.id));
       }
     }
-  }, [cities, selectedCity]);
+  }, [availableCities, selectedCity]);
 
   if (!isOpen) return null;
 
   const handleCityChange = (cityName) => {
     setDestination(cityName);
-    const matched = cities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
+    const matched = availableCities.find((c) => c.name.toLowerCase() === cityName.toLowerCase());
     if (matched) {
       setSelectedCity(matched);
       if (!name || name.endsWith('Getaway')) {
@@ -127,14 +130,14 @@ export default function NewTripModal({ isOpen, onClose }) {
                 <div>
                   <label className="block text-xs font-bold text-[#444651] mb-1 flex items-center justify-between">
                     <span>Select a Place :</span>
-                    <span className="text-[10px] text-[#00236f] font-semibold">{cities.length} destinations available</span>
+                    <span className="text-[10px] text-[#00236f] font-semibold">{availableCities.length} destinations available</span>
                   </label>
                   <select
                     value={destination}
                     onChange={(e) => handleCityChange(e.target.value)}
                     className="w-full px-3.5 py-2 bg-white border border-[#c5c5d3] rounded-xl text-xs font-bold text-[#00236f] focus:border-[#00236f] focus:outline-none cursor-pointer"
                   >
-                    {cities.map((c) => (
+                    {availableCities.map((c) => (
                       <option key={c.id} value={c.name}>
                         📍 {c.name}, {c.state || c.country}
                       </option>

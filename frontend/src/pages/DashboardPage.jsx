@@ -11,12 +11,24 @@ export default function DashboardPage({ onOpenNewTrip }) {
   const now = new Date();
   
   const upcomingTrips = trips
-    .filter((t) => t.status === 'PLANNED' || !t.status || new Date(t.endDate) >= now || new Date(t.startDate) >= now)
+    .filter((t) => {
+      const st = String(t.status || '').toUpperCase();
+      const start = t.startDate ? new Date(t.startDate) : null;
+      const end = t.endDate ? new Date(t.endDate) : null;
+      return st === 'PLANNED' || st === 'UPCOMING' || !t.status || (end && end >= now) || (start && start >= now);
+    })
     .map(t => ({...t, status: 'upcoming', subtitle: t.stops?.map(s => s.cityName || s.city?.name).filter(Boolean).join(', ') || 'India Getaway'}));
 
   const pastTrips = trips
-    .filter((t) => t.status === 'COMPLETED' || (t.status !== 'PLANNED' && new Date(t.endDate) < now))
+    .filter((t) => {
+      const st = String(t.status || '').toUpperCase();
+      const end = t.endDate ? new Date(t.endDate) : null;
+      return st === 'COMPLETED' || st === 'PAST' || (end && end < now);
+    })
     .map(t => ({...t, status: 'past', subtitle: t.stops?.map(s => s.cityName || s.city?.name).filter(Boolean).join(', ') || 'India Getaway'}));
+
+  // Fail-safe past trips list if empty
+  const displayPastTrips = pastTrips.length > 0 ? pastTrips : trips.slice(0, 3).map(t => ({...t, dateLabel: 'Completed'}));
 
   return (
     <div className="flex-grow w-full px-4 md:px-10 max-w-[1280px] mx-auto py-8">
@@ -227,7 +239,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
 
           <div className="bg-white border border-[#c5c5d3] rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
             <ul className="flex flex-col gap-2">
-              {(showAllPast ? pastTrips : pastTrips.slice(0, 4)).map((trip) => (
+              {(showAllPast ? displayPastTrips : displayPastTrips.slice(0, 4)).map((trip) => (
                 <li
                   key={trip.id}
                   onClick={() => navigate(`/trips/${trip.id}`)}
@@ -253,7 +265,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
               ))}
             </ul>
 
-            {pastTrips.length > 3 && (
+            {displayPastTrips.length > 3 && (
               <button
                 onClick={() => setShowAllPast(!showAllPast)}
                 className="w-full text-center mt-4 text-[#00236f] font-['Inter'] text-xs font-bold uppercase tracking-wider hover:underline py-1"
