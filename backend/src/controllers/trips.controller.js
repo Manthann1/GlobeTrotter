@@ -2,7 +2,11 @@ import { prisma } from '../db.js';
 
 export const getTrips = async (req, res, next) => {
   try {
+    const isPublic = req.query.public === 'true';
+    const where = isPublic ? { isPublic: true } : { userId: req.user.id };
+
     const trips = await prisma.trip.findMany({
+      where,
       include: {
         user: { select: { id: true, name: true, email: true, profilePhoto: true } },
         budget: true,

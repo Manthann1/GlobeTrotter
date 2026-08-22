@@ -1,6 +1,7 @@
 import { registerSchema, loginSchema } from '../schemas/auth.schema.js';
 import { registerUser, loginUser } from '../services/auth.service.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
+import { prisma } from '../db.js';
 
 /**
  * Controller to handle user registration
@@ -65,6 +66,36 @@ export const getMe = async (req, res, next) => {
       statusCode: 200,
       message: 'User profile retrieved successfully',
       data: { user: req.user },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Controller to update current authenticated user profile
+ */
+export const updateMe = async (req, res, next) => {
+  try {
+    const { name, email, profilePhoto } = req.body;
+    
+    // In a real app we would validate, but let's just update directly for now
+    const updatedUser = await prisma.user.update({
+      where: { id: req.user.id },
+      data: {
+        ...(name && { name }),
+        ...(email && { email }),
+        ...(profilePhoto && { profilePhoto }),
+      }
+    });
+    
+    // Strip passwordHash before sending back
+    const { passwordHash, ...safeUser } = updatedUser;
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: 'User profile updated successfully',
+      data: { user: safeUser },
     });
   } catch (error) {
     next(error);

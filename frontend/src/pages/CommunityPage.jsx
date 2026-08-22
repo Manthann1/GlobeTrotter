@@ -1,19 +1,36 @@
-import React, { useState, useMemo } from 'react';
-import { COMMUNITY_POSTS } from '../data/mockData';
+import React, { useState, useEffect, useMemo } from 'react';
 import SearchFilterToolbar from '../components/ui/SearchFilterToolbar';
-import { Heart, MessageCircle } from 'lucide-react';
+import { Heart, MessageCircle, MapPin, Loader } from 'lucide-react';
+import { api } from '../services/api';
+import { Link } from 'react-router-dom';
 
 export default function CommunityPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [publicTrips, setPublicTrips] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTrips = async () => {
+      try {
+        setIsLoading(true);
+        const data = await api.getPublicTrips();
+        setPublicTrips(data);
+      } catch (error) {
+        console.error('Failed to fetch public trips:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchTrips();
+  }, []);
   
-  const filteredPosts = useMemo(() => {
-    return COMMUNITY_POSTS.filter(post => 
-      post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.tripName.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredTrips = useMemo(() => {
+    return publicTrips.filter(trip => 
+      trip.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      trip.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (trip.description && trip.description.toLowerCase().includes(searchQuery.toLowerCase()))
     );
-  }, [searchQuery]);
+  }, [searchQuery, publicTrips]);
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 py-8 w-full">
@@ -43,37 +60,57 @@ export default function CommunityPage() {
       <h1 className="font-['Montserrat'] text-2xl font-bold text-[#191c1d] mb-6">Community Tab</h1>
       
       <div className="grid grid-cols-1 gap-6">
-        {filteredPosts.map(post => (
-          <div key={post.id} className="bg-white rounded-xl border border-[#e1e3e4] p-6 hover:shadow-md transition-shadow flex gap-4">
-            <img 
-              src={post.userAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.userName)}&background=random`} 
-              alt={post.userName} 
-              className="w-10 h-10 rounded-full object-cover shrink-0"
-            />
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-['Inter'] font-semibold text-[#191c1d]">{post.userName}</h3>
-                <span className="text-[#757682] text-sm">• {post.destination} • {post.tripName}</span>
-              </div>
-              <p className="font-['Inter'] text-[#444651] mb-4">{post.content}</p>
-              
-              <div className="flex items-center gap-6 text-[#757682]">
-                <button className="flex items-center gap-1.5 hover:text-[#00236f] transition-colors">
-                  <Heart className="w-4 h-4" />
-                  <span className="text-sm">{post.likes}</span>
-                </button>
-                <button className="flex items-center gap-1.5 hover:text-[#00236f] transition-colors">
-                  <MessageCircle className="w-4 h-4" />
-                  <span className="text-sm">{post.comments}</span>
-                </button>
+        {isLoading ? (
+          <div className="py-12 flex justify-center"><Loader className="w-8 h-8 animate-spin text-[#00236f]" /></div>
+        ) : filteredTrips.length === 0 ? (
+          <div className="text-center py-12 text-[#757682] font-['Inter']">No public trips found.</div>
+        ) : (
+          filteredTrips.map(trip => (
+            <div key={trip.id} className="bg-white rounded-xl border border-[#e1e3e4] p-6 hover:shadow-md transition-shadow flex flex-col md:flex-row gap-6">
+              {trip.coverPhoto && (
+                <img 
+                  src={trip.coverPhoto} 
+                  alt={trip.name} 
+                  className="w-full md:w-48 h-48 md:h-full object-cover rounded-lg"
+                />
+              )}
+              <div className="flex-1 flex flex-col">
+                <div className="flex items-center gap-3 mb-3">
+                  <img 
+                    src={trip.user?.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(trip.user?.name || 'User')}&background=random`} 
+                    alt={trip.user?.name} 
+                    className="w-10 h-10 rounded-full object-cover shrink-0"
+                  />
+                  <div>
+                    <h3 className="font-['Inter'] font-semibold text-[#191c1d]">{trip.user?.name}</h3>
+                    <span className="text-[#757682] text-xs">{new Date(trip.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                
+                <h4 className="font-['Montserrat'] font-bold text-lg text-[#00236f] mb-2">{trip.name}</h4>
+                <p className="font-['Inter'] text-[#444651] mb-4 text-sm flex-1">{trip.description || 'No description provided.'}</p>
+                
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-[#e1e3e4]">
+                  <div className="flex items-center gap-4 text-[#757682]">
+                    <button className="flex items-center gap-1.5 hover:text-[#E65100] transition-colors">
+                      <Heart className="w-4 h-4" />
+                      <span className="text-xs font-semibold">{trip._count?.sharedLinks || 0}</span>
+                    </button>
+                    <button className="flex items-center gap-1.5 hover:text-[#00236f] transition-colors">
+                      <MapPin className="w-4 h-4" />
+                      <span className="text-xs font-semibold">{trip._count?.stops || 0} Stops</span>
+                    </button>
+                  </div>
+                  <Link 
+                    to={`/trips/${trip.id}`} 
+                    className="text-xs font-bold font-['Inter'] text-[#00236f] uppercase tracking-wider hover:underline"
+                  >
+                    View Trip
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        {filteredPosts.length === 0 && (
-          <div className="text-center py-12 text-[#757682] font-['Inter']">
-            No community posts found matching your search.
-          </div>
+          ))
         )}
       </div>
     </div>

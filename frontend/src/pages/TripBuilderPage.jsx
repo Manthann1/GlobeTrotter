@@ -151,6 +151,13 @@ export default function TripBuilderPage() {
             >
               <ExternalLink className="w-3.5 h-3.5" /> Public View
             </Link>
+            <Link
+              to="/calendar"
+              className="text-xs text-[#006c49] hover:underline flex items-center gap-1 font-bold font-['Inter'] ml-2"
+              title="View in Calendar"
+            >
+              <Calendar className="w-3.5 h-3.5" /> Calendar View
+            </Link>
           </div>
 
           {/* Budget Meter */}

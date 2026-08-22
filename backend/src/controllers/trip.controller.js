@@ -30,11 +30,20 @@ export const createTrip = async (req, res, next) => {
 };
 
 /**
- * Get all trips belonging to the authenticated user
+ * Get all trips belonging to the authenticated user or public trips
  */
 export const getTrips = async (req, res, next) => {
   try {
-    const trips = await tripService.getUserTrips(req.user.id);
+    // If accessing the /public endpoint, path ends with 'public'
+    const isPublic = req.path.endsWith('/public') || req.query.public === 'true';
+
+    let trips;
+    if (isPublic) {
+      trips = await tripService.getPublicTrips();
+    } else {
+      if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+      trips = await tripService.getUserTrips(req.user.id);
+    }
 
     return successResponse(res, {
       statusCode: 200,

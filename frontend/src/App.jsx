@@ -14,6 +14,11 @@ import ExplorePage from './pages/ExplorePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import LandingPage from './pages/LandingPage';
+import MyTripsPage from './pages/MyTripsPage';
+import CalendarPage from './pages/CalendarPage';
+import AdminPage from './pages/AdminPage';
+import CommunityPage from './pages/CommunityPage';
+import SearchPage from './pages/SearchPage';
 import NewTripModal from './components/modals/NewTripModal';
 import ToastContainer from './components/ui/Toast';
 
@@ -138,6 +143,54 @@ function App() {
                     <ProfilePage />
                   </StandardLayout>
                 </ProtectedRoute>
+              }
+            />
+
+            {/* Additional Missing Routes */}
+            <Route
+              path="/my-trips"
+              element={
+                <ProtectedRoute>
+                  <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                    <MyTripsPage />
+                  </StandardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                    <CalendarPage />
+                  </StandardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                    <AdminPage />
+                  </StandardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/community"
+              element={
+                <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                  <CommunityPage />
+                </StandardLayout>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                  <SearchPage />
+                </StandardLayout>
               }
             />
 

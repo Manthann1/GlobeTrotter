@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTrip } from '../context/TripContext';
 import { Search, Plus } from 'lucide-react';
+import { api } from '../services/api';
 
 export default function ExplorePage({ onOpenNewTrip }) {
   const { cities, trips } = useTrip();
@@ -9,9 +10,13 @@ export default function ExplorePage({ onOpenNewTrip }) {
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
+  const [publicTrips, setPublicTrips] = useState([]);
+
+  useEffect(() => {
+    api.getPublicTrips().then(setPublicTrips).catch(console.error);
+  }, []);
 
   // Derived data
-  const publicTrips = trips.filter(t => t.isPublic || t.status === 'COMPLETED');
   const topRegions = cities.filter(c => c.imageUrl).slice(0, 5);
 
   return (

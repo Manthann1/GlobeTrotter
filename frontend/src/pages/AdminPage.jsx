@@ -1,13 +1,39 @@
-import React, { useState, useMemo } from 'react';
-import { MOCK_USERS } from '../data/mockData';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTrip } from '../context/TripContext';
 import SearchFilterToolbar from '../components/ui/SearchFilterToolbar';
-import { Users, MapPin, Activity, TrendingUp } from 'lucide-react';
+import { Users, MapPin, Activity, TrendingUp, Loader } from 'lucide-react';
+import { api } from '../services/api';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState('users');
   const [searchQuery, setSearchQuery] = useState('');
   const { cities, formatPrice, trips } = useTrip();
+  
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [adminStats, setAdminStats] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      try {
+        setIsLoading(true);
+        const [usersData, statsData] = await Promise.all([
+          api.getUsers(),
+          api.getStats()
+        ]);
+        setAdminUsers(usersData);
+        setAdminStats(statsData);
+      } catch (error) {
+        console.error('Failed to fetch admin data', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    if (activeTab === 'users' || activeTab === 'trends') {
+      fetchAdminData();
+    }
+  }, [activeTab]);
 
   const TABS = [
     { id: 'users', label: 'Manage Users', icon: Users },
@@ -67,29 +93,33 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_USERS.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase())).map(user => (
-                  <tr key={user.id} className="border-b border-[#e1e3e4] hover:bg-[#f8f9fa] transition-colors">
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <img src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`} alt={user.name} className="w-8 h-8 rounded-full" />
-                        <div>
-                          <div className="font-['Inter'] font-semibold text-[#191c1d]">{user.name}</div>
-                          <div className="text-sm text-[#757682]">{user.email}</div>
+                {isLoading ? (
+                  <tr><td colSpan="5" className="p-8 text-center"><Loader className="w-6 h-6 animate-spin mx-auto text-[#00236f]"/></td></tr>
+                ) : (
+                  adminUsers.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase())).map(user => (
+                    <tr key={user.id} className="border-b border-[#e1e3e4] hover:bg-[#f8f9fa] transition-colors">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <img src={user.profilePhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random`} alt={user.name} className="w-8 h-8 rounded-full" />
+                          <div>
+                            <div className="font-['Inter'] font-semibold text-[#191c1d]">{user.name}</div>
+                            <div className="text-sm text-[#757682]">{user.email}</div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="p-4 text-[#444651] text-sm">{user.location || 'Unknown'}</td>
-                    <td className="p-4 text-[#444651] text-sm">{user.tripsCount || 0}</td>
-                    <td className="p-4 text-[#444651] text-sm">{user.joinedDate || 'Recently'}</td>
-                    <td className="p-4">
-                      {user.isAdmin ? (
-                        <span className="bg-[#00236f] text-white text-xs px-2 py-1 rounded-full font-bold uppercase">Admin</span>
-                      ) : (
-                        <span className="bg-[#f3f4f5] text-[#444651] text-xs px-2 py-1 rounded-full font-bold uppercase">User</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="p-4 text-[#444651] text-sm">{user.location || 'Unknown'}</td>
+                      <td className="p-4 text-[#444651] text-sm">{user._count?.trips || 0}</td>
+                      <td className="p-4 text-[#444651] text-sm">{new Date(user.createdAt).toLocaleDateString()}</td>
+                      <td className="p-4">
+                        {user.email.includes('admin') ? (
+                          <span className="bg-[#00236f] text-white text-xs px-2 py-1 rounded-full font-bold uppercase">Admin</span>
+                        ) : (
+                          <span className="bg-[#f3f4f5] text-[#444651] text-xs px-2 py-1 rounded-full font-bold uppercase">User</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -161,19 +191,27 @@ export default function AdminPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white p-6 rounded-xl border border-[#e1e3e4] shadow-sm">
               <div className="text-[#757682] text-sm font-semibold uppercase mb-2">Total Users</div>
-              <div className="text-3xl font-bold text-[#00236f] font-['Montserrat']">{MOCK_USERS.length}</div>
+              <div className="text-3xl font-bold text-[#00236f] font-['Montserrat']">
+                {isLoading ? <Loader className="w-6 h-6 animate-spin" /> : (adminStats?.totalUsers || 0)}
+              </div>
             </div>
             <div className="bg-white p-6 rounded-xl border border-[#e1e3e4] shadow-sm">
               <div className="text-[#757682] text-sm font-semibold uppercase mb-2">Total Cities</div>
-              <div className="text-3xl font-bold text-[#006c49] font-['Montserrat']">{(cities || []).length}</div>
+              <div className="text-3xl font-bold text-[#006c49] font-['Montserrat']">
+                {isLoading ? <Loader className="w-6 h-6 animate-spin" /> : (adminStats?.totalCities || 0)}
+              </div>
             </div>
             <div className="bg-white p-6 rounded-xl border border-[#e1e3e4] shadow-sm">
               <div className="text-[#757682] text-sm font-semibold uppercase mb-2">Total Activities</div>
-              <div className="text-3xl font-bold text-[#ef9900] font-['Montserrat']">{allActivities.length}</div>
+              <div className="text-3xl font-bold text-[#ef9900] font-['Montserrat']">
+                {isLoading ? <Loader className="w-6 h-6 animate-spin" /> : (adminStats?.totalActivities || 0)}
+              </div>
             </div>
             <div className="bg-white p-6 rounded-xl border border-[#e1e3e4] shadow-sm">
               <div className="text-[#757682] text-sm font-semibold uppercase mb-2">Total Trips</div>
-              <div className="text-3xl font-bold text-[#FF5722] font-['Montserrat']">{trips?.length || 0}</div>
+              <div className="text-3xl font-bold text-[#FF5722] font-['Montserrat']">
+                {isLoading ? <Loader className="w-6 h-6 animate-spin" /> : (adminStats?.totalTrips || 0)}
+              </div>
             </div>
           </div>
 

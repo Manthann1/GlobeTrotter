@@ -66,34 +66,44 @@ export default function Navbar({ onOpenNewTrip }) {
             Dashboard
           </Link>
           <Link
-            to="/trips/trip-royal-rajasthan/edit"
+            to="/my-trips"
             className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
-              location.pathname.includes('/edit')
+              isActive('/my-trips')
                 ? 'text-[#00236f] border-b-2 border-[#00236f] pb-0.5'
                 : 'text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] px-2 rounded-t'
             }`}
           >
-            Planner
+            My Trips
           </Link>
           <Link
-            to="/explore"
+            to="/calendar"
             className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
-              isActive('/explore')
+              isActive('/calendar')
                 ? 'text-[#00236f] border-b-2 border-[#00236f] pb-0.5'
                 : 'text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] px-2 rounded-t'
             }`}
           >
-            Explore
+            Calendar
           </Link>
           <Link
-            to="/profile"
+            to="/community"
             className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
-              isActive('/profile')
+              isActive('/community')
                 ? 'text-[#00236f] border-b-2 border-[#00236f] pb-0.5'
                 : 'text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] px-2 rounded-t'
             }`}
           >
-            Profile
+            Community
+          </Link>
+          <Link
+            to="/admin"
+            className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
+              isActive('/admin')
+                ? 'text-[#00236f] border-b-2 border-[#00236f] pb-0.5'
+                : 'text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] px-2 rounded-t'
+            }`}
+          >
+            Admin
           </Link>
         </nav>
 

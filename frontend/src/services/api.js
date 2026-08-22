@@ -41,9 +41,30 @@ export const api = {
     return res.data.data.user;
   },
 
+  async updateUser(userData) {
+    const res = await apiClient.put('/auth/me', userData);
+    return res.data.data.user;
+  },
+
+  // Admin
+  async getUsers() {
+    const res = await apiClient.get('/admin/users');
+    return res.data;
+  },
+
+  async getStats() {
+    const res = await apiClient.get('/admin/stats');
+    return res.data;
+  },
+
   // Trips
   async getTrips() {
     const res = await apiClient.get('/trips');
+    return res.data?.data?.trips || res.data || [];
+  },
+
+  async getPublicTrips() {
+    const res = await apiClient.get('/trips/public');
     return res.data?.data?.trips || res.data || [];
   },
 

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTrip } from '../context/TripContext';
+import { useAuth } from '../context/AuthContext';
 import TripCard from '../components/ui/TripCard';
+import { api } from '../services/api';
 
 export default function ProfilePage() {
   const { user, trips } = useTrip();
@@ -19,9 +21,19 @@ export default function ProfilePage() {
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
-  const handleSave = () => {
-    // In a real app, save to context/backend
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      const updatedUser = await api.updateUser({
+        name: editForm.name,
+        email: editForm.email,
+        profilePhoto: editForm.profilePhoto
+      });
+      // In a real app we'd also update auth context, but for now we'll just reload or assume it worked
+      setIsEditing(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    }
   };
 
   const handleCancel = () => {
@@ -40,13 +52,13 @@ export default function ProfilePage() {
   
   const upcomingTrips = (trips || []).filter(t => {
     const start = new Date(t.startDate);
-    return start > now && t.status !== 'past' && t.status !== 'completed';
-  });
+    return start > now;
+  }).map(t => ({...t, status: 'upcoming', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
 
   const previousTrips = (trips || []).filter(t => {
     const end = new Date(t.endDate);
-    return end < now || t.status === 'past' || t.status === 'completed';
-  });
+    return end < now;
+  }).map(t => ({...t, status: 'past', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
 
   const avatarUrl = user?.avatarUrl || "https://ui-avatars.com/api/?name=Jane+Doe&background=00236f&color=fff";
 

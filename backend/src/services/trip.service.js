@@ -24,11 +24,37 @@ export const createTrip = async (userId, { name, startDate, endDate, description
 export const getUserTrips = async (userId) => {
   const trips = await prisma.trip.findMany({
     where: { userId },
-    orderBy: { startDate: 'asc' },
+    orderBy: { startDate: 'desc' },
     include: {
+      user: { select: { id: true, name: true, profilePhoto: true } },
+      budget: true,
       _count: {
         select: { stops: true },
       },
+      stops: {
+        include: { city: true }
+      }
+    },
+  });
+  return trips;
+};
+
+/**
+ * Get all public trips
+ */
+export const getPublicTrips = async () => {
+  const trips = await prisma.trip.findMany({
+    where: { isPublic: true },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      user: { select: { id: true, name: true, profilePhoto: true } },
+      budget: true,
+      _count: {
+        select: { stops: true, sharedLinks: true },
+      },
+      stops: {
+        include: { city: true }
+      }
     },
   });
   return trips;

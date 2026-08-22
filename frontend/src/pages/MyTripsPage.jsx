@@ -31,8 +31,8 @@ export default function MyTripsPage() {
     
     if (searchTerm) {
       result = result.filter(t => 
-        t.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        t.city?.toLowerCase().includes(searchTerm.toLowerCase())
+        (t.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (t.stops || []).some(s => s.city?.name?.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
     
@@ -41,7 +41,7 @@ export default function MyTripsPage() {
     } else if (sortBy === 'date-desc') {
       result.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
     } else if (sortBy === 'name') {
-      result.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+      result.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
     
     return result;
@@ -51,17 +51,17 @@ export default function MyTripsPage() {
     const start = new Date(t.startDate);
     const end = new Date(t.endDate);
     return start <= now && end >= now;
-  });
+  }).map(t => ({...t, status: 'ongoing', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
 
   const upcomingTrips = filteredTrips.filter(t => {
     const start = new Date(t.startDate);
-    return start > now && t.status !== 'past' && t.status !== 'completed';
-  });
+    return start > now;
+  }).map(t => ({...t, status: 'upcoming', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
 
   const completedTrips = filteredTrips.filter(t => {
     const end = new Date(t.endDate);
-    return end < now || t.status === 'past' || t.status === 'completed';
-  });
+    return end < now;
+  }).map(t => ({...t, status: 'completed', subtitle: t.stops?.map(s => s.city?.name).join(', ') || 'No destinations'}));
 
   const Section = ({ title, data }) => (
     <div className="mb-8">

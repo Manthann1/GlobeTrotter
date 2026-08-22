@@ -7,6 +7,7 @@ const router = Router();
 
 // Public shared trip route (No auth required)
 router.get('/shared/:token', getTripByShareToken);
+router.get('/public', getTrips); // Handled by controller to check isPublic
 
 // Protect all following trip endpoints with authentication middleware
 router.use(authenticateToken);
