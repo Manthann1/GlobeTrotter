@@ -3,1235 +3,843 @@ import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
+// ─────────────────────────────────────────────────────────────
+// CITIES & ACTIVITIES DATA (10 Indian + 5 International)
+// ─────────────────────────────────────────────────────────────
+
 const CITIES_DATA = [
+  // ═══════════ INDIAN CITIES ═══════════
+  {
+    name: 'Jaipur',
+    state: 'Rajasthan',
+    country: 'India',
+    region: 'North India',
+    description: 'The Pink City — a vibrant capital of Rajasthan known for grand forts, ornate palaces, and bustling bazaars.',
+    costIndex: 0.65,
+    popularityScore: 4.85,
+    latitude: 26.9124,
+    longitude: 75.7873,
+    currency: 'INR',
+    imageUrl: 'https://images.unsplash.com/photo-1603262110263-fb010d6e59d4?auto=format&fit=crop&w=1200&q=80',
+    activities: [
+      { name: 'Amber Fort & Sheesh Mahal VIP Tour', category: 'Culture & History', cost: 1200, durationMins: 180, description: 'Explore the magnificent Amber Fort complex including the dazzling mirror-work Sheesh Mahal with a private guide.', imageUrl: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80', rating: 4.90, tags: ['fort', 'heritage', 'guided-tour'] },
+      { name: 'Hawa Mahal Sunrise Photography Walk', category: 'Sightseeing', cost: 500, durationMins: 90, description: 'Capture the iconic Palace of Winds at golden hour with a local photography guide through the old city lanes.', imageUrl: 'https://images.unsplash.com/photo-1586612438666-ffd232f60086?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['photography', 'sunrise', 'walking-tour'] },
+      { name: 'Chokhi Dhani Royal Rajasthani Thali', category: 'Food & Dining', cost: 1800, durationMins: 150, description: 'Authentic 56-item Rajasthani thali with live folk dance, puppet shows, and camel rides at this cultural village.', imageUrl: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['thali', 'folk-culture', 'dinner'] },
+      { name: 'City Palace & Museum Complex', category: 'Culture & History', cost: 700, durationMins: 120, description: 'Tour the royal City Palace complex housing the Maharaja Sawai Man Singh II Museum with textiles, arms, and art.', imageUrl: 'https://images.unsplash.com/photo-1603204077779-bed963ea7d0e?auto=format&fit=crop&w=800&q=80', rating: 4.65, tags: ['palace', 'museum', 'royalty'] },
+      { name: 'Nahargarh Fort Sunset & Jaipur Panorama', category: 'Sightseeing', cost: 350, durationMins: 120, description: 'Watch the sunset over the Pink City from the ramparts of Nahargarh Fort perched on the Aravalli hills.', imageUrl: 'https://images.unsplash.com/photo-1614082242765-7c98ca0f3df3?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['sunset', 'panorama', 'fort'] },
+      { name: 'Johari Bazaar Gemstone & Textile Walk', category: 'Leisure', cost: 200, durationMins: 120, description: 'Guided walk through the famous jewellery and textile bazaar — learn about Kundan, Meenakari, and block printing.', imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80', rating: 4.50, tags: ['shopping', 'bazaar', 'crafts'] },
+      { name: 'Samode Haveli Heritage Stay', category: 'Lodging', cost: 8500, durationMins: 1440, description: 'Overnight stay in a 175-year-old restored haveli with courtyard pool, Sheesh Mahal dining, and rooftop yoga.', imageUrl: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80', rating: 4.95, tags: ['haveli', 'heritage-stay', 'luxury'] },
+    ]
+  },
+  {
+    name: 'Udaipur',
+    state: 'Rajasthan',
+    country: 'India',
+    region: 'North India',
+    description: 'City of Lakes — a romantic royal city with floating palaces, serene lakes, and Mewar heritage.',
+    costIndex: 0.70,
+    popularityScore: 4.80,
+    latitude: 24.5854,
+    longitude: 73.7125,
+    currency: 'INR',
+    imageUrl: 'https://images.unsplash.com/photo-1602508451168-011e500f147a?auto=format&fit=crop&w=1200&q=80',
+    activities: [
+      { name: 'Lake Pichola Sunset Boat Cruise', category: 'Leisure', cost: 900, durationMins: 90, description: 'Cruise past the Jag Mandir and Taj Lake Palace on shimmering Lake Pichola as the sun sets behind the Aravallis.', imageUrl: 'https://images.unsplash.com/photo-1602508451168-011e500f147a?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['boat-cruise', 'sunset', 'lake'] },
+      { name: 'City Palace & Crystal Gallery Tour', category: 'Culture & History', cost: 600, durationMins: 150, description: 'Explore the sprawling City Palace complex and the rare Crystal Gallery with Bohemian crystal furniture and jewels.', imageUrl: 'https://images.unsplash.com/photo-1590063005492-0e83bf702e7c?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['palace', 'museum', 'crystal'] },
+      { name: 'Ambrai Lakeside Fine Dining', category: 'Food & Dining', cost: 2500, durationMins: 120, description: 'Dine on Rajasthani and continental cuisine at one of India\'s most scenic restaurants overlooking Lake Pichola and the City Palace.', imageUrl: 'https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['lakeside', 'fine-dining', 'romantic'] },
+      { name: 'Taj Fateh Prakash Palace Stay', category: 'Lodging', cost: 28000, durationMins: 1440, description: 'Grand heritage palace hotel on the shores of Lake Pichola with royal suites, butler service, and private Darbar Hall dining.', imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80', rating: 4.95, tags: ['palace-hotel', 'luxury', 'heritage'] },
+      { name: 'Kumbalgarh Fort & Ranakpur Jain Temple Day Trip', category: 'Culture & History', cost: 1500, durationMins: 480, description: 'Visit the massive Kumbalgarh Fort with the second-longest wall in the world, and the intricately carved Ranakpur Jain Temple.', imageUrl: 'https://images.unsplash.com/photo-1558431382-27e303142255?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['fort', 'temple', 'day-trip'] },
+      { name: 'Bagore Ki Haveli Folk Dance Show', category: 'Culture & History', cost: 250, durationMins: 75, description: 'Nightly Rajasthani folk dance performance at the restored 18th-century Bagore Ki Haveli on Gangaur Ghat.', imageUrl: 'https://images.unsplash.com/photo-1583309219338-a582f1f9ca6b?auto=format&fit=crop&w=800&q=80', rating: 4.60, tags: ['folk-dance', 'evening-show', 'culture'] },
+    ]
+  },
+  {
+    name: 'Goa',
+    state: 'Goa',
+    country: 'India',
+    region: 'Coastal India',
+    description: 'India\'s beach paradise — golden sands, Portuguese heritage, vibrant nightlife, and fresh seafood.',
+    costIndex: 0.75,
+    popularityScore: 4.75,
+    latitude: 15.2993,
+    longitude: 74.1240,
+    currency: 'INR',
+    imageUrl: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1200&q=80',
+    activities: [
+      { name: 'Grand Island Scuba Diving Adventure', category: 'Adventure', cost: 3500, durationMins: 240, description: 'Dive into the Arabian Sea to explore coral reefs, tropical fish, and an underwater shipwreck at Grand Island.', imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['scuba', 'ocean', 'adventure'] },
+      { name: 'Fontainhas Latin Quarter Heritage Walk', category: 'Culture & History', cost: 400, durationMins: 120, description: 'Stroll through the colourful Portuguese-era Latin Quarter with tile-roofed houses, churches, and art galleries.', imageUrl: 'https://images.unsplash.com/photo-1587922546307-776227941871?auto=format&fit=crop&w=800&q=80', rating: 4.55, tags: ['heritage', 'walking-tour', 'portuguese'] },
+      { name: 'Beach Shack Goan Seafood Feast', category: 'Food & Dining', cost: 1200, durationMins: 120, description: 'Feast on prawn balchão, fish recheado, and Goan feni at a beachside bamboo shack on Palolem or Agonda beach.', imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['seafood', 'beach', 'local-cuisine'] },
+      { name: 'Dudhsagar Waterfall Jeep Safari', category: 'Adventure', cost: 2800, durationMins: 360, description: 'Off-road jeep safari through the Western Ghats to the magnificent 310-meter Dudhsagar Falls and a forest swim.', imageUrl: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['waterfall', 'safari', 'nature'] },
+      { name: 'Basilica of Bom Jesus & Old Goa Churches', category: 'Spiritual', cost: 0, durationMins: 120, description: 'Visit the UNESCO World Heritage Basilica housing the relics of St. Francis Xavier and other 16th-century churches.', imageUrl: 'https://images.unsplash.com/photo-1564507592768-90bd3ab15d90?auto=format&fit=crop&w=800&q=80', rating: 4.60, tags: ['church', 'UNESCO', 'heritage'] },
+      { name: 'Palolem Beach Kayaking & Dolphin Spotting', category: 'Leisure', cost: 800, durationMins: 90, description: 'Paddle along the crescent-shaped Palolem beach at dawn with chances to spot Indo-Pacific dolphins in the bay.', imageUrl: 'https://images.unsplash.com/photo-1506953823976-52e1fdc0149a?auto=format&fit=crop&w=800&q=80', rating: 4.65, tags: ['kayaking', 'dolphins', 'beach'] },
+      { name: 'Latin Quarter Heritage Villa Stay', category: 'Lodging', cost: 5500, durationMins: 1440, description: 'Stay in a restored Portuguese villa in Fontainhas with azulejo tiles, courtyard garden, and traditional Goan breakfast.', imageUrl: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['heritage-villa', 'boutique', 'portuguese'] },
+    ]
+  },
+  {
+    name: 'Alleppey',
+    state: 'Kerala',
+    country: 'India',
+    region: 'South India',
+    description: 'Venice of the East — a dreamy network of backwaters, houseboats, paddy fields, and coconut palms in Kerala.',
+    costIndex: 0.60,
+    popularityScore: 4.70,
+    latitude: 9.4981,
+    longitude: 76.3388,
+    currency: 'INR',
+    imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1200&q=80',
+    activities: [
+      { name: 'Overnight Luxury Kettuvallam Houseboat Cruise', category: 'Leisure', cost: 12000, durationMins: 1440, description: 'Drift through the palm-fringed canals of Vembanad Lake in a premium 2-bedroom houseboat with onboard chef and sundeck.', imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80', rating: 4.90, tags: ['houseboat', 'backwaters', 'luxury'] },
+      { name: 'Munnar Tea Estate Walk & Factory Tour', category: 'Sightseeing', cost: 600, durationMins: 180, description: 'Walk through rolling tea plantations in Munnar, visit a working factory, and taste fresh estate-grown varieties.', imageUrl: 'https://images.unsplash.com/photo-1564329494380-3d401b2ccb10?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['tea', 'plantation', 'munnar'] },
+      { name: 'Kathakali Classical Dance & Kalaripayattu Show', category: 'Culture & History', cost: 500, durationMins: 120, description: 'Watch the spectacular Kathakali makeup ceremony, dance performance, and a thrilling Kalaripayattu martial arts demonstration.', imageUrl: 'https://images.unsplash.com/photo-1583309219338-a582f1f9ca6b?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['kathakali', 'martial-arts', 'performance'] },
+      { name: 'Kerala Sadya Banana-Leaf Feast', category: 'Food & Dining', cost: 450, durationMins: 90, description: 'Traditional 28-course vegetarian feast served on a banana leaf — avial, olan, payasam, and more.', imageUrl: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['sadya', 'vegetarian', 'traditional'] },
+      { name: 'Periyar Wildlife Sanctuary Bamboo Rafting', category: 'Adventure', cost: 1500, durationMins: 240, description: 'Bamboo raft through the Periyar Tiger Reserve spotting wild elephants, gaur, and Nilgiri langurs.', imageUrl: 'https://images.unsplash.com/photo-1536431311719-398b6704d40e?auto=format&fit=crop&w=800&q=80', rating: 4.65, tags: ['wildlife', 'rafting', 'nature'] },
+      { name: 'Ayurvedic Spa & Panchakarma Retreat', category: 'Leisure', cost: 3500, durationMins: 180, description: 'Traditional Kerala Ayurvedic massage, Shirodhara oil therapy, and herbal steam bath at a waterside retreat.', imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['ayurveda', 'spa', 'wellness'] },
+    ]
+  },
+  {
+    name: 'Varanasi',
+    state: 'Uttar Pradesh',
+    country: 'India',
+    region: 'North India',
+    description: 'The spiritual capital of India — ancient ghats, Ganga Aarti, temple lanes, and 5,000 years of living history.',
+    costIndex: 0.45,
+    popularityScore: 4.65,
+    latitude: 25.3176,
+    longitude: 83.0068,
+    currency: 'INR',
+    imageUrl: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80',
+    activities: [
+      { name: 'Subah-e-Banaras Sunrise Boat Ride', category: 'Spiritual', cost: 600, durationMins: 90, description: 'Witness the magical sunrise over the Ganges from a rowboat — watch morning rituals, yoga, and cremation ghats.', imageUrl: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80', rating: 4.90, tags: ['sunrise', 'boat-ride', 'spiritual'] },
+      { name: 'Dashashwamedh Ghat Grand Ganga Aarti', category: 'Spiritual', cost: 0, durationMins: 60, description: 'Experience the spectacular evening fire-and-chant ceremony performed by priests on the main ghat — an unforgettable ritual.', imageUrl: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=800&q=80', rating: 4.95, tags: ['ganga-aarti', 'evening', 'ceremony'] },
+      { name: 'Kashi Vishwanath Temple & Gali Tour', category: 'Spiritual', cost: 300, durationMins: 120, description: 'Navigate the narrow temple lanes of old Kashi to the revered Vishwanath Temple with a local pandit guide.', imageUrl: 'https://images.unsplash.com/photo-1627894483216-2138af692e32?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['temple', 'guided-tour', 'old-city'] },
+      { name: 'Banarasi Chaat & Street Food Trail', category: 'Food & Dining', cost: 350, durationMins: 120, description: 'Taste legendary kachori-sabzi, tamatar chaat, thandai, and malaiyo at the iconic street food stalls of Varanasi.', imageUrl: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['street-food', 'chaat', 'food-walk'] },
+      { name: 'Sarnath Buddhist Heritage Excursion', category: 'Culture & History', cost: 400, durationMins: 180, description: 'Visit Sarnath where Buddha gave his first sermon — see the Dhamek Stupa, Ashoka Pillar, and archaeological museum.', imageUrl: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80', rating: 4.60, tags: ['buddhism', 'stupa', 'heritage'] },
+      { name: 'Banarasi Silk Weaving Workshop', category: 'Culture & History', cost: 800, durationMins: 120, description: 'Visit a family-run silk workshop to see the painstaking hand-loom process of creating a Banarasi silk sari.', imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?auto=format&fit=crop&w=800&q=80', rating: 4.55, tags: ['silk', 'weaving', 'crafts'] },
+    ]
+  },
+  {
+    name: 'Leh',
+    state: 'Ladakh',
+    country: 'India',
+    region: 'Himalayas',
+    description: 'Land of High Passes — stark Himalayan beauty, ancient monasteries, high-altitude lakes, and thrilling road trips.',
+    costIndex: 0.80,
+    popularityScore: 4.70,
+    latitude: 34.1526,
+    longitude: 77.5771,
+    currency: 'INR',
+    imageUrl: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=1200&q=80',
+    activities: [
+      { name: 'Pangong Tso Lake Overnight Camping', category: 'Adventure', cost: 4500, durationMins: 1440, description: 'Drive the breathtaking Changla Pass to the surreal blue Pangong Lake and camp under a canopy of Milky Way stars.', imageUrl: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=800&q=80', rating: 4.90, tags: ['lake', 'camping', 'stargazing'] },
+      { name: 'Nubra Valley & Diskit Monastery', category: 'Culture & History', cost: 3500, durationMins: 720, description: 'Cross the world\'s highest motorable pass Khardung La to explore the sand dunes and 32-meter Maitreya Buddha of Nubra.', imageUrl: 'https://images.unsplash.com/photo-1600498148212-62bd3542ceb3?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['monastery', 'khardung-la', 'desert'] },
+      { name: 'Khardung La Pass & Magnetic Hill Drive', category: 'Adventure', cost: 2000, durationMins: 360, description: 'Ride or drive to the legendary Khardung La (5,359m) and experience the optical illusion of Magnetic Hill.', imageUrl: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['high-pass', 'road-trip', 'motorcycle'] },
+      { name: 'Thiksey & Hemis Monastery Tour', category: 'Spiritual', cost: 500, durationMins: 240, description: 'Visit the "Little Potala" Thiksey Monastery for morning prayers and the ancient Hemis Monastery with its sacred murals.', imageUrl: 'https://images.unsplash.com/photo-1573467730814-58044e08a2f8?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['monastery', 'buddhism', 'morning-prayers'] },
+      { name: 'Ladakhi Thukpa & Momos Home Dining', category: 'Food & Dining', cost: 500, durationMins: 90, description: 'Home-cooked Ladakhi meal — steaming thukpa noodle soup, butter tea, and hand-rolled momos with a local family.', imageUrl: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80', rating: 4.65, tags: ['home-dining', 'local-cuisine', 'momos'] },
+      { name: 'Zanskar River Rafting', category: 'Adventure', cost: 3000, durationMins: 300, description: 'White-water rafting through the dramatic Zanskar Gorge — Grade III-IV rapids with towering canyon walls.', imageUrl: 'https://images.unsplash.com/photo-1530866495561-507c83781b70?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['rafting', 'white-water', 'canyon'] },
+    ]
+  },
+  {
+    name: 'Manali',
+    state: 'Himachal Pradesh',
+    country: 'India',
+    region: 'Himalayas',
+    description: 'Valley of the Gods — lush valleys, snow-capped peaks, ancient temples, and the gateway to Spiti and Rohtang.',
+    costIndex: 0.55,
+    popularityScore: 4.60,
+    latitude: 32.2396,
+    longitude: 77.1887,
+    currency: 'INR',
+    imageUrl: 'https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?auto=format&fit=crop&w=1200&q=80',
+    activities: [
+      { name: 'Rohtang Pass Snow Adventure', category: 'Adventure', cost: 2500, durationMins: 360, description: 'Drive to Rohtang Pass (3,978m) for snowfall views, paragliding, and snowmobile rides amidst the Greater Himalayas.', imageUrl: 'https://images.unsplash.com/photo-1585409677983-0f6c41ca9c3b?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['snow', 'paragliding', 'high-pass'] },
+      { name: 'Solang Valley Paragliding', category: 'Adventure', cost: 1800, durationMins: 60, description: 'Tandem paragliding flight over Solang Valley with stunning views of Himalayan peaks and the Beas River.', imageUrl: 'https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['paragliding', 'valley', 'aerial'] },
+      { name: 'Old Manali Café Hopping & Hippie Trail', category: 'Leisure', cost: 300, durationMins: 180, description: 'Explore the bohemian cafés, bakeries, and handicraft shops of Old Manali village along the Manalsu stream.', imageUrl: 'https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=800&q=80', rating: 4.50, tags: ['cafes', 'old-town', 'bohemian'] },
+      { name: 'Hadimba Devi Temple & Cedar Forest Walk', category: 'Spiritual', cost: 0, durationMins: 90, description: 'Visit the 1553 pagoda-style Hadimba Temple set in a serene deodar cedar forest — a Mahabharata heritage site.', imageUrl: 'https://images.unsplash.com/photo-1626621341517-bbf3d9990a23?auto=format&fit=crop&w=800&q=80', rating: 4.60, tags: ['temple', 'cedar-forest', 'mythology'] },
+      { name: 'Beas River Rafting & Camping', category: 'Adventure', cost: 1200, durationMins: 240, description: 'White-water rafting on the Beas River followed by riverside bonfire camping under the stars.', imageUrl: 'https://images.unsplash.com/photo-1530866495561-507c83781b70?auto=format&fit=crop&w=800&q=80', rating: 4.65, tags: ['rafting', 'camping', 'bonfire'] },
+      { name: 'Trout Fishing & Siddu Lunch Experience', category: 'Food & Dining', cost: 900, durationMins: 180, description: 'Catch-and-cook trout fishing in the Tirthan Valley, followed by a traditional Himachali Siddu (steamed bun) meal.', imageUrl: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=80', rating: 4.55, tags: ['fishing', 'local-cuisine', 'himachali'] },
+    ]
+  },
+  {
+    name: 'Mumbai',
+    state: 'Maharashtra',
+    country: 'India',
+    region: 'West India',
+    description: 'Maximum City — Bollywood dreams, colonial architecture, vibrant street food, and the Gateway of India.',
+    costIndex: 1.10,
+    popularityScore: 4.55,
+    latitude: 19.0760,
+    longitude: 72.8777,
+    currency: 'INR',
+    imageUrl: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=1200&q=80',
+    activities: [
+      { name: 'Gateway of India & Elephanta Caves Ferry', category: 'Culture & History', cost: 600, durationMins: 300, description: 'Take the harbour ferry from the iconic Gateway to the UNESCO Elephanta Caves with 6th-century Shiva sculptures.', imageUrl: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=800&q=80', rating: 4.65, tags: ['gateway', 'caves', 'UNESCO'] },
+      { name: 'Mumbai Street Food Trail — Chowpatty to Mohammed Ali Road', category: 'Food & Dining', cost: 500, durationMins: 180, description: 'Taste vada pav, pav bhaji, bhel puri, kebabs, and malpua on a guided crawl through Mumbai\'s iconic food streets.', imageUrl: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['street-food', 'vada-pav', 'food-walk'] },
+      { name: 'Dharavi Creative Economy Walking Tour', category: 'Culture & History', cost: 800, durationMins: 150, description: 'Respectful tour of Dharavi\'s $1B informal economy — leather, pottery, recycling, and textile workshops.', imageUrl: 'https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?auto=format&fit=crop&w=800&q=80', rating: 4.50, tags: ['walking-tour', 'social-enterprise', 'workshops'] },
+      { name: 'Marine Drive Sunset & Art Deco Walk', category: 'Sightseeing', cost: 0, durationMins: 90, description: 'Stroll along the Queen\'s Necklace at sunset, admiring Mumbai\'s UNESCO Art Deco ensemble along Marine Drive.', imageUrl: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e13?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['sunset', 'art-deco', 'promenade'] },
+      { name: 'Bollywood Studio Tour & Dance Workshop', category: 'Leisure', cost: 1500, durationMins: 240, description: 'Behind-the-scenes tour of Film City sets followed by a Bollywood dance lesson with a choreographer.', imageUrl: 'https://images.unsplash.com/photo-1440404653325-ab127d49abc1?auto=format&fit=crop&w=800&q=80', rating: 4.55, tags: ['bollywood', 'studio', 'dance'] },
+      { name: 'Taj Mahal Palace Heritage Stay', category: 'Lodging', cost: 25000, durationMins: 1440, description: 'Iconic 1903 palace hotel overlooking the Gateway of India — opulent rooms, sea-facing suites, and legendary hospitality.', imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80', rating: 4.95, tags: ['palace-hotel', 'heritage', 'luxury'] },
+    ]
+  },
+  {
+    name: 'Delhi',
+    state: 'Delhi',
+    country: 'India',
+    region: 'North India',
+    description: 'India\'s capital — layers of Mughal, British, and modern history from Red Fort to India Gate to Hauz Khas.',
+    costIndex: 0.85,
+    popularityScore: 4.50,
+    latitude: 28.6139,
+    longitude: 77.2090,
+    currency: 'INR',
+    imageUrl: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=1200&q=80',
+    activities: [
+      { name: 'Red Fort & Chandni Chowk Heritage Walk', category: 'Culture & History', cost: 500, durationMins: 180, description: 'Explore the Mughal Red Fort, then dive into the chaotic charm of Chandni Chowk — India\'s oldest and busiest market.', imageUrl: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['red-fort', 'mughal', 'old-delhi'] },
+      { name: 'Chandni Chowk Paranthe Wali Gali Food Walk', category: 'Food & Dining', cost: 400, durationMins: 120, description: 'Legendary stuffed parantha lane, chole bhature, jalebi, and rabri at the 150-year-old shops of Old Delhi.', imageUrl: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['street-food', 'parantha', 'old-delhi'] },
+      { name: 'Humayun\'s Tomb & Nizamuddin Qawwali', category: 'Spiritual', cost: 600, durationMins: 180, description: 'Visit the magnificent Mughal-era Humayun\'s Tomb, then attend a soul-stirring Sufi Qawwali at Nizamuddin Dargah.', imageUrl: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['mughal', 'qawwali', 'sufi'] },
+      { name: 'Qutub Minar & Mehrauli Archaeological Park', category: 'Culture & History', cost: 350, durationMins: 150, description: 'Visit India\'s tallest stone minaret and the surrounding ruins spanning 1,000 years of Delhi sultanates.', imageUrl: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=800&q=80', rating: 4.65, tags: ['qutub-minar', 'archaeological', 'UNESCO'] },
+      { name: 'India Gate & Rajpath Evening Stroll', category: 'Sightseeing', cost: 0, durationMins: 90, description: 'Walk the grand Kartavya Path from Rashtrapati Bhavan to India Gate at sunset — Delhi\'s most iconic promenade.', imageUrl: 'https://images.unsplash.com/photo-1564823345768-3e2271bca15e?auto=format&fit=crop&w=800&q=80', rating: 4.50, tags: ['india-gate', 'sunset', 'promenade'] },
+      { name: 'Hauz Khas Village Art & Nightlife', category: 'Leisure', cost: 1200, durationMins: 180, description: 'Explore art galleries, designer boutiques, and rooftop bars in the trendy Hauz Khas Village beside the medieval lake.', imageUrl: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80', rating: 4.45, tags: ['nightlife', 'art', 'rooftop'] },
+    ]
+  },
+  {
+    name: 'Rishikesh',
+    state: 'Uttarakhand',
+    country: 'India',
+    region: 'Himalayas',
+    description: 'Yoga Capital of the World — where the Ganges flows from the Himalayas, offering adventure, spirituality, and peace.',
+    costIndex: 0.50,
+    popularityScore: 4.55,
+    latitude: 30.0869,
+    longitude: 78.2676,
+    currency: 'INR',
+    imageUrl: 'https://images.unsplash.com/photo-1591018653367-7d4c22159780?auto=format&fit=crop&w=1200&q=80',
+    activities: [
+      { name: 'Ganges White-Water Rafting (16km)', category: 'Adventure', cost: 1200, durationMins: 180, description: 'Raft 16km of Grade III–IV rapids on the Ganges from Shivpuri to Rishikesh with cliff jumping stops.', imageUrl: 'https://images.unsplash.com/photo-1530866495561-507c83781b70?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['rafting', 'white-water', 'ganges'] },
+      { name: 'Laxman Jhula & Trimbakeshwar Temple Walk', category: 'Spiritual', cost: 0, durationMins: 120, description: 'Cross the iconic suspension bridge and visit the 13-storey Trimbakeshwar temple complex on the east bank.', imageUrl: 'https://images.unsplash.com/photo-1591018653367-7d4c22159780?auto=format&fit=crop&w=800&q=80', rating: 4.55, tags: ['suspension-bridge', 'temple', 'walking'] },
+      { name: 'Beatles Ashram (Chaurasi Kutia) Art Walk', category: 'Culture & History', cost: 150, durationMins: 120, description: 'Explore the abandoned ashram where The Beatles wrote the White Album — now a graffiti art gallery in the forest.', imageUrl: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80', rating: 4.60, tags: ['beatles', 'ashram', 'art'] },
+      { name: 'Sunrise Yoga & Meditation Session', category: 'Spiritual', cost: 500, durationMins: 90, description: 'Join a traditional Hatha Yoga and guided meditation session at a Ganges-side ashram with Himalayan views.', imageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['yoga', 'meditation', 'sunrise'] },
+      { name: 'Bungee Jumping at Jumpin Heights', category: 'Adventure', cost: 3550, durationMins: 60, description: 'India\'s highest bungee jump — 83 metres over a rocky ravine, operated by New Zealand jump masters.', imageUrl: 'https://images.unsplash.com/photo-1502139214982-d0ad755818d8?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['bungee', 'extreme', 'adventure'] },
+      { name: 'Triveni Ghat Evening Aarti', category: 'Spiritual', cost: 0, durationMins: 45, description: 'Attend the serene evening Ganga Aarti at Triveni Ghat where three sacred rivers meet — a gentle Himalayan ritual.', imageUrl: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['ganga-aarti', 'evening', 'spiritual'] },
+    ]
+  },
+
+  // ═══════════ INTERNATIONAL CITIES ═══════════
   {
     name: 'Paris',
+    state: null,
     country: 'France',
+    region: 'International',
+    description: 'The City of Light — world-class museums, iconic monuments, haute cuisine, and timeless romance.',
     costIndex: 1.45,
     popularityScore: 4.95,
+    latitude: 48.8566,
+    longitude: 2.3522,
+    currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80',
     activities: [
-      {
-        name: 'Eiffel Tower Summit Tour',
-        category: 'Sightseeing',
-        cost: 38.00,
-        durationMins: 150,
-        description: 'Ascend to the summit of the Eiffel Tower for panoramic views across Paris.',
-        imageUrl: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Louvre Museum Masterpieces Guided Walk',
-        category: 'Culture & History',
-        cost: 45.00,
-        durationMins: 180,
-        description: 'Explore the Mona Lisa, Venus de Milo, and Winged Victory with an expert art historian.',
-        imageUrl: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Seine River Sunset Dinner Cruise',
-        category: 'Food & Dining',
-        cost: 85.00,
-        durationMins: 120,
-        description: 'Enjoy a 3-course French dinner while cruising past illuminated Parisian monuments.',
-        imageUrl: 'https://images.unsplash.com/photo-1509299349698-dd22323b5963?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Montmartre & Sacre-Coeur Walking Tour',
-        category: 'Sightseeing',
-        cost: 20.00,
-        durationMins: 120,
-        description: 'Stroll through bohemian Montmartre and visit the artists square at Place du Tertre.',
-        imageUrl: 'https://images.unsplash.com/photo-1520939817895-060bdef4ad1b?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Croissant & Pastry Baking Masterclass',
-        category: 'Food & Dining',
-        cost: 65.00,
-        durationMins: 180,
-        description: 'Learn the artisan techniques of classic French pastry and puff dough with a Parisian baker.',
-        imageUrl: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Palace of Versailles Day Trip',
-        category: 'Culture & History',
-        cost: 55.00,
-        durationMins: 360,
-        description: 'Tour the Hall of Mirrors, Grand Apartments, and magnificent Royal Gardens.',
-        imageUrl: 'https://images.unsplash.com/photo-1584646098378-0874589d76b1?auto=format&fit=crop&w=800&q=80'
-      }
+      { name: 'Eiffel Tower Summit Tour', category: 'Sightseeing', cost: 3200, durationMins: 150, description: 'Ascend to the summit of the Eiffel Tower for panoramic views across Paris — book skip-the-line access.', imageUrl: 'https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['eiffel-tower', 'panorama', 'landmark'] },
+      { name: 'Louvre Museum Masterpieces Guided Walk', category: 'Culture & History', cost: 3800, durationMins: 180, description: 'Explore the Mona Lisa, Venus de Milo, and Winged Victory with an expert art historian guide.', imageUrl: 'https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=800&q=80', rating: 4.90, tags: ['louvre', 'art', 'museum'] },
+      { name: 'Seine River Sunset Dinner Cruise', category: 'Food & Dining', cost: 7200, durationMins: 120, description: 'Enjoy a 3-course French dinner while cruising past illuminated Parisian monuments at twilight.', imageUrl: 'https://images.unsplash.com/photo-1509299349698-dd22323b5963?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['seine', 'dinner-cruise', 'romantic'] },
+      { name: 'Montmartre & Sacré-Cœur Walking Tour', category: 'Sightseeing', cost: 1700, durationMins: 120, description: 'Stroll through bohemian Montmartre, visit the artists\' square at Place du Tertre, and enter Sacré-Cœur.', imageUrl: 'https://images.unsplash.com/photo-1520939817895-060bdef4ad1b?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['montmartre', 'walking-tour', 'bohemian'] },
+      { name: 'Croissant & Pastry Baking Masterclass', category: 'Food & Dining', cost: 5500, durationMins: 180, description: 'Learn artisan techniques of classic French pastry and puff dough with a Parisian baker in a private atelier.', imageUrl: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['baking', 'pastry', 'masterclass'] },
+      { name: 'Palace of Versailles Day Trip', category: 'Culture & History', cost: 4600, durationMins: 360, description: 'Tour the Hall of Mirrors, Grand Apartments, and magnificent Royal Gardens of Versailles.', imageUrl: 'https://images.unsplash.com/photo-1584646098378-0874589d76b1?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['versailles', 'palace', 'day-trip'] },
     ]
   },
   {
     name: 'Tokyo',
+    state: null,
     country: 'Japan',
+    region: 'International',
+    description: 'Where ancient temples meet neon-lit skyscrapers — a dazzling blend of tradition and ultra-modernity.',
     costIndex: 1.30,
     popularityScore: 4.90,
+    latitude: 35.6762,
+    longitude: 139.6503,
+    currency: 'JPY',
     imageUrl: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=80',
     activities: [
-      {
-        name: 'Senso-ji Temple & Asakusa Traditional Walk',
-        category: 'Culture & History',
-        cost: 0.00,
-        durationMins: 120,
-        description: 'Visit Tokyos oldest Buddhist temple and browse traditional craft shops along Nakamise.',
-        imageUrl: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Shibuya Crossing & Harajuku Pop-Culture Safari',
-        category: 'Sightseeing',
-        cost: 15.00,
-        durationMins: 150,
-        description: 'Experience the world-famous scramble crossing and trendy fashion boutiques on Takeshita Street.',
-        imageUrl: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Tsukiji Outer Market Sushi Tasting',
-        category: 'Food & Dining',
-        cost: 50.00,
-        durationMins: 90,
-        description: 'Taste world-class fresh sashimi, grilled seafood skewers, and tamagoyaki.',
-        imageUrl: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'teamLab Borderless Digital Art Museum',
-        category: 'Adventure',
-        cost: 32.00,
-        durationMins: 150,
-        description: 'Immerse yourself in world-renowned interactive 3D digital projection art.',
-        imageUrl: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Shinjuku Golden Gai Izakaya Food Crawl',
-        category: 'Nightlife',
-        cost: 60.00,
-        durationMins: 180,
-        description: 'Bar-hop through atmospheric narrow alleys packed with tiny 6-seat izakayas.',
-        imageUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=80'
-      }
+      { name: 'Senso-ji Temple & Asakusa Traditional Walk', category: 'Culture & History', cost: 0, durationMins: 120, description: 'Visit Tokyo\'s oldest Buddhist temple and browse traditional craft shops along the Nakamise shopping street.', imageUrl: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['temple', 'asakusa', 'traditional'] },
+      { name: 'Shibuya Crossing & Harajuku Pop-Culture Safari', category: 'Sightseeing', cost: 0, durationMins: 180, description: 'Experience the world\'s busiest pedestrian crossing then explore Harajuku\'s Takeshita Street fashion scene.', imageUrl: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['shibuya', 'harajuku', 'pop-culture'] },
+      { name: 'Tsukiji Outer Market Sushi Masterclass', category: 'Food & Dining', cost: 6500, durationMins: 150, description: 'Learn to make nigiri and maki sushi with a master sushi chef at the legendary Tsukiji Outer Market.', imageUrl: 'https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=800&q=80', rating: 4.90, tags: ['sushi', 'cooking-class', 'tsukiji'] },
+      { name: 'TeamLab Borderless Digital Art Museum', category: 'Leisure', cost: 2800, durationMins: 120, description: 'Immersive, boundary-less digital art installations where you walk through flowing water, flowers, and light.', imageUrl: 'https://images.unsplash.com/photo-1549277513-f1b32fe1f8f5?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['teamlab', 'digital-art', 'immersive'] },
+      { name: 'Mount Fuji & Hakone Day Trip', category: 'Sightseeing', cost: 8500, durationMins: 600, description: 'Day trip to see Mount Fuji from Lake Kawaguchiko, cruise Lake Ashi, and ride the Hakone ropeway.', imageUrl: 'https://images.unsplash.com/photo-1490806843957-31f4c9a91c65?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['mount-fuji', 'hakone', 'day-trip'] },
+      { name: 'Golden Gai Bar Hopping Experience', category: 'Food & Dining', cost: 3000, durationMins: 150, description: 'Explore the 200+ tiny bars of Shinjuku Golden Gai with a local guide — each seats just 6-8 people.', imageUrl: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?auto=format&fit=crop&w=800&q=80', rating: 4.65, tags: ['nightlife', 'bars', 'shinjuku'] },
     ]
   },
   {
     name: 'Rome',
+    state: null,
     country: 'Italy',
+    region: 'International',
+    description: 'The Eternal City — 2,500 years of art, architecture, and culinary tradition from the Colosseum to Vatican City.',
     costIndex: 1.25,
-    popularityScore: 4.92,
+    popularityScore: 4.80,
+    latitude: 41.9028,
+    longitude: 12.4964,
+    currency: 'EUR',
     imageUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1200&q=80',
     activities: [
-      {
-        name: 'Colosseum & Roman Forum VIP Access',
-        category: 'Culture & History',
-        cost: 40.00,
-        durationMins: 180,
-        description: 'Step onto the gladiators arena floor and explore the ruins of ancient Rome.',
-        imageUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Vatican Museums & Sistine Chapel Tour',
-        category: 'Culture & History',
-        cost: 48.00,
-        durationMins: 210,
-        description: 'Marvel at Michelangelos ceiling frescoes and St. Peters Basilica.',
-        imageUrl: 'https://images.unsplash.com/photo-1543429776-2782fc8e1acd?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Trastevere Sunset Food & Wine Walk',
-        category: 'Food & Dining',
-        cost: 55.00,
-        durationMins: 150,
-        description: 'Sample authentic carbonara, cacio e pepe, supplì, and local Italian wine.',
-        imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Trevi Fountain & Spanish Steps Night Walk',
-        category: 'Sightseeing',
-        cost: 0.00,
-        durationMins: 90,
-        description: 'Toss a coin into the Trevi Fountain and relax on the illuminated Spanish Steps.',
-        imageUrl: 'https://images.unsplash.com/photo-1529260830199-42c24126f198?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Handmade Pasta & Gelato Workshop',
-        category: 'Food & Dining',
-        cost: 70.00,
-        durationMins: 180,
-        description: 'Cook fresh tagliatelle and ravioli from scratch with a local Roman chef.',
-        imageUrl: 'https://images.unsplash.com/photo-1621996346565-e3d5d62810a9?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'New York',
-    country: 'United States',
-    costIndex: 1.60,
-    popularityScore: 4.88,
-    imageUrl: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Statue of Liberty & Ellis Island Ferry',
-        category: 'Sightseeing',
-        cost: 30.00,
-        durationMins: 240,
-        description: 'Visit Americas most iconic landmark and the historic immigration museum.',
-        imageUrl: 'https://images.unsplash.com/photo-1506146332389-18140dc7b2fb?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Central Park Bicycle Tour',
-        category: 'Nature',
-        cost: 25.00,
-        durationMins: 120,
-        description: 'Pedal past Bethesda Terrace, Strawberry Fields, and Bow Bridge.',
-        imageUrl: 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Broadway Musical Evening Show',
-        category: 'Culture & History',
-        cost: 95.00,
-        durationMins: 160,
-        description: 'Experience a world-class theatrical performance in the heart of Times Square.',
-        imageUrl: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Summit One Vanderbilt Observation Deck',
-        category: 'Sightseeing',
-        cost: 46.00,
-        durationMins: 90,
-        description: 'Multi-sensory immersive glass observation decks overlooking Manhattan skyline.',
-        imageUrl: 'https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Chelsea Market & High Line Food Tour',
-        category: 'Food & Dining',
-        cost: 65.00,
-        durationMins: 150,
-        description: 'Savor gourmet tacos, lobster rolls, and artisanal desserts along the elevated rail park.',
-        imageUrl: 'https://images.unsplash.com/photo-1538688525198-9b88f6f53126?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Barcelona',
-    country: 'Spain',
-    costIndex: 1.20,
-    popularityScore: 4.87,
-    imageUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Sagrada Familia Towers & Basilica Tour',
-        category: 'Culture & History',
-        cost: 36.00,
-        durationMins: 120,
-        description: 'Marvel at Gaudis architectural masterpiece with fast-track tower access.',
-        imageUrl: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Park Guell Mosaic & Panoramic Walk',
-        category: 'Sightseeing',
-        cost: 14.00,
-        durationMins: 120,
-        description: 'Explore the whimsical ceramic wonderland overlooking the Mediterranean Sea.',
-        imageUrl: 'https://images.unsplash.com/photo-1564221710304-0b34005b45f4?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Tapas & Sangria Crawl in El Born',
-        category: 'Food & Dining',
-        cost: 45.00,
-        durationMins: 180,
-        description: 'Taste Iberian ham, patatas bravas, pimientos de padron, and local vermouth.',
-        imageUrl: 'https://images.unsplash.com/photo-1536510233921-8e5043fce771?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Barceloneta Beach Paddleboarding',
-        category: 'Adventure',
-        cost: 28.00,
-        durationMins: 90,
-        description: 'Stand-up paddleboard on gentle Mediterranean morning waves.',
-        imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Gothic Quarter Mystery & Legends Tour',
-        category: 'Culture & History',
-        cost: 18.00,
-        durationMins: 120,
-        description: 'Discover Roman ruins and medieval secrets hidden in winding stone alleyways.',
-        imageUrl: 'https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Kyoto',
-    country: 'Japan',
-    costIndex: 1.15,
-    popularityScore: 4.89,
-    imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Fushimi Inari 10,000 Torii Gates Hike',
-        category: 'Culture & History',
-        cost: 0.00,
-        durationMins: 180,
-        description: 'Climb through thousands of vermillion gates winding up sacred Mount Inari.',
-        imageUrl: 'https://images.unsplash.com/photo-1478436127897-769e1b3f0f36?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Arashiyama Bamboo Grove & Monkey Park',
-        category: 'Nature',
-        cost: 10.00,
-        durationMins: 150,
-        description: 'Wander towering green bamboo stalks and view wild macaque monkeys.',
-        imageUrl: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Kinkaku-ji (Golden Pavilion) Visit',
-        category: 'Sightseeing',
-        cost: 5.00,
-        durationMins: 60,
-        description: 'Admire the gold leaf-covered Zen Buddhist temple reflected in the mirror pond.',
-        imageUrl: 'https://images.unsplash.com/photo-1578637387939-43c525550085?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Traditional Tea Ceremony & Kimono Experience',
-        category: 'Culture & History',
-        cost: 45.00,
-        durationMins: 90,
-        description: 'Learn the ritual art of preparing matcha tea inside a historic machiya townhouse.',
-        imageUrl: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Gion Geisha District Evening Walk',
-        category: 'Sightseeing',
-        cost: 20.00,
-        durationMins: 90,
-        description: 'Explore lantern-lit streets and tea houses where Geiko and Maiko practice traditional arts.',
-        imageUrl: 'https://images.unsplash.com/photo-1528164344705-475426879c0d?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'London',
-    country: 'United Kingdom',
-    costIndex: 1.50,
-    popularityScore: 4.85,
-    imageUrl: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Tower of London & Crown Jewels',
-        category: 'Culture & History',
-        cost: 38.00,
-        durationMins: 180,
-        description: 'See the Crown Jewels and uncover 1,000 years of royal history and intrigue.',
-        imageUrl: 'https://images.unsplash.com/photo-1520986606214-8b456906c813?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'British Museum Guided Highlights',
-        category: 'Culture & History',
-        cost: 0.00,
-        durationMins: 150,
-        description: 'Explore the Rosetta Stone, Parthenon Sculptures, and Egyptian mummies for free.',
-        imageUrl: 'https://images.unsplash.com/photo-1574610758891-5b809b6e6e2e?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'London Eye Panoramic Flight',
-        category: 'Sightseeing',
-        cost: 35.00,
-        durationMins: 45,
-        description: 'Soar 135 meters above the Thames in a glass observation capsule.',
-        imageUrl: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Borough Market Gourmet Food Tour',
-        category: 'Food & Dining',
-        cost: 50.00,
-        durationMins: 120,
-        description: 'Feast on artisanal British cheeses, scotch eggs, oysters, and freshly baked fudge.',
-        imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'West End Theatre Night',
-        category: 'Culture & History',
-        cost: 75.00,
-        durationMins: 150,
-        description: 'Catch an award-winning musical or play in Covent Garden / Soho.',
-        imageUrl: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Bangkok',
-    country: 'Thailand',
-    costIndex: 0.70,
-    popularityScore: 4.82,
-    imageUrl: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Grand Palace & Wat Phra Kaew (Emerald Buddha)',
-        category: 'Culture & History',
-        cost: 15.00,
-        durationMins: 180,
-        description: 'Admire golden spires and sacred Siamese royal architecture.',
-        imageUrl: 'https://images.unsplash.com/photo-1563492065599-3520f775eeed?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Chao Phraya River Longtail Boat Tour',
-        category: 'Sightseeing',
-        cost: 25.00,
-        durationMins: 120,
-        description: 'Cruise the historic canals (klongs) and view water-front stilt communities.',
-        imageUrl: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Chinatown (Yaowarat) Midnight Street Food Crawl',
-        category: 'Food & Dining',
-        cost: 20.00,
-        durationMins: 150,
-        description: 'Taste Michelin-rated street pad thai, crispy pork belly, and mango sticky rice.',
-        imageUrl: 'https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Traditional Thai Massage at Wat Pho',
-        category: 'Relaxation',
-        cost: 18.00,
-        durationMins: 90,
-        description: 'Rejuvenate body and mind at the birthplace of authentic Thai herbal massage.',
-        imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Chatuchak Weekend Market Shopping Spree',
-        category: 'Shopping',
-        cost: 10.00,
-        durationMins: 240,
-        description: 'Bargain hunt across 15,000 stalls of clothes, vintage items, and handicrafts.',
-        imageUrl: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Cape Town',
-    country: 'South Africa',
-    costIndex: 0.85,
-    popularityScore: 4.80,
-    imageUrl: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Table Mountain Cable Car & Summit Trek',
-        category: 'Nature',
-        cost: 24.00,
-        durationMins: 180,
-        description: 'Ride the rotating aerial cableway and take in 360-degree Atlantic views.',
-        imageUrl: 'https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Boulders Beach African Penguin Colony',
-        category: 'Nature',
-        cost: 12.00,
-        durationMins: 120,
-        description: 'Get up close to adorable wild endangered penguins nesting on sheltered granite beaches.',
-        imageUrl: 'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Cape Point & Cape of Good Hope Day Excursion',
-        category: 'Adventure',
-        cost: 45.00,
-        durationMins: 360,
-        description: 'Drive along Chapman’s Peak to the dramatic southwestern tip of Africa.',
-        imageUrl: 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Stellenbosch Wine Estate Tasting Tour',
-        category: 'Food & Dining',
-        cost: 65.00,
-        durationMins: 300,
-        description: 'Sample premium Pinotage and Chenin Blanc paired with artisanal chocolates and cheeses.',
-        imageUrl: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Robben Island Historical Tour',
-        category: 'Culture & History',
-        cost: 30.00,
-        durationMins: 210,
-        description: 'Tour Nelson Mandelas prison cell guided by a former political prisoner.',
-        imageUrl: 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Sydney',
-    country: 'Australia',
-    costIndex: 1.40,
-    popularityScore: 4.86,
-    imageUrl: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Sydney Opera House Architectural Tour',
-        category: 'Culture & History',
-        cost: 32.00,
-        durationMins: 90,
-        description: 'Discover the engineering marvel and drama behind Utzons world-heritage sails.',
-        imageUrl: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Sydney Harbour BridgeClimb',
-        category: 'Adventure',
-        cost: 180.00,
-        durationMins: 210,
-        description: 'Scale the steel arches 134m above Sydney Harbour for unmatched vistas.',
-        imageUrl: 'https://images.unsplash.com/photo-1524293581917-878a6d017c structure?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Bondi to Coogee Coastal Walk & Swim',
-        category: 'Nature',
-        cost: 0.00,
-        durationMins: 150,
-        description: 'A 6km scenic cliff top walk linking Bondi, Tamarama, Bronte, and Coogee beaches.',
-        imageUrl: 'https://images.unsplash.com/photo-1516815231560-8f41ec531527?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Manly Ferry Ride & Fish and Chips',
-        category: 'Sightseeing',
-        cost: 16.00,
-        durationMins: 120,
-        description: 'Enjoy iconic harbour cruise views on the public ferry followed by fresh beachside seafood.',
-        imageUrl: 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Blue Mountains Day Trip & Scenic World',
-        category: 'Adventure',
-        cost: 75.00,
-        durationMins: 480,
-        description: 'Witness the Three Sisters rock formation, waterfalls, and eucalyptus forests.',
-        imageUrl: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Cairo',
-    country: 'Egypt',
-    costIndex: 0.65,
-    popularityScore: 4.78,
-    imageUrl: 'https://images.unsplash.com/photo-1572252009286-268acec5ca0a?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Giza Pyramids & Great Sphinx Private Tour',
-        category: 'Culture & History',
-        cost: 35.00,
-        durationMins: 240,
-        description: 'Explore the Great Pyramid of Khufu and camel trek across the Giza plateau.',
-        imageUrl: 'https://images.unsplash.com/photo-1503177119275-0aa32b3a9368?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Grand Egyptian Museum (GEM) Tour',
-        category: 'Culture & History',
-        cost: 25.00,
-        durationMins: 180,
-        description: 'Witness King Tutankhamuns complete treasure collection in the state-of-the-art museum.',
-        imageUrl: 'https://images.unsplash.com/photo-1572252009286-268acec5ca0a?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Khan el-Khalili Bazaar Spice & Lantern Hunt',
-        category: 'Shopping',
-        cost: 10.00,
-        durationMins: 150,
-        description: 'Bargain for saffron, perfumes, handcrafted brass lamps, and sip mint tea at El Fishawy.',
-        imageUrl: 'https://images.unsplash.com/photo-1568322445389-f64ac2515020?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Nile Felucca Sailboat at Sunset',
-        category: 'Relaxation',
-        cost: 20.00,
-        durationMins: 90,
-        description: 'Sail quietly along the Nile River in a traditional wooden sailboat.',
-        imageUrl: 'https://images.unsplash.com/photo-1539768942893-daf53e448371?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Authentic Koshary & Egyptian Street Feast',
-        category: 'Food & Dining',
-        cost: 8.00,
-        durationMins: 60,
-        description: 'Taste Cairo’s national dish of lentils, rice, macaroni, spicy tomato sauce, and fried onions.',
-        imageUrl: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Rio de Janeiro',
-    country: 'Brazil',
-    costIndex: 0.90,
-    popularityScore: 4.81,
-    imageUrl: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Christ the Redeemer & Corcovado Train',
-        category: 'Sightseeing',
-        cost: 28.00,
-        durationMins: 180,
-        description: 'Ascend through Tijuca rainforest to the feet of the iconic 30m Art Deco statue.',
-        imageUrl: 'https://images.unsplash.com/photo-1599818816947-a9a3b83643b9?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Sugarloaf Mountain Cable Car Sunset',
-        category: 'Sightseeing',
-        cost: 30.00,
-        durationMins: 150,
-        description: 'Two-stage glass cable car offering breathtaking views over Guanabara Bay.',
-        imageUrl: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Copacabana & Ipanema Beachfront Experience',
-        category: 'Relaxation',
-        cost: 15.00,
-        durationMins: 180,
-        description: 'Sip fresh caipirinhas, play footvolley, and watch sunset at Arpoador rock.',
-        imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Lapa Steps (Escadaria Selaron) & Samba Club',
-        category: 'Nightlife',
-        cost: 22.00,
-        durationMins: 210,
-        description: 'Visit the 215 colorful tile steps followed by live samba rhythms in historic Lapa.',
-        imageUrl: 'https://images.unsplash.com/photo-1516307365426-bea591f05011?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Tijuca National Park Forest Jeep Safari',
-        category: 'Adventure',
-        cost: 45.00,
-        durationMins: 240,
-        description: 'Drive through the worlds largest urban rainforest and swim in crystal waterfalls.',
-        imageUrl: 'https://images.unsplash.com/photo-1518457607834-6e8d80c183c5?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Dubai',
-    country: 'United Arab Emirates',
-    costIndex: 1.55,
-    popularityScore: 4.84,
-    imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Burj Khalifa Level 148 Sky Lounge',
-        category: 'Sightseeing',
-        cost: 95.00,
-        durationMins: 90,
-        description: 'Stand at 555m on the highest outdoor observation deck in the world.',
-        imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Desert 4x4 Dune Bashing & BBQ Bedouin Camp',
-        category: 'Adventure',
-        cost: 65.00,
-        durationMins: 360,
-        description: 'Thrilling red dune driving, sandboarding, camel rides, and belly dance dinner show.',
-        imageUrl: 'https://images.unsplash.com/photo-1451337516015-6b6e9a44a8a3?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Dubai Mall & Fountain Show Cruise',
-        category: 'Sightseeing',
-        cost: 20.00,
-        durationMins: 60,
-        description: 'Ride an abra on Burj Lake during the choreographed water and music fountain spectacle.',
-        imageUrl: 'https://images.unsplash.com/photo-1578895101407-74b5c777e4cf?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Old Dubai Gold & Spice Souk Walking Tour',
-        category: 'Shopping',
-        cost: 15.00,
-        durationMins: 120,
-        description: 'Cross Dubai Creek on a traditional 1-dirham abra to explore glittering gold alleyways.',
-        imageUrl: 'https://images.unsplash.com/photo-1546412414-e1885259563a?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Museum of the Future Interactive Entry',
-        category: 'Culture & History',
-        cost: 42.00,
-        durationMins: 120,
-        description: 'Journey to the year 2071 inside an architectural marvel shaped as a torus ring.',
-        imageUrl: 'https://images.unsplash.com/photo-1580674684081-7617fbf3d745?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Amsterdam',
-    country: 'Netherlands',
-    costIndex: 1.35,
-    popularityScore: 4.83,
-    imageUrl: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Van Gogh Museum Masterpieces Tour',
-        category: 'Culture & History',
-        cost: 24.00,
-        durationMins: 150,
-        description: 'Explore the worlds largest collection of Vincent van Goghs paintings and letters.',
-        imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Canal Ring Electric Boat Cruise with Dutch Cheese',
-        category: 'Sightseeing',
-        cost: 32.00,
-        durationMins: 90,
-        description: 'Glide through UNESCO canals with unlimited Gouda cheese and local craft beer.',
-        imageUrl: 'https://images.unsplash.com/photo-1512470876302-972faa2aa9a4?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Anne Frank House & Jordaan District Walk',
-        category: 'Culture & History',
-        cost: 18.00,
-        durationMins: 120,
-        description: 'Visit the secret annex and explore the quaint streets and boutique cafes of Jordaan.',
-        imageUrl: 'https://images.unsplash.com/photo-1534351590666-13e3e96b5017?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Zaanse Schans Windmills & Wooden Clog Village',
-        category: 'Nature',
-        cost: 35.00,
-        durationMins: 240,
-        description: 'See working 18th-century windmills, artisan cheese farms, and clog shoemakers.',
-        imageUrl: 'https://images.unsplash.com/photo-1508873696983-2df57046475a?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Amsterdam City Highlights Bike Tour',
-        category: 'Adventure',
-        cost: 25.00,
-        durationMins: 150,
-        description: 'Ride like a local through Vondelpark, Museumplein, and hidden courtyards.',
-        imageUrl: 'https://images.unsplash.com/photo-1468818438311-4bab781ab9b8?auto=format&fit=crop&w=800&q=80'
-      }
+      { name: 'Colosseum & Roman Forum VIP Underground Tour', category: 'Culture & History', cost: 5500, durationMins: 180, description: 'Skip-the-line access to the Colosseum arena floor, underground chambers, and the ancient Roman Forum ruins.', imageUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80', rating: 4.90, tags: ['colosseum', 'ruins', 'VIP'] },
+      { name: 'Vatican Museums, Sistine Chapel & St. Peter\'s', category: 'Culture & History', cost: 4800, durationMins: 240, description: 'Guided tour of the Vatican Museums, Raphael Rooms, Michelangelo\'s Sistine Chapel, and St. Peter\'s Basilica.', imageUrl: 'https://images.unsplash.com/photo-1531572753322-ad063cecc140?auto=format&fit=crop&w=800&q=80', rating: 4.95, tags: ['vatican', 'sistine-chapel', 'art'] },
+      { name: 'Trastevere Food & Wine Walking Tour', category: 'Food & Dining', cost: 4200, durationMins: 180, description: 'Taste authentic Roman cuisine — supplì, cacio e pepe, porchetta, and local wines in the charming Trastevere quarter.', imageUrl: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['food-tour', 'wine', 'trastevere'] },
+      { name: 'Trevi Fountain, Pantheon & Piazza Navona Walk', category: 'Sightseeing', cost: 0, durationMins: 120, description: 'Self-guided walk through Rome\'s most beautiful piazzas — toss a coin at Trevi and marvel at the Pantheon\'s dome.', imageUrl: 'https://images.unsplash.com/photo-1529260830199-42c24126f198?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['trevi', 'pantheon', 'walking'] },
+      { name: 'Pasta-Making Class in a Roman Home', category: 'Food & Dining', cost: 5000, durationMins: 180, description: 'Learn to make fresh pasta — fettuccine, ravioli, and tiramisu — with a local nonna in her home kitchen.', imageUrl: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['pasta', 'cooking-class', 'home-dining'] },
     ]
   },
   {
     name: 'Bali',
+    state: null,
     country: 'Indonesia',
-    costIndex: 0.60,
-    popularityScore: 4.91,
+    region: 'International',
+    description: 'Island of the Gods — lush rice terraces, ancient temples, volcanic peaks, surf breaks, and wellness retreats.',
+    costIndex: 0.55,
+    popularityScore: 4.75,
+    latitude: -8.3405,
+    longitude: 115.0920,
+    currency: 'IDR',
     imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1200&q=80',
     activities: [
-      {
-        name: 'Ubud Sacred Monkey Forest & Rice Terraces',
-        category: 'Nature',
-        cost: 12.00,
-        durationMins: 240,
-        description: 'Encounter friendly macaques and walk through UNESCO Tegalalang emerald rice fields.',
-        imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Mount Batur Sunrise Volcano Hike & Breakfast',
-        category: 'Adventure',
-        cost: 45.00,
-        durationMins: 360,
-        description: 'Trek up an active volcano in darkness to witness sunrise above cloud inversions.',
-        imageUrl: 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Uluwatu Cliffside Temple & Kecak Fire Dance',
-        category: 'Culture & History',
-        cost: 18.00,
-        durationMins: 180,
-        description: 'Watch rhythmic Balinese chanting and drama set against a dramatic ocean cliff sunset.',
-        imageUrl: 'https://images.unsplash.com/photo-1555400038-63f5ba517a47?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Balinese Herbal Spa & Flower Bath',
-        category: 'Relaxation',
-        cost: 30.00,
-        durationMins: 120,
-        description: 'Indulge in deep tissue massage, traditional body scrub, and petal-filled warm bath.',
-        imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Nusa Penida Manta Ray Snorkeling Trip',
-        category: 'Adventure',
-        cost: 55.00,
-        durationMins: 480,
-        description: 'Speedboat to Kelingking T-Rex cliff and swim with giant oceanic manta rays.',
-        imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80'
-      }
+      { name: 'Tegallalang Rice Terrace & Swing', category: 'Sightseeing', cost: 800, durationMins: 120, description: 'Walk the stunning UNESCO rice terraces of Tegallalang and ride the famous Bali swing over the jungle canopy.', imageUrl: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['rice-terrace', 'swing', 'UNESCO'] },
+      { name: 'Uluwatu Temple Sunset & Kecak Fire Dance', category: 'Culture & History', cost: 600, durationMins: 150, description: 'Watch the sunset from the cliff-top Uluwatu Temple, then enjoy the mesmerising Kecak fire dance performance.', imageUrl: 'https://images.unsplash.com/photo-1555400038-63f5ba517a47?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['temple', 'sunset', 'kecak'] },
+      { name: 'Mount Batur Sunrise Trek', category: 'Adventure', cost: 2500, durationMins: 360, description: 'Pre-dawn hike to the summit of active volcano Mount Batur for an unforgettable sunrise above the clouds.', imageUrl: 'https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['volcano', 'trekking', 'sunrise'] },
+      { name: 'Ubud Monkey Forest & Art Market', category: 'Leisure', cost: 400, durationMins: 120, description: 'Visit the Sacred Monkey Forest Sanctuary and browse the vibrant Ubud Art Market for batik and wood carvings.', imageUrl: 'https://images.unsplash.com/photo-1555400038-63f5ba517a47?auto=format&fit=crop&w=800&q=80', rating: 4.60, tags: ['monkey-forest', 'art-market', 'ubud'] },
+      { name: 'Balinese Cooking Class & Jimbaran Seafood', category: 'Food & Dining', cost: 1500, durationMins: 240, description: 'Learn to cook satay, nasi goreng, and lawar in a family compound, then feast on grilled seafood at Jimbaran Bay.', imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['cooking-class', 'seafood', 'jimbaran'] },
+      { name: 'Spa & Flower Bath Wellness Retreat', category: 'Leisure', cost: 2000, durationMins: 180, description: 'Traditional Balinese massage, body scrub, and iconic flower petal bath in a jungle-set wellness retreat.', imageUrl: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['spa', 'wellness', 'flower-bath'] },
     ]
   },
   {
-    name: 'Singapore',
-    country: 'Singapore',
-    costIndex: 1.48,
-    popularityScore: 4.88,
-    imageUrl: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=1200&q=80',
+    name: 'Dubai',
+    state: null,
+    country: 'United Arab Emirates',
+    region: 'International',
+    description: 'City of superlatives — the world\'s tallest building, luxury shopping, desert safaris, and futuristic architecture.',
+    costIndex: 1.60,
+    popularityScore: 4.65,
+    latitude: 25.2048,
+    longitude: 55.2708,
+    currency: 'AED',
+    imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80',
     activities: [
-      {
-        name: 'Gardens by the Bay & Supertree Observatory',
-        category: 'Sightseeing',
-        cost: 26.00,
-        durationMins: 180,
-        description: 'Explore the Flower Dome, Cloud Forest waterfall, and futuristic glowing Supertrees.',
-        imageUrl: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Marina Bay Sands SkyPark Observation Deck',
-        category: 'Sightseeing',
-        cost: 22.00,
-        durationMins: 90,
-        description: 'Enjoy 360-degree views of Singapore skyline, shipping strait, and Marina Bay.',
-        imageUrl: 'https://images.unsplash.com/photo-1506351421178-63b52a2d15c8?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Chinatown & Maxwell Hawker Centre Food Feast',
-        category: 'Food & Dining',
-        cost: 15.00,
-        durationMins: 120,
-        description: 'Taste Tian Tian Hainanese chicken rice, char kway teow, and laksa noodles.',
-        imageUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Night Safari Open-Air Tram & Walking Trail',
-        category: 'Adventure',
-        cost: 38.00,
-        durationMins: 180,
-        description: 'Observe nocturnal wildlife in naturalistic habitats in the worlds first night zoo.',
-        imageUrl: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Sentosa Island Cable Car & Beach Club',
-        category: 'Relaxation',
-        cost: 30.00,
-        durationMins: 240,
-        description: 'Take the scenic harbour ropeway to white sand beaches and tropical beach clubs.',
-        imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80'
-      }
+      { name: 'Burj Khalifa At the Top Observation Deck', category: 'Sightseeing', cost: 3500, durationMins: 90, description: 'Visit the 124th & 148th floors of the world\'s tallest building for 360° views across Dubai and the Arabian Gulf.', imageUrl: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['burj-khalifa', 'observation', 'landmark'] },
+      { name: 'Desert Safari — Dune Bashing, BBQ & Belly Dance', category: 'Adventure', cost: 4000, durationMins: 360, description: 'SUV dune bashing, camel rides, sandboarding, henna art, BBQ dinner, and traditional belly dance under the stars.', imageUrl: 'https://images.unsplash.com/photo-1451337516015-6b6e9a44a8a3?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['desert', 'safari', 'BBQ'] },
+      { name: 'Dubai Mall & Dubai Fountain Show', category: 'Leisure', cost: 0, durationMins: 180, description: 'Explore the world\'s largest mall, visit the aquarium and ice rink, and watch the spectacular Dubai Fountain at night.', imageUrl: 'https://images.unsplash.com/photo-1580674684081-7617fbf3d745?auto=format&fit=crop&w=800&q=80', rating: 4.65, tags: ['mall', 'fountain', 'shopping'] },
+      { name: 'Old Dubai Heritage Tour — Al Fahidi & Souks', category: 'Culture & History', cost: 600, durationMins: 150, description: 'Explore the Al Fahidi Historical District, take an abra across Dubai Creek, and bargain in the Gold and Spice Souks.', imageUrl: 'https://images.unsplash.com/photo-1548603015-fd247efd15aa?auto=format&fit=crop&w=800&q=80', rating: 4.55, tags: ['heritage', 'souks', 'old-dubai'] },
+      { name: 'Palm Jumeirah Yacht Sunset Cruise', category: 'Leisure', cost: 8000, durationMins: 120, description: 'Private yacht cruise around Palm Jumeirah and the Dubai Marina skyline with canapés and sunset views.', imageUrl: 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['yacht', 'sunset', 'luxury'] },
     ]
   },
-  {
-    name: 'Prague',
-    country: 'Czech Republic',
-    costIndex: 0.95,
-    popularityScore: 4.82,
-    imageUrl: 'https://images.unsplash.com/photo-1541849546-216549ae216d?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Prague Castle & St. Vitus Cathedral Complex',
-        category: 'Culture & History',
-        cost: 16.00,
-        durationMins: 180,
-        description: 'Explore the ancient seat of Bohemian kings with gothic spires and Golden Lane.',
-        imageUrl: 'https://images.unsplash.com/photo-1541849546-216549ae216d?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Charles Bridge & Old Town Astronomical Clock',
-        category: 'Sightseeing',
-        cost: 0.00,
-        durationMins: 90,
-        description: 'Cross the 14th-century cobblestone bridge lined with 30 baroque saint statues.',
-        imageUrl: 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Bohemian Beer Tasting & Goulash Feast',
-        category: 'Food & Dining',
-        cost: 32.00,
-        durationMins: 150,
-        description: 'Sample world-famous Pilsner Urquell paired with beef goulash and bread dumplings.',
-        imageUrl: 'https://images.unsplash.com/photo-1538488881522-4326c36460f7?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Vltava River Panoramic Wooden Boat Tour',
-        category: 'Sightseeing',
-        cost: 20.00,
-        durationMins: 60,
-        description: 'Cruise past Prague Castle and beneath historic bridge arches with live commentary.',
-        imageUrl: 'https://images.unsplash.com/photo-1520645521318-f03a712f0e67?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Classical Music Concert in Klementinum Chapel',
-        category: 'Culture & History',
-        cost: 28.00,
-        durationMins: 75,
-        description: 'Enjoy Vivaldi and Mozart performed in a breathtaking baroque hall with pipe organ.',
-        imageUrl: 'https://images.unsplash.com/photo-1511192336575-5a79af67a629?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Florence',
-    country: 'Italy',
-    costIndex: 1.20,
-    popularityScore: 4.87,
-    imageUrl: 'https://images.unsplash.com/photo-1543429776-2782fc8e1acd?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Uffizi Gallery Renaissance Masterpieces Tour',
-        category: 'Culture & History',
-        cost: 32.00,
-        durationMins: 150,
-        description: 'Stand in awe before Botticellis Birth of Venus and works by Leonardo and Michelangelo.',
-        imageUrl: 'https://images.unsplash.com/photo-1543429776-2782fc8e1acd?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Brunelleschis Duomo Dome Climb',
-        category: 'Sightseeing',
-        cost: 30.00,
-        durationMins: 120,
-        description: 'Climb 463 stone steps between the double shell of the worlds greatest masonry dome.',
-        imageUrl: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Chianti Hills Wine & Olive Oil Safari',
-        category: 'Food & Dining',
-        cost: 68.00,
-        durationMins: 300,
-        description: 'Tour Tuscan vineyards and sample Chianti Classico with freshly baked focaccia.',
-        imageUrl: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Ponte Vecchio & Piazzale Michelangelo Sunset',
-        category: 'Sightseeing',
-        cost: 0.00,
-        durationMins: 90,
-        description: 'Watch the sun sink over Florence and the Arno River from the iconic scenic terrace.',
-        imageUrl: 'https://images.unsplash.com/photo-1520645521318-f03a712f0e67?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Artisan Leather Workshop Tour',
-        category: 'Shopping',
-        cost: 15.00,
-        durationMins: 90,
-        description: 'Witness master craftsmen crafting handmade Florentine leather goods in Santa Croce.',
-        imageUrl: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'San Francisco',
-    country: 'United States',
-    costIndex: 1.55,
-    popularityScore: 4.80,
-    imageUrl: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Alcatraz Island Cellhouse Audio Tour',
-        category: 'Culture & History',
-        cost: 45.00,
-        durationMins: 180,
-        description: 'Ferry across the bay to explore the notorious former federal maximum-security prison.',
-        imageUrl: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Golden Gate Bridge Bike Ride to Sausalito',
-        category: 'Adventure',
-        cost: 32.00,
-        durationMins: 210,
-        description: 'Cycle across the majestic orange suspension bridge and take the ferry back.',
-        imageUrl: 'https://images.unsplash.com/photo-1449034446853-66c86144b0ad?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Fishermans Wharf Clam Chowder & Sea Lions',
-        category: 'Food & Dining',
-        cost: 22.00,
-        durationMins: 90,
-        description: 'Enjoy steaming clam chowder in a sourdough bread bowl at historic Pier 39.',
-        imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Historic Cable Car Ride & Lombard Street Walk',
-        category: 'Sightseeing',
-        cost: 8.00,
-        durationMins: 90,
-        description: 'Hang on the outside running board of a cable car down Californias crookedest street.',
-        imageUrl: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Muir Woods Giant Redwood Forest Expedition',
-        category: 'Nature',
-        cost: 55.00,
-        durationMins: 300,
-        description: 'Walk in the serene shade of ancient thousand-year-old coastal redwood trees.',
-        imageUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  },
-  {
-    name: 'Istanbul',
-    country: 'Turkey',
-    costIndex: 0.80,
-    popularityScore: 4.86,
-    imageUrl: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=1200&q=80',
-    activities: [
-      {
-        name: 'Hagia Sophia & Blue Mosque Guided Tour',
-        category: 'Culture & History',
-        cost: 25.00,
-        durationMins: 150,
-        description: 'Discover 1,500 years of Byzantine and Ottoman history and dazzling blue Iznik tiles.',
-        imageUrl: 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Grand Bazaar & Spice Market Shopping Exploration',
-        category: 'Shopping',
-        cost: 10.00,
-        durationMins: 180,
-        description: 'Navigate 4,000 shops selling Turkish rugs, ceramics, baklava, and Turkish delight.',
-        imageUrl: 'https://images.unsplash.com/photo-1546412414-e1885259563a?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Bosphorus Sunset Yacht Cruise with Turkish Meze',
-        category: 'Sightseeing',
-        cost: 38.00,
-        durationMins: 120,
-        description: 'Cruise between Europe and Asia past illuminated palaces and seaside mansions.',
-        imageUrl: 'https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Traditional Turkish Hamam Bath & Massage',
-        category: 'Relaxation',
-        cost: 45.00,
-        durationMins: 90,
-        description: 'Relax on heated marble in a 500-year-old Ottoman bath with foam scrub massage.',
-        imageUrl: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        name: 'Karakoy & Kadikoy Street Food Safari',
-        category: 'Food & Dining',
-        cost: 22.00,
-        durationMins: 180,
-        description: 'Taste balik ekmek (mackerel sandwich), doner kebab, midye dolma, and strong Turkish coffee.',
-        imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80'
-      }
-    ]
-  }
 ];
 
+// ─────────────────────────────────────────────────────────────
+// MAIN SEED FUNCTION
+// ─────────────────────────────────────────────────────────────
+
 async function main() {
-  console.log('🚀 Starting GlobeTrotter database seeding...');
+  console.log('🌱 Starting GlobeTrotter database seeding...\n');
 
-  // Clean existing tables in order
-  console.log('🧹 Cleaning previous seed data...');
-  await prisma.sharedLink.deleteMany({});
-  await prisma.budget.deleteMany({});
-  await prisma.tripActivity.deleteMany({});
-  await prisma.stop.deleteMany({});
-  await prisma.activity.deleteMany({});
-  await prisma.city.deleteMany({});
-  await prisma.trip.deleteMany({});
-  await prisma.user.deleteMany({});
+  // ────────────────────────────────
+  // 1. Clean existing data
+  // ────────────────────────────────
+  console.log('🗑️  Cleaning existing data...');
+  await prisma.tripActivity.deleteMany();
+  await prisma.stop.deleteMany();
+  await prisma.budget.deleteMany();
+  await prisma.sharedLink.deleteMany();
+  await prisma.savedCity.deleteMany();
+  await prisma.trip.deleteMany();
+  await prisma.activity.deleteMany();
+  await prisma.city.deleteMany();
+  await prisma.passwordResetToken.deleteMany();
+  await prisma.user.deleteMany();
+  console.log('✅ All tables cleared.\n');
 
-  // 1. Create Demo User
-  console.log('👤 Creating demo user...');
-  const passwordHash = await bcrypt.hash('Password123!', 10);
+  // ────────────────────────────────
+  // 2. Create demo users
+  // ────────────────────────────────
+  console.log('👤 Creating demo users...');
+  const passwordHash = await bcrypt.hash('Explorer@2026', 10);
+
   const demoUser = await prisma.user.create({
     data: {
-      name: 'Manthan & Team',
-      email: 'demo@globetrotter.com',
-      passwordHash: passwordHash,
-      profilePhoto: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-      languagePref: 'en'
-    }
+      name: 'Aarav Sharma',
+      email: 'aarav@globetrotter.in',
+      passwordHash,
+      phone: '+91 98201 23456',
+      bio: 'Travel photographer & heritage explorer based in Mumbai. 15 Indian states visited and counting! 🇮🇳',
+      profilePhoto: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+      currencyPref: 'INR',
+      languagePref: 'en',
+      isAdmin: false,
+    },
   });
-  console.log(`✅ Demo user created: ${demoUser.email} (ID: ${demoUser.id})`);
+  console.log(`   ✅ Demo user: ${demoUser.name} (${demoUser.email})`);
 
-  // 2. Seed Cities & Activities
-  console.log(`🏙️  Seeding ${CITIES_DATA.length} global cities and their activity catalogs...`);
-  const createdCities = [];
-  const cityActivityMap = new Map();
+  const adminUser = await prisma.user.create({
+    data: {
+      name: 'GlobeTrotter Admin',
+      email: 'admin@globetrotter.in',
+      passwordHash: await bcrypt.hash('Admin@2026', 10),
+      profilePhoto: null,
+      currencyPref: 'INR',
+      languagePref: 'en',
+      isAdmin: true,
+    },
+  });
+  console.log(`   ✅ Admin user: ${adminUser.name} (${adminUser.email})\n`);
+
+  // ────────────────────────────────
+  // 3. Seed cities & activities
+  // ────────────────────────────────
+  console.log('🏙️  Seeding cities & activities...');
+  const cityMap = {};
+  let totalActivities = 0;
 
   for (const cityData of CITIES_DATA) {
-    const { activities, ...cityFields } = cityData;
+    const { activities: activitiesData, ...cityFields } = cityData;
+
     const city = await prisma.city.create({
-      data: cityFields
+      data: cityFields,
     });
-    createdCities.push(city);
+
+    cityMap[city.name] = city;
 
     const createdActivities = [];
-    for (const act of activities) {
+    for (const actData of activitiesData) {
       const activity = await prisma.activity.create({
         data: {
-          ...act,
-          cityId: city.id
-        }
+          cityId: city.id,
+          name: actData.name,
+          category: actData.category,
+          cost: actData.cost,
+          currency: cityData.currency,
+          durationMins: actData.durationMins,
+          description: actData.description,
+          imageUrl: actData.imageUrl,
+          rating: actData.rating || null,
+          tags: actData.tags || [],
+        },
       });
       createdActivities.push(activity);
+      totalActivities++;
     }
-    cityActivityMap.set(city.name, createdActivities);
+
+    cityMap[city.name].activities = createdActivities;
+    console.log(`   ✅ ${city.name}, ${cityData.state || cityData.country} — ${createdActivities.length} activities`);
   }
-  console.log(`✅ Created ${createdCities.length} cities and seeded all activities.`);
 
-  // 3. Create Sample Demo Trip (European Grand Tour)
-  console.log('🗺️ Creating sample multi-city itinerary (Paris -> Florence -> Rome)...');
-  const parisCity = createdCities.find(c => c.name === 'Paris');
-  const florenceCity = createdCities.find(c => c.name === 'Florence');
-  const romeCity = createdCities.find(c => c.name === 'Rome');
+  console.log(`\n📊 Total: ${Object.keys(cityMap).length} cities, ${totalActivities} activities seeded.\n`);
 
-  const demoTrip = await prisma.trip.create({
+  // ────────────────────────────────
+  // 4. Save favourite cities for demo user
+  // ────────────────────────────────
+  console.log('⭐ Saving favourite cities for Aarav...');
+  const favCities = ['Jaipur', 'Udaipur', 'Goa', 'Leh', 'Varanasi'];
+  for (const cityName of favCities) {
+    if (cityMap[cityName]) {
+      await prisma.savedCity.create({
+        data: { userId: demoUser.id, cityId: cityMap[cityName].id },
+      });
+    }
+  }
+  console.log(`   ✅ ${favCities.length} cities saved.\n`);
+
+  // ────────────────────────────────
+  // 5. Create sample trips
+  // ────────────────────────────────
+  console.log('✈️  Creating sample trips...');
+
+  // --- Trip 1: Royal Rajasthan Heritage Tour ---
+  const rajasthanTrip = await prisma.trip.create({
     data: {
       userId: demoUser.id,
-      name: 'European Grand Highlights 2026',
-      description: 'A two-week adventure spanning Paris monuments, Tuscan vineyards, and ancient Roman history.',
-      startDate: new Date('2026-09-01'),
-      endDate: new Date('2026-09-14'),
-      coverPhoto: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80',
+      name: 'Royal Rajasthan Heritage Tour',
+      startDate: new Date('2026-10-15'),
+      endDate: new Date('2026-10-25'),
+      description: 'A 10-day luxury journey through the Pink City of Jaipur and the Lake City of Udaipur — exploring grand forts, ornate havelis, sunset boat cruises, and royal Rajasthani thali feasts.',
+      coverPhoto: 'https://images.unsplash.com/photo-1603262110263-fb010d6e59d4?auto=format&fit=crop&w=1200&q=80',
+      totalBudget: 85000,
+      status: 'PLANNED',
       isPublic: true,
-      shareToken: 'euro-tour-2026-demo'
-    }
+      shareToken: 'rajasthan-heritage-2026',
+    },
   });
 
-  // 4. Create Trip Budget
-  const tripBudget = await prisma.budget.create({
+  // Budget for Rajasthan trip
+  await prisma.budget.create({
     data: {
-      tripId: demoTrip.id,
-      dailyCap: 250.00,
+      tripId: rajasthanTrip.id,
+      dailyCap: 8500,
       categoryCaps: {
-        "Sightseeing": 400.00,
-        "Food & Dining": 600.00,
-        "Culture & History": 350.00,
-        "Adventure": 200.00,
-        "Shopping": 200.00,
-        "Relaxation": 150.00
-      }
-    }
+        lodging: 46500,
+        food: 12500,
+        transport: 6200,
+        activities: 9500,
+        shopping: 5000,
+      },
+    },
   });
 
-  // 5. Create Stops & Snapshotted Trip Activities
-  // Stop 1: Paris
-  const stop1 = await prisma.stop.create({
+  // Stops
+  const jaipurStop = await prisma.stop.create({
     data: {
-      tripId: demoTrip.id,
-      cityId: parisCity.id,
-      arrivalDate: new Date('2026-09-01'),
-      departureDate: new Date('2026-09-05'),
-      sortOrder: 0
-    }
+      tripId: rajasthanTrip.id,
+      cityId: cityMap['Jaipur'].id,
+      arrivalDate: new Date('2026-10-15'),
+      departureDate: new Date('2026-10-20'),
+      sortOrder: 0,
+      notes: 'Main base: Samode Haveli. Book Amber Fort VIP tour in advance.',
+    },
   });
 
-  const parisActs = cityActivityMap.get('Paris') || [];
-  if (parisActs.length >= 3) {
-    await prisma.tripActivity.createMany({
-      data: [
-        {
-          stopId: stop1.id,
-          activityId: parisActs[0].id,
-          nameSnapshot: parisActs[0].name,
-          costSnapshot: parisActs[0].cost,
-          categorySnapshot: parisActs[0].category,
-          scheduledDate: new Date('2026-09-01'),
-          timeSlot: '10:00 AM - 12:30 PM',
-          sortOrder: 0
-        },
-        {
-          stopId: stop1.id,
-          activityId: parisActs[1].id,
-          nameSnapshot: parisActs[1].name,
-          costSnapshot: parisActs[1].cost,
-          categorySnapshot: parisActs[1].category,
-          scheduledDate: new Date('2026-09-02'),
-          timeSlot: '02:00 PM - 05:00 PM',
-          sortOrder: 1
-        },
-        {
-          stopId: stop1.id,
-          activityId: parisActs[2].id,
-          nameSnapshot: parisActs[2].name,
-          costSnapshot: parisActs[2].cost,
-          categorySnapshot: parisActs[2].category,
-          scheduledDate: new Date('2026-09-03'),
-          timeSlot: '07:30 PM - 09:30 PM',
-          sortOrder: 2
-        }
-      ]
+  const udaipurStop = await prisma.stop.create({
+    data: {
+      tripId: rajasthanTrip.id,
+      cityId: cityMap['Udaipur'].id,
+      arrivalDate: new Date('2026-10-20'),
+      departureDate: new Date('2026-10-25'),
+      sortOrder: 1,
+      notes: 'Taj Fateh Prakash Palace booked. Lake Pichola boat pre-booked for Oct 21 sunset.',
+    },
+  });
+
+  // Trip Activities for Jaipur
+  const jaipurActs = cityMap['Jaipur'].activities;
+  const jaipurSchedule = [
+    { actIdx: 0, date: '2026-10-15', time: '09:00 AM - 12:00 PM', order: 0 },
+    { actIdx: 1, date: '2026-10-16', time: '05:30 AM - 07:00 AM', order: 1 },
+    { actIdx: 2, date: '2026-10-16', time: '07:00 PM - 09:30 PM', order: 2 },
+    { actIdx: 3, date: '2026-10-17', time: '10:00 AM - 12:00 PM', order: 3 },
+    { actIdx: 4, date: '2026-10-17', time: '04:00 PM - 06:00 PM', order: 4 },
+    { actIdx: 5, date: '2026-10-18', time: '11:00 AM - 01:00 PM', order: 5 },
+    { actIdx: 6, date: '2026-10-15', time: 'Full Day', order: 6 },
+  ];
+  for (const s of jaipurSchedule) {
+    await prisma.tripActivity.create({
+      data: {
+        stopId: jaipurStop.id,
+        activityId: jaipurActs[s.actIdx].id,
+        nameSnapshot: jaipurActs[s.actIdx].name,
+        costSnapshot: jaipurActs[s.actIdx].cost,
+        categorySnapshot: jaipurActs[s.actIdx].category,
+        scheduledDate: new Date(s.date),
+        timeSlot: s.time,
+        sortOrder: s.order,
+      },
     });
   }
 
-  // Stop 2: Florence
-  const stop2 = await prisma.stop.create({
-    data: {
-      tripId: demoTrip.id,
-      cityId: florenceCity.id,
-      arrivalDate: new Date('2026-09-05'),
-      departureDate: new Date('2026-09-09'),
-      sortOrder: 1
-    }
-  });
-
-  const florenceActs = cityActivityMap.get('Florence') || [];
-  if (florenceActs.length >= 2) {
-    await prisma.tripActivity.createMany({
-      data: [
-        {
-          stopId: stop2.id,
-          activityId: florenceActs[0].id,
-          nameSnapshot: florenceActs[0].name,
-          costSnapshot: florenceActs[0].cost,
-          categorySnapshot: florenceActs[0].category,
-          scheduledDate: new Date('2026-09-06'),
-          timeSlot: '09:30 AM - 12:00 PM',
-          sortOrder: 0
-        },
-        {
-          stopId: stop2.id,
-          activityId: florenceActs[2].id,
-          nameSnapshot: florenceActs[2].name,
-          costSnapshot: florenceActs[2].cost,
-          categorySnapshot: florenceActs[2].category,
-          scheduledDate: new Date('2026-09-07'),
-          timeSlot: '01:00 PM - 06:00 PM',
-          sortOrder: 1
-        }
-      ]
+  // Trip Activities for Udaipur
+  const udaipurActs = cityMap['Udaipur'].activities;
+  const udaipurSchedule = [
+    { actIdx: 0, date: '2026-10-21', time: '04:30 PM - 06:00 PM', order: 0 },
+    { actIdx: 1, date: '2026-10-22', time: '09:00 AM - 11:30 AM', order: 1 },
+    { actIdx: 2, date: '2026-10-22', time: '07:30 PM - 09:30 PM', order: 2 },
+    { actIdx: 3, date: '2026-10-20', time: 'Full Day', order: 3 },
+    { actIdx: 4, date: '2026-10-23', time: '08:00 AM - 04:00 PM', order: 4 },
+    { actIdx: 5, date: '2026-10-24', time: '07:00 PM - 08:15 PM', order: 5 },
+  ];
+  for (const s of udaipurSchedule) {
+    await prisma.tripActivity.create({
+      data: {
+        stopId: udaipurStop.id,
+        activityId: udaipurActs[s.actIdx].id,
+        nameSnapshot: udaipurActs[s.actIdx].name,
+        costSnapshot: udaipurActs[s.actIdx].cost,
+        categorySnapshot: udaipurActs[s.actIdx].category,
+        scheduledDate: new Date(s.date),
+        timeSlot: s.time,
+        sortOrder: s.order,
+      },
     });
   }
 
-  // Stop 3: Rome
-  const stop3 = await prisma.stop.create({
+  console.log(`   ✅ Trip 1: "${rajasthanTrip.name}" — 2 stops, ${jaipurSchedule.length + udaipurSchedule.length} activities`);
+
+  // --- Trip 2: Kerala Backwaters & Tea Hills ---
+  const keralaTrip = await prisma.trip.create({
     data: {
-      tripId: demoTrip.id,
-      cityId: romeCity.id,
-      arrivalDate: new Date('2026-09-09'),
-      departureDate: new Date('2026-09-14'),
-      sortOrder: 2
-    }
+      userId: demoUser.id,
+      name: 'Kerala Backwaters & Tea Hills',
+      startDate: new Date('2026-12-20'),
+      endDate: new Date('2026-12-28'),
+      description: 'An 8-day exploration of God\'s Own Country — from the misty tea estates of Munnar to the palm-fringed houseboats of Alleppey.',
+      coverPhoto: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1200&q=80',
+      totalBudget: 55000,
+      status: 'DRAFT',
+      isPublic: true,
+      shareToken: 'kerala-backwaters-2026',
+    },
   });
 
-  const romeActs = cityActivityMap.get('Rome') || [];
-  if (romeActs.length >= 3) {
-    await prisma.tripActivity.createMany({
-      data: [
-        {
-          stopId: stop3.id,
-          activityId: romeActs[0].id,
-          nameSnapshot: romeActs[0].name,
-          costSnapshot: romeActs[0].cost,
-          categorySnapshot: romeActs[0].category,
-          scheduledDate: new Date('2026-09-10'),
-          timeSlot: '09:00 AM - 12:00 PM',
-          sortOrder: 0
-        },
-        {
-          stopId: stop3.id,
-          activityId: romeActs[1].id,
-          nameSnapshot: romeActs[1].name,
-          costSnapshot: romeActs[1].cost,
-          categorySnapshot: romeActs[1].category,
-          scheduledDate: new Date('2026-09-11'),
-          timeSlot: '01:30 PM - 05:00 PM',
-          sortOrder: 1
-        },
-        {
-          stopId: stop3.id,
-          activityId: romeActs[2].id,
-          nameSnapshot: romeActs[2].name,
-          costSnapshot: romeActs[2].cost,
-          categorySnapshot: romeActs[2].category,
-          scheduledDate: new Date('2026-09-12'),
-          timeSlot: '06:00 PM - 08:30 PM',
-          sortOrder: 2
-        }
-      ]
+  await prisma.budget.create({
+    data: {
+      tripId: keralaTrip.id,
+      dailyCap: 7000,
+      categoryCaps: { lodging: 25000, food: 8000, transport: 8000, activities: 10000 },
+    },
+  });
+
+  const keralaStop = await prisma.stop.create({
+    data: {
+      tripId: keralaTrip.id,
+      cityId: cityMap['Alleppey'].id,
+      arrivalDate: new Date('2026-12-20'),
+      departureDate: new Date('2026-12-28'),
+      sortOrder: 0,
+      notes: 'Premium 2-bedroom houseboat on Vembanad Lake. Munnar day trip on Dec 22.',
+    },
+  });
+
+  const keralaActs = cityMap['Alleppey'].activities;
+  for (let i = 0; i < keralaActs.length; i++) {
+    await prisma.tripActivity.create({
+      data: {
+        stopId: keralaStop.id,
+        activityId: keralaActs[i].id,
+        nameSnapshot: keralaActs[i].name,
+        costSnapshot: keralaActs[i].cost,
+        categorySnapshot: keralaActs[i].category,
+        scheduledDate: new Date(`2026-12-${20 + i}`),
+        timeSlot: '10:00 AM',
+        sortOrder: i,
+      },
     });
   }
 
-  // 6. Create Shared Link
-  const sharedLink = await prisma.sharedLink.create({
+  console.log(`   ✅ Trip 2: "${keralaTrip.name}" — 1 stop, ${keralaActs.length} activities`);
+
+  // --- Trip 3: Goa Coastal Getaway ---
+  const goaTrip = await prisma.trip.create({
     data: {
-      tripId: demoTrip.id,
-      shareToken: demoTrip.shareToken,
-      viewCount: 14
-    }
+      userId: demoUser.id,
+      name: 'Goa Coastal Getaway',
+      startDate: new Date('2026-11-10'),
+      endDate: new Date('2026-11-17'),
+      description: 'A 7-day coastal escape — from the Portuguese heritage of Fontainhas to the underwater world of Grand Island and beach shack feasts.',
+      coverPhoto: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1200&q=80',
+      totalBudget: 45000,
+      status: 'DRAFT',
+      isPublic: true,
+      shareToken: 'goa-coastal-2026',
+    },
   });
 
-  console.log(`✅ Sample trip created with ${3} stops, budget, snapshotted activities, and public share token: '${demoTrip.shareToken}'`);
-  console.log('🎉 Database seeding finished successfully!');
+  await prisma.budget.create({
+    data: {
+      tripId: goaTrip.id,
+      dailyCap: 6500,
+      categoryCaps: { lodging: 18000, food: 7000, transport: 5000, activities: 10000 },
+    },
+  });
+
+  const goaStop = await prisma.stop.create({
+    data: {
+      tripId: goaTrip.id,
+      cityId: cityMap['Goa'].id,
+      arrivalDate: new Date('2026-11-10'),
+      departureDate: new Date('2026-11-17'),
+      sortOrder: 0,
+      notes: 'Latin Quarter villa in Fontainhas. Scuba on Nov 12 (pre-booked).',
+    },
+  });
+
+  const goaActs = cityMap['Goa'].activities;
+  for (let i = 0; i < goaActs.length; i++) {
+    await prisma.tripActivity.create({
+      data: {
+        stopId: goaStop.id,
+        activityId: goaActs[i].id,
+        nameSnapshot: goaActs[i].name,
+        costSnapshot: goaActs[i].cost,
+        categorySnapshot: goaActs[i].category,
+        scheduledDate: new Date(`2026-11-${10 + i}`),
+        timeSlot: '10:00 AM',
+        sortOrder: i,
+      },
+    });
+  }
+
+  console.log(`   ✅ Trip 3: "${goaTrip.name}" — 1 stop, ${goaActs.length} activities`);
+
+  // --- Trip 4 (Past/Completed): Varanasi Spiritual Journey ---
+  const varanasiTrip = await prisma.trip.create({
+    data: {
+      userId: demoUser.id,
+      name: 'Varanasi Ghats & Ganga Aarti',
+      startDate: new Date('2026-03-10'),
+      endDate: new Date('2026-03-14'),
+      description: 'A soul-stirring 4-day spiritual journey along the ancient ghats of Varanasi — sunrise boats, Ganga Aarti, and silk weaving.',
+      coverPhoto: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80',
+      totalBudget: 22000,
+      status: 'COMPLETED',
+      isPublic: true,
+      shareToken: 'varanasi-ghats-2026',
+    },
+  });
+
+  await prisma.budget.create({
+    data: { tripId: varanasiTrip.id, dailyCap: 5500, categoryCaps: {} },
+  });
+
+  console.log(`   ✅ Trip 4: "${varanasiTrip.name}" (completed)`);
+
+  // --- Trip 5 (Past/Completed): Leh-Ladakh ---
+  const ladakhTrip = await prisma.trip.create({
+    data: {
+      userId: demoUser.id,
+      name: 'Leh-Ladakh High Passes Adventure',
+      startDate: new Date('2026-06-01'),
+      endDate: new Date('2026-06-10'),
+      description: 'A 10-day high-altitude adventure — Pangong Tso stargazing, Nubra sand dunes, Khardung La summit, and Zanskar rafting.',
+      coverPhoto: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=1200&q=80',
+      totalBudget: 65000,
+      status: 'COMPLETED',
+      isPublic: false,
+      shareToken: 'ladakh-passes-2026',
+    },
+  });
+
+  await prisma.budget.create({
+    data: { tripId: ladakhTrip.id, dailyCap: 6500, categoryCaps: {} },
+  });
+
+  console.log(`   ✅ Trip 5: "${ladakhTrip.name}" (completed)`);
+
+  // --- Trip 6 (Past): European Summer ---
+  const euroTrip = await prisma.trip.create({
+    data: {
+      userId: demoUser.id,
+      name: 'European Summer — Paris & Rome',
+      startDate: new Date('2026-07-01'),
+      endDate: new Date('2026-07-14'),
+      description: 'A 14-day European grand tour — Eiffel Tower, Louvre, Seine cruises in Paris, then Colosseum, Vatican, and pasta-making in Rome.',
+      coverPhoto: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80',
+      totalBudget: 240000,
+      status: 'COMPLETED',
+      isPublic: true,
+      shareToken: 'europe-summer-2026',
+    },
+  });
+
+  await prisma.budget.create({
+    data: { tripId: euroTrip.id, dailyCap: 18000, categoryCaps: {} },
+  });
+
+  // Paris stop
+  const parisStop = await prisma.stop.create({
+    data: {
+      tripId: euroTrip.id,
+      cityId: cityMap['Paris'].id,
+      arrivalDate: new Date('2026-07-01'),
+      departureDate: new Date('2026-07-08'),
+      sortOrder: 0,
+    },
+  });
+
+  const parisActs = cityMap['Paris'].activities;
+  for (let i = 0; i < parisActs.length; i++) {
+    await prisma.tripActivity.create({
+      data: {
+        stopId: parisStop.id,
+        activityId: parisActs[i].id,
+        nameSnapshot: parisActs[i].name,
+        costSnapshot: parisActs[i].cost,
+        categorySnapshot: parisActs[i].category,
+        scheduledDate: new Date(`2026-07-${1 + i}`),
+        timeSlot: '10:00 AM',
+        sortOrder: i,
+      },
+    });
+  }
+
+  // Rome stop
+  const romeStop = await prisma.stop.create({
+    data: {
+      tripId: euroTrip.id,
+      cityId: cityMap['Rome'].id,
+      arrivalDate: new Date('2026-07-08'),
+      departureDate: new Date('2026-07-14'),
+      sortOrder: 1,
+    },
+  });
+
+  const romeActs = cityMap['Rome'].activities;
+  for (let i = 0; i < romeActs.length; i++) {
+    await prisma.tripActivity.create({
+      data: {
+        stopId: romeStop.id,
+        activityId: romeActs[i].id,
+        nameSnapshot: romeActs[i].name,
+        costSnapshot: romeActs[i].cost,
+        categorySnapshot: romeActs[i].category,
+        scheduledDate: new Date(`2026-07-${8 + i}`),
+        timeSlot: '10:00 AM',
+        sortOrder: i,
+      },
+    });
+  }
+
+  console.log(`   ✅ Trip 6: "${euroTrip.name}" (completed) — 2 stops`);
+
+  // ────────────────────────────────
+  // 6. Create shared links
+  // ────────────────────────────────
+  console.log('\n🔗 Creating shared links...');
+  const sharedTrips = [
+    { trip: rajasthanTrip, views: 1240 },
+    { trip: keralaTrip, views: 890 },
+    { trip: goaTrip, views: 567 },
+    { trip: varanasiTrip, views: 340 },
+    { trip: euroTrip, views: 215 },
+  ];
+  for (const { trip, views } of sharedTrips) {
+    if (trip.shareToken) {
+      await prisma.sharedLink.create({
+        data: {
+          tripId: trip.id,
+          shareToken: trip.shareToken,
+          viewCount: views,
+        },
+      });
+    }
+  }
+  console.log(`   ✅ ${sharedTrips.length} shared links created.\n`);
+
+  // ────────────────────────────────
+  // 7. Summary
+  // ────────────────────────────────
+  const counts = {
+    users: await prisma.user.count(),
+    cities: await prisma.city.count(),
+    activities: await prisma.activity.count(),
+    trips: await prisma.trip.count(),
+    stops: await prisma.stop.count(),
+    tripActivities: await prisma.tripActivity.count(),
+    budgets: await prisma.budget.count(),
+    sharedLinks: await prisma.sharedLink.count(),
+    savedCities: await prisma.savedCity.count(),
+  };
+
+  console.log('══════════════════════════════════════════════════');
+  console.log('🎉 DATABASE SEEDING COMPLETE');
+  console.log('══════════════════════════════════════════════════');
+  console.log(`  👤 Users:           ${counts.users}`);
+  console.log(`  🏙️  Cities:          ${counts.cities}`);
+  console.log(`  🎯 Activities:      ${counts.activities}`);
+  console.log(`  ✈️  Trips:           ${counts.trips}`);
+  console.log(`  📍 Stops:           ${counts.stops}`);
+  console.log(`  📋 Trip Activities: ${counts.tripActivities}`);
+  console.log(`  💰 Budgets:         ${counts.budgets}`);
+  console.log(`  🔗 Shared Links:    ${counts.sharedLinks}`);
+  console.log(`  ⭐ Saved Cities:    ${counts.savedCities}`);
+  console.log('══════════════════════════════════════════════════');
+  console.log('');
+  console.log('🔑 Demo Login Credentials:');
+  console.log('   Email:    aarav@globetrotter.in');
+  console.log('   Password: Explorer@2026');
+  console.log('');
+  console.log('🔑 Admin Login Credentials:');
+  console.log('   Email:    admin@globetrotter.in');
+  console.log('   Password: Admin@2026');
+  console.log('');
 }
 
 main()
