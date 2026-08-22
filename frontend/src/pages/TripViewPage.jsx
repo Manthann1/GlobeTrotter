@@ -50,15 +50,24 @@ export default function TripViewPage() {
           }
         })
         .catch(() => {
-          api.getTripByShareToken(tripId)
-            .then((res) => res && setFetchedTrip(normalizeTrip(res)))
+          api.getPublicTrips()
+            .then((publicTrips) => {
+              const match = Array.isArray(publicTrips) ? publicTrips.find((t) => t.id === tripId || t.shareToken === tripId) : null;
+              if (match) {
+                setFetchedTrip(normalizeTrip(match));
+              } else {
+                api.getTripByShareToken(tripId)
+                  .then((res) => res && setFetchedTrip(normalizeTrip(res)))
+                  .catch(console.error);
+              }
+            })
             .catch(console.error);
         })
         .finally(() => setIsLoading(false));
     }
   }, [tripId, localTrip]);
 
-  const trip = localTrip || fetchedTrip || getTrip('trip-royal-rajasthan');
+  const trip = localTrip || fetchedTrip || getTrip(tripId) || getTrip('trip-royal-rajasthan');
 
   if (isLoading) {
     return (

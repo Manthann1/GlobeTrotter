@@ -1,20 +1,20 @@
 import { Router } from 'express';
 import { createTrip, getTrips, getTripById, updateTrip, deleteTrip, getTripByShareToken } from '../controllers/trip.controller.js';
 import { addStop } from '../controllers/stop.controller.js';
-import { authenticateToken } from '../middleware/auth.middleware.js';
+import { authenticateToken, optionalAuth } from '../middleware/auth.middleware.js';
 
 const router = Router();
 
-// Public shared trip route (No auth required)
+// Public shared & public trip routes (No strict auth required)
 router.get('/shared/:token', getTripByShareToken);
-router.get('/public', getTrips); // Handled by controller to check isPublic
+router.get('/public', getTrips);
+router.get('/:id', optionalAuth, getTripById);
 
-// Protect all following trip endpoints with authentication middleware
+// Protect remaining trip write endpoints with authentication middleware
 router.use(authenticateToken);
 
 router.post('/', createTrip);
 router.get('/', getTrips);
-router.get('/:id', getTripById);
 router.patch('/:id', updateTrip);
 router.put('/:id', updateTrip);
 router.delete('/:id', deleteTrip);

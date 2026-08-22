@@ -76,7 +76,8 @@ export const getTrips = async (req, res, next) => {
  */
 export const getTripById = async (req, res, next) => {
   try {
-    const trip = await tripService.getTripById(req.user.id, req.params.id);
+    const userId = req.user?.id || null;
+    const trip = await tripService.getTripById(userId, req.params.id);
 
     return successResponse(res, {
       statusCode: 200,
