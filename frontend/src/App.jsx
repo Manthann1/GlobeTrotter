@@ -6,6 +6,9 @@ import Footer from './components/layout/Footer';
 import DashboardPage from './pages/DashboardPage';
 import TripViewPage from './pages/TripViewPage';
 import TripBuilderPage from './pages/TripBuilderPage';
+import BudgetAnalysisPage from './pages/BudgetAnalysisPage';
+import ProfilePage from './pages/ProfilePage';
+import TripCopiedPage from './pages/TripCopiedPage';
 import ExplorePage from './pages/ExplorePage';
 import NewTripModal from './components/modals/NewTripModal';
 import ToastContainer from './components/ui/Toast';
@@ -64,12 +67,34 @@ function App() {
             element={<TripBuilderPage />}
           />
 
+          {/* Dedicated Budget Analysis Route (Mockup 1) */}
+          <Route
+            path="/trips/:tripId/budget"
+            element={<BudgetAnalysisPage />}
+          />
+
+          {/* Trip Copied Success Route (Mockup 3) */}
+          <Route
+            path="/trips/:tripId/copied"
+            element={<TripCopiedPage />}
+          />
+
           {/* Explore Destinations */}
           <Route
             path="/explore"
             element={
               <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
                 <ExplorePage onOpenNewTrip={handleOpenNewTrip} />
+              </StandardLayout>
+            }
+          />
+
+          {/* User Profile & Preferences Route (Mockup 2) */}
+          <Route
+            path="/profile"
+            element={
+              <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                <ProfilePage />
               </StandardLayout>
             }
           />

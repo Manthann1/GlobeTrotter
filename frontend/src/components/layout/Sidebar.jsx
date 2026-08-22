@@ -53,21 +53,21 @@ export default function Sidebar({ tripId, onShareClick, activeTab = 'itinerary',
           <span className="font-['Inter'] text-xs uppercase tracking-wider">Itinerary</span>
         </button>
 
-        {/* Budget Tab */}
-        <button
-          onClick={() => onTabChange && onTabChange('budget')}
+        {/* Budget Tab / Link */}
+        <Link
+          to={`/trips/${tripId}/budget`}
           className={`w-full flex items-center gap-3 py-3 px-4 rounded-lg mx-1 transition-all text-left relative ${
-            activeTab === 'budget'
+            activeTab === 'budget' || location.pathname.includes('/budget')
               ? 'bg-[#1e3a8a] text-[#90a8ff] shadow-inner font-bold'
               : 'text-white/75 hover:text-white hover:bg-white/10 font-semibold'
           }`}
         >
-          {activeTab === 'budget' && (
+          {(activeTab === 'budget' || location.pathname.includes('/budget')) && (
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-[#90a8ff] rounded-r-full"></div>
           )}
           <span className="material-symbols-outlined text-[20px]">payments</span>
-          <span className="font-['Inter'] text-xs uppercase tracking-wider">Budget</span>
-        </button>
+          <span className="font-['Inter'] text-xs uppercase tracking-wider">Budget Analysis</span>
+        </Link>
 
         {/* Documents Tab */}
         <button

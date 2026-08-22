@@ -83,6 +83,16 @@ export default function Navbar({ onOpenNewTrip }) {
           >
             Explore
           </Link>
+          <Link
+            to="/profile"
+            className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
+              isActive('/profile')
+                ? 'text-[#00236f] border-b-2 border-[#00236f] pb-0.5'
+                : 'text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] px-2 rounded-t'
+            }`}
+          >
+            Profile
+          </Link>
         </nav>
 
         {/* Trailing Actions */}
