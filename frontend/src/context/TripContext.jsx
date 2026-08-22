@@ -6,21 +6,41 @@ import confetti from 'canvas-confetti';
 const TripContext = createContext();
 
 export function TripProvider({ children }) {
-  const [trips, setTrips] = useState(() => getStoredData('globetrotter_trips', INITIAL_TRIPS));
-  const [cities, setCities] = useState(() => getStoredData('globetrotter_cities', CITIES_DATA));
-  const [user, setUser] = useState(() => getStoredData('globetrotter_user', INITIAL_USER));
+  const [trips, setTrips] = useState(() => getStoredData('globetrotter_trips_v2', INITIAL_TRIPS));
+  const [cities, setCities] = useState(() => getStoredData('globetrotter_cities_v2', CITIES_DATA));
+  const [user, setUser] = useState(() => getStoredData('globetrotter_user_v2', INITIAL_USER));
+  const [currency, setCurrency] = useState(() => localStorage.getItem('globetrotter_currency') || 'INR');
   const [searchQuery, setSearchQuery] = useState('');
   const [toasts, setToasts] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Sync with local storage
   useEffect(() => {
-    setStoredData('globetrotter_trips', trips);
+    setStoredData('globetrotter_trips_v2', trips);
   }, [trips]);
 
   useEffect(() => {
-    setStoredData('globetrotter_user', user);
+    setStoredData('globetrotter_user_v2', user);
   }, [user]);
+
+  useEffect(() => {
+    localStorage.setItem('globetrotter_currency', currency);
+  }, [currency]);
+
+  // Currency formatting helper
+  const formatPrice = (amount) => {
+    const num = Number(amount || 0);
+    if (currency === 'INR') {
+      return `₹${num.toLocaleString('en-IN')}`;
+    }
+    // Approx USD conversion (1 USD ≈ 85 INR)
+    const usd = Math.round(num / 85);
+    return `$${usd.toLocaleString('en-US')}`;
+  };
+
+  const toggleCurrency = () => {
+    setCurrency((prev) => (prev === 'INR' ? 'USD' : 'INR'));
+  };
 
   const showToast = (message, type = 'success') => {
     const id = Date.now() + Math.random();
@@ -46,11 +66,11 @@ export function TripProvider({ children }) {
         const cost = Number(act.cost || 0);
         total += cost;
         const cat = (act.category || '').toLowerCase();
-        if (cat.includes('lodging') || cat.includes('hotel') || cat.includes('stay')) {
+        if (cat.includes('lodging') || cat.includes('hotel') || cat.includes('stay') || cat.includes('haveli') || cat.includes('houseboat')) {
           breakdown.lodging += cost;
-        } else if (cat.includes('food') || cat.includes('dining') || cat.includes('restaurant') || cat.includes('tasting')) {
+        } else if (cat.includes('food') || cat.includes('dining') || cat.includes('restaurant') || cat.includes('thali') || cat.includes('tasting')) {
           breakdown.food += cost;
-        } else if (cat.includes('transport') || cat.includes('flight') || cat.includes('train')) {
+        } else if (cat.includes('transport') || cat.includes('train') || cat.includes('flight') || cat.includes('cab')) {
           breakdown.transport += cost;
         } else {
           breakdown.activities += cost;
@@ -69,22 +89,22 @@ export function TripProvider({ children }) {
     const newTrip = {
       id: `trip-${Date.now()}`,
       userId: user.id,
-      name: tripData.name || 'New Adventure',
-      subtitle: tripData.destination || 'Uncharted Lands',
+      name: tripData.name || 'New India Adventure',
+      subtitle: tripData.destination || 'Incredible India',
       startDate: tripData.startDate || new Date().toISOString().slice(0, 10),
       endDate: tripData.endDate || new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
       status: 'upcoming',
       isPublic: true,
       shareToken: `trip-${Date.now()}`,
-      coverPhoto: tripData.coverPhoto || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=85',
-      description: tripData.description || 'A custom planned trip on GlobeTrotter.',
+      coverPhoto: tripData.coverPhoto || 'https://images.unsplash.com/photo-1603262110263-fb010d6e59d4?auto=format&fit=crop&w=1600&q=85',
+      description: tripData.description || 'A custom planned travel itinerary on GlobeTrotter.',
       author: {
         name: user.name,
         photo: user.profilePhoto,
       },
       budget: {
-        totalBudget: Number(tripData.totalBudget || 4000),
-        dailyCap: Number(tripData.dailyCap || 300),
+        totalBudget: Number(tripData.totalBudget || 50000),
+        dailyCap: Number(tripData.dailyCap || 5000),
         categoryBreakdown: { lodging: 0, food: 0, activities: 0, transport: 0 },
       },
       stops: tripData.initialCity ? [
@@ -92,7 +112,8 @@ export function TripProvider({ children }) {
           id: `stop-${Date.now()}`,
           cityId: tripData.initialCity.id || 'c-custom',
           cityName: tripData.initialCity.name || tripData.destination,
-          country: tripData.initialCity.country || '',
+          state: tripData.initialCity.state || '',
+          country: tripData.initialCity.country || 'India',
           arrivalDate: tripData.startDate || new Date().toISOString().slice(0, 10),
           departureDate: tripData.endDate || new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
           sortOrder: 0,
@@ -172,7 +193,7 @@ export function TripProvider({ children }) {
         origin: { y: 0.6 }
       });
     } catch {
-      // ignore if confetti fails
+      // ignore
     }
 
     showToast(`✈️ Trip "${tripToCopy.name}" copied to your account!`);
@@ -188,6 +209,7 @@ export function TripProvider({ children }) {
             id: `stop-${Date.now()}`,
             cityId: city.id || 'c-custom',
             cityName: city.name,
+            state: city.state || '',
             country: city.country,
             arrivalDate: t.endDate || new Date().toISOString().slice(0, 10),
             departureDate: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
@@ -253,12 +275,12 @@ export function TripProvider({ children }) {
               const acts = stop.activities || [];
               const newAct = {
                 id: `act-${Date.now()}`,
-                name: activityData.name || 'Custom Activity',
+                name: activityData.name || 'Custom Experience',
                 category: activityData.category || 'Sightseeing',
                 cost: Number(activityData.cost || 0),
                 timeSlot: activityData.timeSlot || '12:00',
                 description: activityData.description || 'Custom activity',
-                imageUrl: activityData.imageUrl || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80',
+                imageUrl: activityData.imageUrl || 'https://images.unsplash.com/photo-1603262110263-fb010d6e59d4?auto=format&fit=crop&w=800&q=80',
                 day: activityData.day || 1,
                 dayTitle: activityData.dayTitle || `Day 1: ${activityData.name}`,
                 sortOrder: acts.length,
@@ -305,6 +327,10 @@ export function TripProvider({ children }) {
         trips,
         cities,
         user,
+        currency,
+        setCurrency,
+        toggleCurrency,
+        formatPrice,
         searchQuery,
         setSearchQuery,
         toasts,

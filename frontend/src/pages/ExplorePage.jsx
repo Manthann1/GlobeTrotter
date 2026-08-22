@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTrip } from '../context/TripContext';
-import { Search, MapPin, Star, DollarSign, Plus, Compass, Sparkles, Filter } from 'lucide-react';
+import { Search, MapPin, Star, DollarSign, Plus, Compass, Sparkles, Filter, IndianRupee } from 'lucide-react';
 
 export default function ExplorePage({ onOpenNewTrip }) {
-  const { cities, createTrip } = useTrip();
+  const { cities, createTrip, formatPrice } = useTrip();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -17,12 +17,13 @@ export default function ExplorePage({ onOpenNewTrip }) {
     if (q) setSearchTerm(q);
   }, [searchParams]);
 
-  const regions = ['All', 'Europe', 'Asia', 'North America', 'Africa'];
+  const regions = ['All', 'North India', 'South India', 'Himalayas', 'Coastal India', 'West India', 'International'];
 
   const filteredCities = cities.filter((city) => {
     const matchesSearch =
       city.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       city.country.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (city.state && city.state.toLowerCase().includes(searchTerm.toLowerCase())) ||
       city.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesRegion = selectedRegion === 'All' || city.region === selectedRegion;
@@ -32,13 +33,14 @@ export default function ExplorePage({ onOpenNewTrip }) {
   });
 
   const handleStartTripWithCity = (city) => {
+    const isIndian = city.country === 'India';
     const newTrip = createTrip({
-      name: `${city.name} Explorer`,
-      destination: city.name,
+      name: `${city.name} Holiday`,
+      destination: `${city.name}${city.state ? `, ${city.state}` : ''}`,
       startDate: new Date().toISOString().slice(0, 10),
-      endDate: new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
-      totalBudget: 3500,
-      dailyCap: 300,
+      endDate: new Date(Date.now() + 6 * 86400000).toISOString().slice(0, 10),
+      totalBudget: isIndian ? 45000 : 180000,
+      dailyCap: isIndian ? 6000 : 15000,
       description: city.description,
       coverPhoto: city.imageUrl,
       initialCity: city,
@@ -52,21 +54,21 @@ export default function ExplorePage({ onOpenNewTrip }) {
       <section className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-bold font-['Inter'] uppercase tracking-wider text-[#00236f] mb-1">
-              <Compass className="w-4 h-4" /> Global Discovery
+            <div className="flex items-center gap-2 text-xs font-bold font-['Inter'] uppercase tracking-wider text-[#006c49] mb-1">
+              <Compass className="w-4 h-4" /> 🇮🇳 Incredible India & Global Discovery
             </div>
             <h1 className="text-3xl md:text-4xl font-bold font-['Montserrat'] text-[#00236f] tracking-tight">
               Explore Destinations
             </h1>
             <p className="text-sm text-[#444651] font-['Inter'] mt-1">
-              Discover top-rated cities, must-visit sights, and curated local activities for your next journey.
+              Discover iconic royal forts, tea plantations, sacred ghats, serene backwaters, and high Himalayan passes.
             </p>
           </div>
           <button
             onClick={onOpenNewTrip}
             className="inline-flex items-center gap-2 bg-[#00236f] text-white hover:bg-[#1e3a8a] px-5 py-2.5 rounded-full font-['Inter'] text-xs font-bold uppercase tracking-wider transition-all shadow-md self-start md:self-auto"
           >
-            <Plus className="w-4 h-4" /> Plan Custom Trip
+            <Plus className="w-4 h-4" /> Plan Custom Journey
           </button>
         </div>
 
@@ -79,7 +81,7 @@ export default function ExplorePage({ onOpenNewTrip }) {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by city, country, or experience..."
+              placeholder="Search Jaipur, Kerala, Goa, Ladakh, Varanasi..."
               className="w-full pl-9 pr-4 py-2 bg-[#f3f4f5] border border-[#c5c5d3] rounded-xl text-sm font-['Inter'] focus:outline-none focus:border-[#00236f]"
             />
           </div>
@@ -92,7 +94,7 @@ export default function ExplorePage({ onOpenNewTrip }) {
                 onClick={() => setSelectedRegion(region)}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold font-['Inter'] uppercase tracking-wider transition-all whitespace-nowrap ${
                   selectedRegion === region
-                    ? 'bg-[#00236f] text-white'
+                    ? 'bg-[#00236f] text-white shadow-xs'
                     : 'bg-[#f3f4f5] text-[#444651] hover:bg-[#e1e3e4]'
                 }`}
               >
@@ -107,7 +109,7 @@ export default function ExplorePage({ onOpenNewTrip }) {
       <section>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold font-['Montserrat'] text-[#191c1d]">
-            Curated Destinations ({filteredCities.length})
+            Destinations & Getaways ({filteredCities.length})
           </h2>
         </div>
 
@@ -153,7 +155,8 @@ export default function ExplorePage({ onOpenNewTrip }) {
                       {city.name}
                     </h3>
                     <p className="text-xs text-white/90 font-['Inter'] flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-[#ef9900]" /> {city.country}
+                      <MapPin className="w-3 h-3 text-[#ef9900]" />
+                      {city.state ? `${city.state}, ` : ''}{city.country}
                     </p>
                   </div>
                 </div>
@@ -163,10 +166,10 @@ export default function ExplorePage({ onOpenNewTrip }) {
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[11px] font-bold font-['Inter'] uppercase tracking-wider text-[#00236f] bg-[#00236f]/10 px-2 py-0.5 rounded">
-                        {city.tag || 'Popular'}
+                        {city.tag || 'Incredible Destination'}
                       </span>
                       <span className="font-['JetBrains Mono'] text-xs font-bold text-[#5c3800]">
-                        Cost Index: {city.costIndex}x
+                        {city.priceLevel || '₹₹'}
                       </span>
                     </div>
 
@@ -185,7 +188,7 @@ export default function ExplorePage({ onOpenNewTrip }) {
                             <li key={i} className="text-xs text-[#191c1d] flex items-center justify-between">
                               <span className="truncate pr-2">• {act.name}</span>
                               <span className="font-['JetBrains Mono'] font-bold text-[#006c49] shrink-0 text-[11px]">
-                                ${act.cost}
+                                {formatPrice(act.cost)}
                               </span>
                             </li>
                           ))}
@@ -200,7 +203,7 @@ export default function ExplorePage({ onOpenNewTrip }) {
                       onClick={() => handleStartTripWithCity(city)}
                       className="w-full py-2.5 bg-[#00236f] text-white hover:bg-[#1e3a8a] rounded-xl font-['Inter'] text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 shadow-xs"
                     >
-                      <Sparkles className="w-3.5 h-3.5" /> Plan Itinerary with {city.name}
+                      <Sparkles className="w-3.5 h-3.5" /> Plan Itinerary for {city.name}
                     </button>
                   </div>
                 </div>

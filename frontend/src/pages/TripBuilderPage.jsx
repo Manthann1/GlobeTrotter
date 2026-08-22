@@ -20,6 +20,7 @@ import {
   PieChart,
   MapPin,
   ExternalLink,
+  IndianRupee,
 } from 'lucide-react';
 
 export default function TripBuilderPage() {
@@ -33,6 +34,7 @@ export default function TripBuilderPage() {
     addActivityToStop,
     removeActivityFromStop,
     calculateTripTotals,
+    formatPrice,
     updateTrip,
     showToast,
   } = useTrip();
@@ -46,7 +48,7 @@ export default function TripBuilderPage() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
   // Retrieve trip or fallback
-  const trip = getTrip(tripId) || getTrip('trip-european-summer');
+  const trip = getTrip(tripId) || getTrip('trip-royal-rajasthan');
 
   if (!trip) {
     return (
@@ -63,19 +65,20 @@ export default function TripBuilderPage() {
   }
 
   const { totalSpent, breakdown } = calculateTripTotals(trip);
-  const totalBudget = trip.budget?.totalBudget || 5000;
+  const totalBudget = trip.budget?.totalBudget || 85000;
   const spentPercent = Math.min(100, Math.round((totalSpent / totalBudget) * 100)) || 0;
 
   // Filter drawer items
   const filteredCities = cities.filter(
     (c) =>
       c.name.toLowerCase().includes(drawerSearch.toLowerCase()) ||
-      c.country.toLowerCase().includes(drawerSearch.toLowerCase())
+      c.country.toLowerCase().includes(drawerSearch.toLowerCase()) ||
+      (c.state && c.state.toLowerCase().includes(drawerSearch.toLowerCase()))
   );
 
   // Collect all catalog activities
   const allCatalogActivities = cities.flatMap((c) =>
-    (c.activities || []).map((a) => ({ ...a, cityName: c.name, cityCountry: c.country }))
+    (c.activities || []).map((a) => ({ ...a, cityName: c.name, cityCountry: c.country, cityState: c.state }))
   );
 
   const filteredActivities = allCatalogActivities.filter(
@@ -95,7 +98,6 @@ export default function TripBuilderPage() {
   };
 
   const handleQuickAddActivity = (act) => {
-    // If no stop selected, pick the first stop or create a stop for that city
     const targetStop = trip.stops && trip.stops.length > 0 ? (selectedStopId ? trip.stops.find((s) => s.id === selectedStopId) : trip.stops[0]) : null;
 
     if (targetStop) {
@@ -109,7 +111,6 @@ export default function TripBuilderPage() {
         day: targetStop.activities ? targetStop.activities.length + 1 : 1,
       });
     } else {
-      // Find matching city and add stop
       const city = cities.find((c) => c.name.toLowerCase() === act.cityName?.toLowerCase()) || cities[0];
       addStopToTrip(trip.id, city);
       showToast(`Added ${city.name} stop with ${act.name}`);
@@ -159,7 +160,7 @@ export default function TripBuilderPage() {
                 Trip Total
               </div>
               <div className="font-['JetBrains Mono'] font-bold text-sm text-[#00236f]">
-                ${totalSpent.toLocaleString()} / ${totalBudget.toLocaleString()}
+                {formatPrice(totalSpent)} / {formatPrice(totalBudget)}
               </div>
             </div>
             <div className="w-36 md:w-48 h-2.5 bg-[#e1e3e4] rounded-full overflow-hidden">
@@ -185,7 +186,7 @@ export default function TripBuilderPage() {
                     No stops in this itinerary yet!
                   </h3>
                   <p className="text-xs text-[#444651] max-w-md mx-auto mb-4">
-                    Pick cities from the search catalog on the right or click below to add your first destination stop.
+                    Pick destinations from Jaipur, Kerala, Goa, Ladakh, or Varanasi from the catalog on the right.
                   </p>
                   <button
                     onClick={() => handleQuickAddCity(cities[0])}
@@ -227,7 +228,7 @@ export default function TripBuilderPage() {
                                 Stop #{stopIdx + 1}
                               </span>
                               <h3 className="text-lg md:text-xl font-bold font-['Montserrat'] text-[#191c1d]">
-                                {stop.cityName}, {stop.country}
+                                {stop.cityName}{stop.state ? `, ${stop.state}` : ''}
                               </h3>
                             </div>
                             <p className="text-xs text-[#757682] mt-1 flex items-center gap-2 font-medium">
@@ -239,7 +240,7 @@ export default function TripBuilderPage() {
                           {/* Est Cost & Order Controls */}
                           <div className="flex items-center gap-2">
                             <span className="bg-[#00236f]/10 text-[#00236f] px-3 py-1 rounded-full text-xs font-bold font-['JetBrains Mono']">
-                              ${stopCost.toLocaleString()} Est.
+                              {formatPrice(stopCost)} Est.
                             </span>
 
                             {/* Move Up/Down Controls */}
@@ -286,7 +287,7 @@ export default function TripBuilderPage() {
                         <div className="space-y-3 pl-3 md:pl-4 border-l-2 border-[#e1e3e4] ml-1">
                           {(!stop.activities || stop.activities.length === 0) ? (
                             <p className="text-xs text-[#757682] italic py-1">
-                              No activities added yet for this stop.
+                              No experiences added yet for this stop.
                             </p>
                           ) : (
                             stop.activities.map((act) => (
@@ -322,7 +323,7 @@ export default function TripBuilderPage() {
 
                                 <div className="flex items-center gap-3">
                                   <div className="font-['JetBrains Mono'] font-bold text-xs text-[#191c1d]">
-                                    ${Number(act.cost).toLocaleString()}
+                                    {formatPrice(act.cost)}
                                   </div>
                                   <button
                                     onClick={() => removeActivityFromStop(trip.id, stop.id, act.id)}
@@ -341,7 +342,7 @@ export default function TripBuilderPage() {
                               onClick={() => handleOpenAddActivityModal(stop)}
                               className="text-[#00236f] text-xs font-bold font-['Inter'] uppercase tracking-wider hover:underline flex items-center gap-1"
                             >
-                              <Plus className="w-3.5 h-3.5" /> Add Activity
+                              <Plus className="w-3.5 h-3.5" /> Add Experience
                             </button>
                             <span className="text-[#c5c5d3]">|</span>
                             <button
@@ -351,7 +352,7 @@ export default function TripBuilderPage() {
                               }}
                               className="text-[#006c49] text-xs font-bold font-['Inter'] uppercase tracking-wider hover:underline flex items-center gap-1"
                             >
-                              <Search className="w-3.5 h-3.5" /> Browse Catalog
+                              <Search className="w-3.5 h-3.5" /> Browse Indian Catalog
                             </button>
                           </div>
                         </div>
@@ -369,7 +370,7 @@ export default function TripBuilderPage() {
                 <span className="material-symbols-outlined text-3xl group-hover:scale-110 transition-transform">
                   add_circle
                 </span>
-                <span className="text-sm font-bold font-['Montserrat']">Add Next Stop from Catalog</span>
+                <span className="text-sm font-bold font-['Montserrat']">Add Next Stop from Indian Catalog</span>
               </button>
             </section>
 
@@ -386,7 +387,7 @@ export default function TripBuilderPage() {
                         : 'text-[#444651] hover:text-[#191c1d]'
                     }`}
                   >
-                    Search Cities
+                    Indian Cities
                   </button>
                   <button
                     onClick={() => setDrawerTab('activities')}
@@ -396,7 +397,7 @@ export default function TripBuilderPage() {
                         : 'text-[#444651] hover:text-[#191c1d]'
                     }`}
                   >
-                    Search Activities
+                    Experiences
                   </button>
                 </div>
 
@@ -408,7 +409,7 @@ export default function TripBuilderPage() {
                       type="text"
                       value={drawerSearch}
                       onChange={(e) => setDrawerSearch(e.target.value)}
-                      placeholder={drawerTab === 'cities' ? 'Find inspiration (Paris, Tokyo...)' : 'Search experiences & tours...'}
+                      placeholder={drawerTab === 'cities' ? 'Find Jaipur, Goa, Kerala...' : 'Search Thali, Forts, Safari...'}
                       className="w-full pl-9 pr-3 py-2 bg-[#f8f9fa] border border-[#c5c5d3] rounded-xl text-xs font-['Inter'] focus:outline-none focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f]"
                     />
                   </div>
@@ -433,13 +434,13 @@ export default function TripBuilderPage() {
                         <div className="flex-1 flex flex-col justify-between py-0.5 min-w-0">
                           <div>
                             <h4 className="text-xs font-bold font-['Montserrat'] text-[#191c1d] truncate">
-                              {city.name}, {city.country}
+                              {city.name}{city.state ? `, ${city.state}` : ''}
                             </h4>
                             <p className="text-[11px] text-[#757682] font-['Inter']">{city.tag || 'Popular Destination'}</p>
                           </div>
                           <div className="flex justify-between items-center mt-1">
                             <span className="font-['JetBrains Mono'] text-[11px] font-bold text-[#5c3800]">
-                              {city.priceLevel || '$$$'}
+                              {city.priceLevel || '₹₹₹'}
                             </span>
                             <span className="text-[#00236f] text-xs font-bold font-['Inter'] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                               + Add Stop
@@ -473,7 +474,7 @@ export default function TripBuilderPage() {
                           </div>
                           <div className="flex justify-between items-center mt-1">
                             <span className="font-['JetBrains Mono'] text-[11px] font-bold text-[#006c49]">
-                              ${Number(act.cost).toLocaleString()}
+                              {formatPrice(act.cost)}
                             </span>
                             <span className="text-[#00236f] text-xs font-bold font-['Inter'] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                               + Add
@@ -494,22 +495,22 @@ export default function TripBuilderPage() {
           <div className="flex-1 px-4 md:px-10 py-8 max-w-[1000px] w-full mx-auto space-y-6">
             <div className="bg-white border border-[#c5c5d3] rounded-2xl p-6 shadow-sm">
               <h2 className="text-xl font-bold font-['Montserrat'] text-[#00236f] mb-4 flex items-center gap-2">
-                <PieChart className="w-5 h-5" /> Budget & Expense Allocator
+                <PieChart className="w-5 h-5" /> Indian Travel Budget & Expense Allocator
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="p-4 bg-[#f8f9fa] border border-[#c5c5d3] rounded-xl">
                   <div className="text-xs text-[#757682] uppercase tracking-wider font-bold mb-1">Target Budget</div>
-                  <div className="text-2xl font-bold font-['JetBrains Mono'] text-[#00236f]">${totalBudget.toLocaleString()}</div>
+                  <div className="text-2xl font-bold font-['JetBrains Mono'] text-[#00236f]">{formatPrice(totalBudget)}</div>
                 </div>
                 <div className="p-4 bg-[#f8f9fa] border border-[#c5c5d3] rounded-xl">
                   <div className="text-xs text-[#757682] uppercase tracking-wider font-bold mb-1">Total Allocated</div>
-                  <div className="text-2xl font-bold font-['JetBrains Mono'] text-[#006c49]">${totalSpent.toLocaleString()}</div>
+                  <div className="text-2xl font-bold font-['JetBrains Mono'] text-[#006c49]">{formatPrice(totalSpent)}</div>
                 </div>
                 <div className="p-4 bg-[#f8f9fa] border border-[#c5c5d3] rounded-xl">
                   <div className="text-xs text-[#757682] uppercase tracking-wider font-bold mb-1">Remaining</div>
                   <div className="text-2xl font-bold font-['JetBrains Mono'] text-[#5c3800]">
-                    ${Math.max(0, totalBudget - totalSpent).toLocaleString()}
+                    {formatPrice(Math.max(0, totalBudget - totalSpent))}
                   </div>
                 </div>
               </div>
@@ -520,8 +521,8 @@ export default function TripBuilderPage() {
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between text-xs font-bold font-['Inter'] mb-1">
-                    <span>🏨 Lodging & Accommodation</span>
-                    <span className="font-['JetBrains Mono']">${breakdown.lodging.toLocaleString()}</span>
+                    <span>🏨 Heritage Havelis, Houseboats & Hotels</span>
+                    <span className="font-['JetBrains Mono']">{formatPrice(breakdown.lodging)}</span>
                   </div>
                   <div className="w-full bg-[#e1e3e4] rounded-full h-3">
                     <div
@@ -533,8 +534,8 @@ export default function TripBuilderPage() {
 
                 <div>
                   <div className="flex justify-between text-xs font-bold font-['Inter'] mb-1">
-                    <span>🍷 Food & Dining</span>
-                    <span className="font-['JetBrains Mono']">${breakdown.food.toLocaleString()}</span>
+                    <span>🍛 Royal Thalis, Street Food & Dining</span>
+                    <span className="font-['JetBrains Mono']">{formatPrice(breakdown.food)}</span>
                   </div>
                   <div className="w-full bg-[#e1e3e4] rounded-full h-3">
                     <div
@@ -546,8 +547,8 @@ export default function TripBuilderPage() {
 
                 <div>
                   <div className="flex justify-between text-xs font-bold font-['Inter'] mb-1">
-                    <span>🎟️ Activities & Attractions</span>
-                    <span className="font-['JetBrains Mono']">${breakdown.activities.toLocaleString()}</span>
+                    <span>🎟️ Fort Entry, Treks & Cultural Shows</span>
+                    <span className="font-['JetBrains Mono']">{formatPrice(breakdown.activities)}</span>
                   </div>
                   <div className="w-full bg-[#e1e3e4] rounded-full h-3">
                     <div
@@ -566,9 +567,9 @@ export default function TripBuilderPage() {
           <div className="flex-1 px-4 md:px-10 py-8 max-w-[1000px] w-full mx-auto space-y-6">
             <div className="bg-white border border-[#c5c5d3] rounded-2xl p-6 shadow-sm">
               <h2 className="text-xl font-bold font-['Montserrat'] text-[#00236f] mb-2 flex items-center gap-2">
-                <FileText className="w-5 h-5" /> Travel Documents & Notes
+                <FileText className="w-5 h-5" /> Travel Documents, IRCTC & Hotel Vouchers
               </h2>
-              <p className="text-xs text-[#757682] mb-6">Keep your boarding passes, hotel reservations, and emergency contacts in one secure place.</p>
+              <p className="text-xs text-[#757682] mb-6">Keep train PNRs, Vande Bharat tickets, flight boarding passes, and palace reservations in one place.</p>
 
               <div className="space-y-4">
                 <div className="p-4 bg-[#f8f9fa] border border-[#c5c5d3] rounded-xl flex items-center justify-between">
@@ -577,15 +578,15 @@ export default function TripBuilderPage() {
                       <FileText className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold font-['Montserrat'] text-[#191c1d]">European Summer Itinerary Guide</h4>
-                      <p className="text-xs text-[#757682]">Full PDF export summary with day breakdowns</p>
+                      <h4 className="text-sm font-bold font-['Montserrat'] text-[#191c1d]">{trip.name} Itinerary Guide</h4>
+                      <p className="text-xs text-[#757682]">Complete day-wise itinerary with contact numbers and route summary</p>
                     </div>
                   </div>
                   <button
                     onClick={() => window.print()}
                     className="px-4 py-2 bg-[#00236f] text-white rounded-lg text-xs font-bold font-['Inter'] uppercase tracking-wider hover:bg-[#1e3a8a]"
                   >
-                    Print / Export
+                    Print / PDF
                   </button>
                 </div>
               </div>

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTrip } from '../../context/TripContext';
-import { Search, Bell, Settings, Plus, Compass, Calendar, LayoutDashboard, Menu, X, User } from 'lucide-react';
+import { Search, Bell, Settings, Plus, Compass, Calendar, LayoutDashboard, Menu, X, Globe, IndianRupee } from 'lucide-react';
 
 export default function Navbar({ onOpenNewTrip }) {
-  const { user, searchQuery, setSearchQuery } = useTrip();
+  const { user, searchQuery, setSearchQuery, currency, toggleCurrency } = useTrip();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -31,6 +31,9 @@ export default function Navbar({ onOpenNewTrip }) {
           <Link to="/" className="text-xl md:text-2xl font-bold font-['Montserrat'] text-[#00236f] flex items-center gap-2 tracking-tight hover:opacity-90 transition-opacity">
             <span className="material-symbols-outlined text-[#00236f] text-28px fill">explore</span>
             GlobeTrotter
+            <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-[#FF9800]/15 text-[#E65100] tracking-wider hidden sm:inline-block">
+              India
+            </span>
           </Link>
 
           {/* Search Bar (desktop) */}
@@ -42,8 +45,8 @@ export default function Navbar({ onOpenNewTrip }) {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search destinations..."
-              className="pl-9 pr-4 py-1.5 bg-[#f3f4f5] border border-[#c5c5d3] rounded-full text-xs font-['Inter'] focus:outline-none focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] w-64 transition-all text-[#191c1d]"
+              placeholder="Search Jaipur, Goa, Kerala, Manali..."
+              className="pl-9 pr-4 py-1.5 bg-[#f3f4f5] border border-[#c5c5d3] rounded-full text-xs font-['Inter'] focus:outline-none focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] w-72 transition-all text-[#191c1d]"
             />
           </form>
         </div>
@@ -61,7 +64,7 @@ export default function Navbar({ onOpenNewTrip }) {
             Dashboard
           </Link>
           <Link
-            to="/trips/trip-european-summer/edit"
+            to="/trips/trip-royal-rajasthan/edit"
             className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
               location.pathname.includes('/edit')
                 ? 'text-[#00236f] border-b-2 border-[#00236f] pb-0.5'
@@ -83,7 +86,16 @@ export default function Navbar({ onOpenNewTrip }) {
         </nav>
 
         {/* Trailing Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          {/* Currency Switcher (INR / USD) */}
+          <button
+            onClick={toggleCurrency}
+            title={`Switch currency (Current: ${currency})`}
+            className="flex items-center gap-1 px-2.5 py-1 bg-[#f3f4f5] hover:bg-[#e1e3e4] border border-[#c5c5d3] rounded-full text-xs font-bold font-['JetBrains Mono'] text-[#00236f] transition-colors"
+          >
+            {currency === 'INR' ? '₹ INR' : '$ USD'}
+          </button>
+
           <button
             onClick={onOpenNewTrip}
             className="hidden sm:inline-flex items-center gap-1.5 bg-[#5c3800] text-[#ef9900] hover:bg-[#3e2400] hover:text-[#ffddb8] transition-all px-4 py-2 rounded-full font-['Inter'] text-xs font-bold uppercase tracking-wider shadow-xs hover:shadow-md"
@@ -101,13 +113,6 @@ export default function Navbar({ onOpenNewTrip }) {
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF5722] rounded-full ring-2 ring-white"></span>
             </button>
 
-            <button
-              title="Settings"
-              className="p-2 text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] rounded-full transition-colors hidden sm:block"
-            >
-              <span className="material-symbols-outlined text-[20px]">settings</span>
-            </button>
-
             {/* Profile Avatar & Dropdown */}
             <div className="relative ml-1">
               <button
@@ -115,17 +120,17 @@ export default function Navbar({ onOpenNewTrip }) {
                 className="flex items-center rounded-full ring-2 ring-transparent hover:ring-[#00236f] transition-all"
               >
                 <img
-                  src={user.profilePhoto || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80"}
+                  src={user.profilePhoto || "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80"}
                   alt={user.name}
                   className="w-8 h-8 rounded-full border border-[#c5c5d3] object-cover"
                 />
               </button>
 
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white border border-[#c5c5d3] rounded-xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 mt-2 w-60 bg-white border border-[#c5c5d3] rounded-xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                   <div className="px-4 py-2 border-b border-[#edeeef]">
                     <p className="text-sm font-bold text-[#191c1d]">{user.name}</p>
-                    <p className="text-xs text-[#757682] truncate">{user.email}</p>
+                    <p className="text-xs text-[#757682] truncate">{user.location || 'Mumbai, India'}</p>
                   </div>
                   <Link
                     to="/"
@@ -141,6 +146,16 @@ export default function Navbar({ onOpenNewTrip }) {
                   >
                     <Compass className="w-4 h-4" /> Explore Destinations
                   </Link>
+                  <button
+                    onClick={() => {
+                      toggleCurrency();
+                      setProfileDropdownOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-2 text-xs font-semibold text-[#444651] hover:bg-[#f3f4f5]"
+                  >
+                    <span>Currency</span>
+                    <span className="font-bold text-[#00236f]">{currency}</span>
+                  </button>
                   <button
                     onClick={() => {
                       setProfileDropdownOpen(false);
@@ -176,10 +191,19 @@ export default function Navbar({ onOpenNewTrip }) {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search destinations..."
+              placeholder="Search Jaipur, Goa, Kerala..."
               className="w-full pl-9 pr-4 py-2 bg-[#f3f4f5] border border-[#c5c5d3] rounded-lg text-sm"
             />
           </form>
+          <div className="flex justify-between items-center px-2 py-1">
+            <span className="text-xs font-bold text-[#444651]">Currency</span>
+            <button
+              onClick={toggleCurrency}
+              className="px-3 py-1 bg-[#f3f4f5] border border-[#c5c5d3] rounded-full text-xs font-bold text-[#00236f]"
+            >
+              {currency === 'INR' ? '₹ INR (India)' : '$ USD (Intl)'}
+            </button>
+          </div>
           <Link
             to="/"
             onClick={() => setMobileMenuOpen(false)}
@@ -188,7 +212,7 @@ export default function Navbar({ onOpenNewTrip }) {
             <LayoutDashboard className="w-4 h-4" /> Dashboard
           </Link>
           <Link
-            to="/trips/trip-european-summer/edit"
+            to="/trips/trip-royal-rajasthan/edit"
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-3 px-3 py-2 rounded-lg font-medium text-sm text-[#444651] hover:bg-[#f3f4f5]"
           >

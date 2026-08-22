@@ -1,27 +1,27 @@
 import React, { useState } from 'react';
 import { useTrip } from '../../context/TripContext';
 import { useNavigate } from 'react-router-dom';
-import { X, MapPin, Calendar, DollarSign, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { X, MapPin, Calendar, DollarSign, Sparkles, Image as ImageIcon, IndianRupee } from 'lucide-react';
 
 const COVER_PHOTOS = [
-  { label: 'Paris Sunset', url: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80' },
-  { label: 'Tokyo Night', url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=80' },
-  { label: 'Rome Colosseum', url: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1200&q=80' },
-  { label: 'Amalfi Coast', url: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=1200&q=80' },
-  { label: 'Barcelona', url: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=1200&q=80' },
+  { label: 'Rajasthan Fort', url: 'https://images.unsplash.com/photo-1603262110263-fb010d6e59d4?auto=format&fit=crop&w=1200&q=80' },
+  { label: 'Kerala Backwaters', url: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1200&q=80' },
+  { label: 'Goa Beaches', url: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1200&q=80' },
+  { label: 'Varanasi Ghats', url: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=1200&q=80' },
+  { label: 'Ladakh Mountains', url: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=1200&q=80' },
 ];
 
 export default function NewTripModal({ isOpen, onClose }) {
-  const { createTrip, cities } = useTrip();
+  const { createTrip, cities, currency } = useTrip();
   const navigate = useNavigate();
 
   const [name, setName] = useState('');
   const [destination, setDestination] = useState('');
   const [selectedCity, setSelectedCity] = useState(null);
   const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
-  const [endDate, setEndDate] = useState(new Date(Date.now() + 10 * 86400000).toISOString().slice(0, 10));
-  const [totalBudget, setTotalBudget] = useState('3500');
-  const [dailyCap, setDailyCap] = useState('250');
+  const [endDate, setEndDate] = useState(new Date(Date.now() + 8 * 86400000).toISOString().slice(0, 10));
+  const [totalBudget, setTotalBudget] = useState('65000');
+  const [dailyCap, setDailyCap] = useState('7500');
   const [description, setDescription] = useState('');
   const [coverPhoto, setCoverPhoto] = useState(COVER_PHOTOS[0].url);
 
@@ -43,7 +43,7 @@ export default function NewTripModal({ isOpen, onClose }) {
 
     const newTrip = createTrip({
       name,
-      destination: destination || (selectedCity ? selectedCity.name : 'World Explorer'),
+      destination: destination || (selectedCity ? `${selectedCity.name}, ${selectedCity.state || selectedCity.country}` : 'Incredible India'),
       startDate,
       endDate,
       totalBudget: Number(totalBudget),
@@ -67,8 +67,8 @@ export default function NewTripModal({ isOpen, onClose }) {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold font-['Montserrat'] text-[#00236f]">Create New Trip</h2>
-              <p className="text-xs text-[#444651] font-['Inter']">Plan your next unforgettable destination</p>
+              <h2 className="text-xl font-bold font-['Montserrat'] text-[#00236f]">Plan New Journey</h2>
+              <p className="text-xs text-[#444651] font-['Inter']">Create your dream travel itinerary in India or abroad</p>
             </div>
           </div>
           <button
@@ -91,7 +91,7 @@ export default function NewTripModal({ isOpen, onClose }) {
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. European Summer, Tokyo Tech Tour"
+              placeholder="e.g. Royal Rajasthan Tour, Kerala Backwaters"
               className="w-full px-4 py-2.5 bg-[#f3f4f5] border border-[#c5c5d3] rounded-xl text-sm font-['Inter'] focus:outline-none focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] transition-all"
             />
           </div>
@@ -99,17 +99,17 @@ export default function NewTripModal({ isOpen, onClose }) {
           {/* Destination Quick Selector */}
           <div>
             <label className="block text-xs font-bold font-['Inter'] uppercase tracking-wider text-[#444651] mb-1.5 flex items-center gap-1.5">
-              <MapPin className="w-3.5 h-3.5 text-[#00236f]" /> Primary Destination / City
+              <MapPin className="w-3.5 h-3.5 text-[#00236f]" /> Popular Destinations
             </label>
             <div className="flex gap-2 mb-2 flex-wrap">
-              {cities.slice(0, 5).map((city) => (
+              {cities.slice(0, 6).map((city) => (
                 <button
                   type="button"
                   key={city.id}
                   onClick={() => handleCitySelect(city.name)}
                   className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
-                    destination === city.name
-                      ? 'bg-[#00236f] text-white border-[#00236f]'
+                    destination.includes(city.name)
+                      ? 'bg-[#00236f] text-white border-[#00236f] font-bold'
                       : 'bg-white border-[#c5c5d3] text-[#444651] hover:border-[#00236f]'
                   }`}
                 >
@@ -121,7 +121,7 @@ export default function NewTripModal({ isOpen, onClose }) {
               type="text"
               value={destination}
               onChange={(e) => handleCitySelect(e.target.value)}
-              placeholder="Or enter city / country name..."
+              placeholder="Or enter Indian state / city / country name..."
               className="w-full px-4 py-2 bg-[#f3f4f5] border border-[#c5c5d3] rounded-xl text-sm font-['Inter'] focus:outline-none focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f]"
             />
           </div>
@@ -158,29 +158,29 @@ export default function NewTripModal({ isOpen, onClose }) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold font-['Inter'] uppercase tracking-wider text-[#444651] mb-1.5 flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5 text-[#006c49]" /> Total Target Budget ($)
+                <DollarSign className="w-3.5 h-3.5 text-[#006c49]" /> Target Budget ({currency === 'INR' ? '₹ INR' : '$ USD'})
               </label>
               <input
                 type="number"
                 min="0"
-                step="50"
+                step="1000"
                 value={totalBudget}
                 onChange={(e) => setTotalBudget(e.target.value)}
-                placeholder="4000"
+                placeholder="65000"
                 className="w-full px-4 py-2 bg-[#f3f4f5] border border-[#c5c5d3] rounded-xl text-sm font-['JetBrains Mono'] focus:outline-none focus:border-[#00236f]"
               />
             </div>
             <div>
               <label className="block text-xs font-bold font-['Inter'] uppercase tracking-wider text-[#444651] mb-1.5 flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5 text-[#006c49]" /> Daily Cap ($)
+                <DollarSign className="w-3.5 h-3.5 text-[#006c49]" /> Daily Cap ({currency === 'INR' ? '₹ INR' : '$ USD'})
               </label>
               <input
                 type="number"
                 min="0"
-                step="10"
+                step="500"
                 value={dailyCap}
                 onChange={(e) => setDailyCap(e.target.value)}
-                placeholder="300"
+                placeholder="7500"
                 className="w-full px-4 py-2 bg-[#f3f4f5] border border-[#c5c5d3] rounded-xl text-sm font-['JetBrains Mono'] focus:outline-none focus:border-[#00236f]"
               />
             </div>
@@ -221,7 +221,7 @@ export default function NewTripModal({ isOpen, onClose }) {
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What are your goals for this trip?"
+              placeholder="E.g. Royal fort tour with family, train bookings via IRCTC..."
               className="w-full px-4 py-2 bg-[#f3f4f5] border border-[#c5c5d3] rounded-xl text-sm font-['Inter'] focus:outline-none focus:border-[#00236f]"
             />
           </div>

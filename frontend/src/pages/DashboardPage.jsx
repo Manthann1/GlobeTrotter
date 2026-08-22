@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTrip } from '../context/TripContext';
-import { Plus, MapPin, Calendar, ArrowRight, Sparkles, Compass } from 'lucide-react';
+import { Plus, MapPin, Calendar, ArrowRight, Sparkles, Compass, Tag, IndianRupee } from 'lucide-react';
 
 export default function DashboardPage({ onOpenNewTrip }) {
-  const { trips, user, calculateTripTotals } = useTrip();
+  const { trips, user, calculateTripTotals, formatPrice, currency } = useTrip();
   const navigate = useNavigate();
   const [showAllPast, setShowAllPast] = useState(false);
 
@@ -17,11 +17,16 @@ export default function DashboardPage({ onOpenNewTrip }) {
       <section className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-bold font-['Inter'] uppercase tracking-wider text-[#006c49] bg-[#006c49]/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                🇮🇳 Incredible India & Global Explorer
+              </span>
+            </div>
             <h1 className="text-3xl md:text-4xl font-bold font-['Montserrat'] text-[#00236f] tracking-tight">
-              Welcome back, Explorer!
+              Namaste, {user.name.split(' ')[0]}!
             </h1>
             <p className="text-sm text-[#444651] font-['Inter'] mt-1">
-              Ready to plan your next journey or review your upcoming adventures?
+              Ready to plan your next Indian getaway or manage your upcoming royal itineraries?
             </p>
           </div>
           <button
@@ -29,7 +34,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
             className="inline-flex items-center gap-2 bg-[#00236f] text-white hover:bg-[#1e3a8a] px-5 py-2.5 rounded-full font-['Inter'] text-xs font-bold uppercase tracking-wider transition-all shadow-md self-start md:self-auto"
           >
             <Plus className="w-4 h-4" />
-            Create Trip
+            Plan New Journey
           </button>
         </div>
 
@@ -38,7 +43,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
           {/* Stat Card 1 */}
           <div className="bg-white border border-[#c5c5d3] rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow flex flex-col justify-center">
             <span className="text-[#444651] font-['Inter'] text-xs font-bold uppercase tracking-wider mb-2">
-              Total Trips
+              Total Trips Planned
             </span>
             <span className="text-3xl font-bold font-['Montserrat'] text-[#191c1d]">
               {trips.length}
@@ -48,7 +53,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
           {/* Stat Card 2 */}
           <div className="bg-white border border-[#c5c5d3] rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow flex flex-col justify-center">
             <span className="text-[#444651] font-['Inter'] text-xs font-bold uppercase tracking-wider mb-2">
-              Upcoming
+              Upcoming Journeys
             </span>
             <span className="text-3xl font-bold font-['Montserrat'] text-[#191c1d]">
               {upcomingTrips.length}
@@ -58,10 +63,10 @@ export default function DashboardPage({ onOpenNewTrip }) {
           {/* Stat Card 3 */}
           <div className="bg-white border border-[#c5c5d3] rounded-xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-md transition-shadow flex flex-col justify-center">
             <span className="text-[#444651] font-['Inter'] text-xs font-bold uppercase tracking-wider mb-2">
-              Budget Savings
+              Estimated Budget Savings
             </span>
             <span className="text-2xl font-bold font-['JetBrains Mono'] text-[#5c3800]">
-              ${user.stats?.budgetSavings?.toLocaleString() || '1,200'}
+              {formatPrice(user.stats?.budgetSavings || 38500)}
             </span>
           </div>
         </div>
@@ -72,26 +77,29 @@ export default function DashboardPage({ onOpenNewTrip }) {
         {/* Left Column: Upcoming Trips (8 cols) */}
         <div className="lg:col-span-8 flex flex-col gap-4">
           <div className="flex justify-between items-end mb-2">
-            <h2 className="text-2xl font-bold font-['Montserrat'] text-[#191c1d]">
-              Upcoming Trips
-            </h2>
+            <div>
+              <h2 className="text-2xl font-bold font-['Montserrat'] text-[#191c1d]">
+                Upcoming Journeys
+              </h2>
+              <p className="text-xs text-[#757682]">Your upcoming itineraries & planned routes</p>
+            </div>
             <Link
               to="/explore"
               className="text-xs font-bold font-['Inter'] text-[#00236f] hover:underline flex items-center gap-1 uppercase tracking-wider"
             >
-              <Compass className="w-3.5 h-3.5" /> Explore more cities
+              <Compass className="w-3.5 h-3.5" /> Explore Destinations
             </Link>
           </div>
 
           {/* Trip Cards List */}
           {upcomingTrips.map((trip) => {
             const { totalSpent } = calculateTripTotals(trip);
-            const totalBudget = trip.budget?.totalBudget || 5000;
+            const totalBudget = trip.budget?.totalBudget || 50000;
             const spentPercent = Math.min(100, Math.round((totalSpent / totalBudget) * 100)) || 0;
             const inBudget = totalSpent <= totalBudget;
 
             // Formatted date
-            const dateStr = trip.dateLabel || `${trip.startDate || '2024-06-15'} - ${trip.endDate || '2024-06-30'}`;
+            const dateStr = trip.dateLabel || `${trip.startDate || '2024-10-15'} - ${trip.endDate || '2024-10-25'}`;
 
             return (
               <div
@@ -128,7 +136,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
 
                     <p className="text-[#444651] font-['Inter'] text-sm mb-1.5 flex items-center gap-1.5 font-medium">
                       <MapPin className="w-4 h-4 text-[#00236f] shrink-0" />
-                      {trip.subtitle || (trip.stops && trip.stops.map(s => s.cityName).join(' & ')) || 'Multi-city itinerary'}
+                      {trip.subtitle || (trip.stops && trip.stops.map(s => s.cityName).join(' & ')) || 'Multi-stop itinerary'}
                     </p>
                     <p className="text-[#757682] font-['Inter'] text-xs flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 shrink-0" />
@@ -143,7 +151,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
                         Budget Spent
                       </span>
                       <span className="font-['JetBrains Mono'] font-bold text-[#00236f]">
-                        {spentPercent}% (${totalSpent.toLocaleString()} / ${totalBudget.toLocaleString()})
+                        {spentPercent}% ({formatPrice(totalSpent)} / {formatPrice(totalBudget)})
                       </span>
                     </div>
                     <div className="w-full bg-[#e1e3e4] rounded-full h-2 overflow-hidden mb-3">
@@ -164,7 +172,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
                       </Link>
                       <Link
                         to={`/trips/${trip.id}/edit`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#00236f]/10 text-[#00236f] hover:bg-[#00236f] hover:text-white font-['Inter'] text-xs font-bold uppercase tracking-wider transition-all"
+                        className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-[#00236f]/10 text-[#00236f] hover:bg-[#00236f] hover:text-white font-['Inter'] text-xs font-bold uppercase tracking-wider transition-all"
                       >
                         Open Planner
                       </Link>
@@ -175,7 +183,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
             );
           })}
 
-          {/* Create New Trip Action Button Area (Dashed Box matching Mockup 1) */}
+          {/* Create New Trip Action Button Area (Dashed Box) */}
           <button
             onClick={onOpenNewTrip}
             className="mt-2 w-full py-6 border-2 border-dashed border-[#00236f]/30 rounded-xl bg-[#f8f9fa] hover:bg-[#f3f4f5] text-[#00236f] flex flex-col items-center justify-center gap-2 transition-all duration-200 group hover:border-[#00236f]"
@@ -183,14 +191,15 @@ export default function DashboardPage({ onOpenNewTrip }) {
             <span className="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform text-[#00236f]">
               add_circle
             </span>
-            <span className="font-['Montserrat'] text-lg font-bold">Create New Trip</span>
+            <span className="font-['Montserrat'] text-lg font-bold">Plan a New Journey in India</span>
+            <span className="text-xs text-[#757682]">Choose from 50+ curated Indian destinations or customize your own</span>
           </button>
         </div>
 
         {/* Right Column: Past Trips (4 cols) */}
         <div className="lg:col-span-4 flex flex-col gap-4 mt-6 lg:mt-0">
-          <h2 className="text-2xl font-bold font-['Montserrat'] text-[#191c1d] mb-2">
-            Past Trips
+          <h2 className="text-2xl font-bold font-['Montserrat'] text-[#191c1d] mb-1">
+            Travel History
           </h2>
 
           <div className="bg-white border border-[#c5c5d3] rounded-xl p-4 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
@@ -231,20 +240,20 @@ export default function DashboardPage({ onOpenNewTrip }) {
             )}
           </div>
 
-          {/* Quick Explore Card Widget */}
-          <div className="bg-gradient-to-br from-[#00236f] to-[#1e3a8a] text-white rounded-xl p-5 shadow-md mt-2">
+          {/* Incredible India Inspiration Widget */}
+          <div className="bg-gradient-to-br from-[#00236f] via-[#1e3a8a] to-[#006c49] text-white rounded-xl p-5 shadow-md mt-2">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-5 h-5 text-[#ef9900]" />
-              <h3 className="font-bold font-['Montserrat'] text-sm">Need Travel Inspiration?</h3>
+              <h3 className="font-bold font-['Montserrat'] text-sm">Top Indian Destinations</h3>
             </div>
             <p className="text-xs text-white/80 font-['Inter'] leading-relaxed mb-4">
-              Browse world-class destinations with cost indices, top activities, and 1-click itinerary planning.
+              Explore royal palaces of Rajasthan, misty tea hills of Kerala, serene Ganga ghats of Varanasi, or high passes of Ladakh.
             </p>
             <Link
               to="/explore"
-              className="inline-block w-full text-center bg-[#ef9900] hover:bg-[#ffb95f] text-[#2a1700] py-2 rounded-lg font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors"
+              className="inline-block w-full text-center bg-[#ef9900] hover:bg-[#ffb95f] text-[#2a1700] py-2.5 rounded-lg font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors shadow-sm"
             >
-              Explore Destinations
+              Explore Indian Destinations
             </Link>
           </div>
         </div>

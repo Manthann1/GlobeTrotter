@@ -17,18 +17,19 @@ import {
   Map as MapIcon,
   User,
   Sparkles,
+  IndianRupee,
 } from 'lucide-react';
 
 export default function TripViewPage() {
   const { tripId } = useParams();
-  const { getTrip, copyTripToAccount, calculateTripTotals, showToast } = useTrip();
+  const { getTrip, copyTripToAccount, calculateTripTotals, formatPrice, showToast } = useTrip();
   const navigate = useNavigate();
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [mapActive, setMapActive] = useState(false);
 
-  // Retrieve trip or fallback to first trip
-  const trip = getTrip(tripId) || getTrip('trip-european-summer');
+  // Retrieve trip or fallback to featured Rajasthan trip
+  const trip = getTrip(tripId) || getTrip('trip-royal-rajasthan');
 
   if (!trip) {
     return (
@@ -46,7 +47,7 @@ export default function TripViewPage() {
   }
 
   const { totalSpent, breakdown } = calculateTripTotals(trip);
-  const totalBudget = trip.budget?.totalBudget || 5000;
+  const totalBudget = trip.budget?.totalBudget || 85000;
 
   // Flatten all activities with day numbering for the timeline view
   const timelineDays = [];
@@ -54,7 +55,6 @@ export default function TripViewPage() {
 
   if (trip.stops && trip.stops.length > 0) {
     trip.stops.forEach((stop, stopIdx) => {
-      // Group activities or assign days
       const acts = stop.activities || [];
       if (acts.length === 0) {
         timelineDays.push({
@@ -64,7 +64,6 @@ export default function TripViewPage() {
           activities: [],
         });
       } else {
-        // Group by day or split
         const dayGroups = {};
         acts.forEach((act) => {
           const d = act.day || 1;
@@ -86,7 +85,7 @@ export default function TripViewPage() {
   } else {
     timelineDays.push({
       dayNum: 1,
-      title: 'Day 1: Arrival & Exploration',
+      title: 'Day 1: Arrival & Local Exploration',
       stop: { cityName: trip.name },
       activities: [],
     });
@@ -99,7 +98,7 @@ export default function TripViewPage() {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    showToast('🔗 Trip link copied to clipboard!');
+    showToast('🔗 Itinerary link copied to clipboard!');
   };
 
   // Category percentages for budget breakdown
@@ -135,9 +134,9 @@ export default function TripViewPage() {
 
         {/* Hero Content */}
         <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full text-white">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className="bg-[#FF5722] text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider font-['Inter'] shadow-sm">
-              Featured Itinerary
+              🇮🇳 Featured Indian Itinerary
             </span>
             <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-['Inter']">
               {trip.startDate} — {trip.endDate}
@@ -151,7 +150,7 @@ export default function TripViewPage() {
           <div className="flex flex-wrap items-center gap-4 text-white/90 text-sm">
             <div className="flex items-center gap-1.5 font-medium">
               <User className="w-4 h-4" />
-              <span>Planned by {trip.author?.name || 'Alex Explorer'}</span>
+              <span>Planned by {trip.author?.name || 'Aarav Sharma'}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#ef9900]" />
@@ -184,10 +183,13 @@ export default function TripViewPage() {
         {/* Left Column: Itinerary Overview (8 cols) */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           <div className="flex justify-between items-center border-b border-[#c5c5d3] pb-3">
-            <h2 className="text-2xl font-bold font-['Montserrat'] text-[#191c1d]">
-              Itinerary Overview
-            </h2>
-            <span className="text-xs font-bold font-['Inter'] text-[#757682] uppercase tracking-wider">
+            <div>
+              <h2 className="text-2xl font-bold font-['Montserrat'] text-[#191c1d]">
+                Itinerary Overview
+              </h2>
+              <p className="text-xs text-[#757682]">Day-by-day curated experiences, stays, and heritage tours</p>
+            </div>
+            <span className="text-xs font-bold font-['Inter'] text-[#00236f] bg-[#00236f]/10 px-3 py-1 rounded-full uppercase tracking-wider">
               {timelineDays.length} Days Planned
             </span>
           </div>
@@ -213,7 +215,7 @@ export default function TripViewPage() {
                 <div className="space-y-4">
                   {dayItem.activities.length === 0 ? (
                     <div className="p-4 bg-white border border-[#c5c5d3] rounded-xl text-xs text-[#757682] italic">
-                      Explore the city at your own leisure or add activities in the planner.
+                      Explore the city bazaars, ghats, and local eateries at your own leisure.
                     </div>
                   ) : (
                     dayItem.activities.map((act) => {
@@ -256,8 +258,8 @@ export default function TripViewPage() {
                                     {act.timeSlot || 'Flexible'}
                                   </span>
                                 </div>
-                                <div className="font-['JetBrains Mono'] font-bold text-[#00236f]">
-                                  ${Number(act.cost).toLocaleString()}
+                                <div className="font-['JetBrains Mono'] font-bold text-[#00236f] text-sm">
+                                  {formatPrice(act.cost)}
                                 </div>
                               </div>
                             </div>
@@ -285,9 +287,9 @@ export default function TripViewPage() {
               {/* Lodging */}
               <div>
                 <div className="flex justify-between mb-1 text-xs font-bold font-['Inter'] uppercase tracking-wider">
-                  <span className="text-[#444651]">Lodging</span>
+                  <span className="text-[#444651]">Stays & Havelis</span>
                   <span className="font-['JetBrains Mono'] text-[#191c1d]">
-                    ${breakdown.lodging.toLocaleString()}
+                    {formatPrice(breakdown.lodging)}
                   </span>
                 </div>
                 <div className="w-full bg-[#e1e3e4] rounded-full h-2">
@@ -301,9 +303,9 @@ export default function TripViewPage() {
               {/* Food */}
               <div>
                 <div className="flex justify-between mb-1 text-xs font-bold font-['Inter'] uppercase tracking-wider">
-                  <span className="text-[#444651]">Food & Dining</span>
+                  <span className="text-[#444651]">Food, Thalis & Dining</span>
                   <span className="font-['JetBrains Mono'] text-[#191c1d]">
-                    ${breakdown.food.toLocaleString()}
+                    {formatPrice(breakdown.food)}
                   </span>
                 </div>
                 <div className="w-full bg-[#e1e3e4] rounded-full h-2">
@@ -317,9 +319,9 @@ export default function TripViewPage() {
               {/* Activities */}
               <div>
                 <div className="flex justify-between mb-1 text-xs font-bold font-['Inter'] uppercase tracking-wider">
-                  <span className="text-[#444651]">Activities</span>
+                  <span className="text-[#444651]">Heritage, Treks & Tours</span>
                   <span className="font-['JetBrains Mono'] text-[#191c1d]">
-                    ${breakdown.activities.toLocaleString()}
+                    {formatPrice(breakdown.activities)}
                   </span>
                 </div>
                 <div className="w-full bg-[#e1e3e4] rounded-full h-2">
@@ -336,7 +338,7 @@ export default function TripViewPage() {
                   Total Est.
                 </span>
                 <span className="font-['JetBrains Mono'] text-2xl font-bold text-[#00236f]">
-                  ${totalSpent.toLocaleString()}
+                  {formatPrice(totalSpent)}
                 </span>
               </div>
             </div>
@@ -348,14 +350,14 @@ export default function TripViewPage() {
             className="bg-white border border-[#c5c5d3] rounded-2xl h-64 shadow-sm overflow-hidden relative group cursor-pointer"
           >
             <img
-              src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80"
+              src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80"
               alt="Map route preview"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-black/25 group-hover:bg-black/15 transition-colors flex items-center justify-center">
               <span className="bg-white/95 text-[#00236f] px-4 py-2 rounded-full font-['Inter'] text-xs font-bold uppercase tracking-wider shadow-lg backdrop-blur-xs flex items-center gap-2 group-hover:scale-105 transition-transform">
                 <MapIcon className="w-4 h-4 text-[#00236f]" />
-                {mapActive ? 'Interactive Route Active' : 'View Map Route'}
+                {mapActive ? 'Route Navigation Active' : 'View Indian Map Route'}
               </span>
             </div>
 
