@@ -47,3 +47,25 @@ export const getCityById = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getCityActivities = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const city = await prisma.city.findUnique({
+      where: { id },
+    });
+
+    if (!city) {
+      return res.status(404).json({ error: 'City not found' });
+    }
+
+    const activities = await prisma.activity.findMany({
+      where: { cityId: id },
+      orderBy: { name: 'asc' },
+    });
+
+    res.json(activities);
+  } catch (error) {
+    next(error);
+  }
+};
