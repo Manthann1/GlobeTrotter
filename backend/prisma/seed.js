@@ -42,9 +42,9 @@ const CITIES_DATA = [
     latitude: 24.5854,
     longitude: 73.7125,
     currency: 'INR',
-    imageUrl: 'https://images.unsplash.com/photo-1596716035787-84eaf9c1e7d2?auto=format&fit=crop&w=1200&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1200&q=80',
     activities: [
-      { name: 'Lake Pichola Sunset Boat Cruise', category: 'Leisure', cost: 900, durationMins: 90, description: 'Cruise past the Jag Mandir and Taj Lake Palace on shimmering Lake Pichola as the sun sets behind the Aravallis.', imageUrl: 'https://images.unsplash.com/photo-1596716035787-84eaf9c1e7d2?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['boat-cruise', 'sunset', 'lake'] },
+      { name: 'Lake Pichola Sunset Boat Cruise', category: 'Leisure', cost: 900, durationMins: 90, description: 'Cruise past the Jag Mandir and Taj Lake Palace on shimmering Lake Pichola as the sun sets behind the Aravallis.', imageUrl: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=800&q=80', rating: 4.85, tags: ['boat-cruise', 'sunset', 'lake'] },
       { name: 'City Palace & Crystal Gallery Tour', category: 'Culture & History', cost: 600, durationMins: 150, description: 'Explore the sprawling City Palace complex and the rare Crystal Gallery with Bohemian crystal furniture and jewels.', imageUrl: 'https://images.unsplash.com/photo-1590063005492-0e83bf702e7c?auto=format&fit=crop&w=800&q=80', rating: 4.75, tags: ['palace', 'museum', 'crystal'] },
       { name: 'Ambrai Lakeside Fine Dining', category: 'Food & Dining', cost: 2500, durationMins: 120, description: 'Dine on Rajasthani and continental cuisine at one of India\'s most scenic restaurants overlooking Lake Pichola and the City Palace.', imageUrl: 'https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['lakeside', 'fine-dining', 'romantic'] },
       { name: 'Taj Fateh Prakash Palace Stay', category: 'Lodging', cost: 28000, durationMins: 1440, description: 'Grand heritage palace hotel on the shores of Lake Pichola with royal suites, butler service, and private Darbar Hall dining.', imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80', rating: 4.95, tags: ['palace-hotel', 'luxury', 'heritage'] },
@@ -276,9 +276,9 @@ const CITIES_DATA = [
     latitude: 41.9028,
     longitude: 12.4964,
     currency: 'EUR',
-    imageUrl: 'https://images.unsplash.com/photo-1515542622106-78b28af7815d?auto=format&fit=crop&w=1200&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=1200&q=80',
     activities: [
-      { name: 'Colosseum & Roman Forum VIP Underground Tour', category: 'Culture & History', cost: 5500, durationMins: 180, description: 'Skip-the-line access to the Colosseum arena floor, underground chambers, and the ancient Roman Forum ruins.', imageUrl: 'https://images.unsplash.com/photo-1515542622106-78b28af7815d?auto=format&fit=crop&w=800&q=80', rating: 4.90, tags: ['colosseum', 'ruins', 'VIP'] },
+      { name: 'Colosseum & Roman Forum VIP Underground Tour', category: 'Culture & History', cost: 5500, durationMins: 180, description: 'Skip-the-line access to the Colosseum arena floor, underground chambers, and the ancient Roman Forum ruins.', imageUrl: 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80', rating: 4.90, tags: ['colosseum', 'ruins', 'VIP'] },
       { name: 'Vatican Museums, Sistine Chapel & St. Peter\'s', category: 'Culture & History', cost: 4800, durationMins: 240, description: 'Guided tour of the Vatican Museums, Raphael Rooms, Michelangelo\'s Sistine Chapel, and St. Peter\'s Basilica.', imageUrl: 'https://images.unsplash.com/photo-1531572753322-ad063cecc140?auto=format&fit=crop&w=800&q=80', rating: 4.95, tags: ['vatican', 'sistine-chapel', 'art'] },
       { name: 'Trastevere Food & Wine Walking Tour', category: 'Food & Dining', cost: 4200, durationMins: 180, description: 'Taste authentic Roman cuisine — supplì, cacio e pepe, porchetta, and local wines in the charming Trastevere quarter.', imageUrl: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=800&q=80', rating: 4.80, tags: ['food-tour', 'wine', 'trastevere'] },
       { name: 'Trevi Fountain, Pantheon & Piazza Navona Walk', category: 'Sightseeing', cost: 0, durationMins: 120, description: 'Self-guided walk through Rome\'s most beautiful piazzas — toss a coin at Trevi and marvel at the Pantheon\'s dome.', imageUrl: 'https://images.unsplash.com/photo-1529260830199-42c24126f198?auto=format&fit=crop&w=800&q=80', rating: 4.70, tags: ['trevi', 'pantheon', 'walking'] },

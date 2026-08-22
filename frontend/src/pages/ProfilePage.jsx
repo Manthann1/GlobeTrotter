@@ -1,4 +1,4 @@
-git import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useTrip } from '../context/TripContext';
 import TripCard from '../components/ui/TripCard';
 

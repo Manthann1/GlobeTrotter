@@ -110,8 +110,7 @@ export function TripProvider({ children }) {
 
     try {
       // Use the actual API to create the trip
-      const res = await api.createTrip(tripData);
-      const newTrip = res.data;
+      const newTrip = await api.createTrip(tripData);
       
       setTrips((prev) => [newTrip, ...prev]);
       showToast(`🎉 "${newTrip.name}" created successfully!`);
