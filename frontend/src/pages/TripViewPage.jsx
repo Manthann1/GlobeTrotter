@@ -93,7 +93,7 @@ export default function TripViewPage() {
 
   const handleCopyTrip = () => {
     const cloned = copyTripToAccount(trip);
-    navigate(`/trips/${cloned.id}/edit`);
+    navigate(`/trips/${cloned.id}/copied`);
   };
 
   const handleCopyLink = () => {

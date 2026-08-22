@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { TripProvider } from './context/TripContext';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import DashboardPage from './pages/DashboardPage';
 import TripViewPage from './pages/TripViewPage';
 import TripBuilderPage from './pages/TripBuilderPage';
+import BudgetAnalysisPage from './pages/BudgetAnalysisPage';
+import ProfilePage from './pages/ProfilePage';
+import TripCopiedPage from './pages/TripCopiedPage';
 import ExplorePage from './pages/ExplorePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import NewTripModal from './components/modals/NewTripModal';
 import ToastContainer from './components/ui/Toast';
 
@@ -21,6 +27,21 @@ function StandardLayout({ children, onOpenNewTrip }) {
   );
 }
 
+// Protected Route wrapper
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+}
+
 function App() {
   const [newTripModalOpen, setNewTripModalOpen] = useState(false);
 
@@ -29,62 +50,102 @@ function App() {
   };
 
   return (
-    <TripProvider>
-      <Router>
-        <ToastContainer />
+    <AuthProvider>
+      <TripProvider>
+        <Router>
+          <ToastContainer />
 
-        <Routes>
-          {/* Dashboard Route */}
-          <Route
-            path="/"
-            element={
-              <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
-                <DashboardPage onOpenNewTrip={handleOpenNewTrip} />
-              </StandardLayout>
-            }
+          <Routes>
+            {/* Public Auth Routes */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* Dashboard Route (Protected) */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                    <DashboardPage onOpenNewTrip={handleOpenNewTrip} />
+                  </StandardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={<Navigate to="/" replace />}
+            />
+
+            {/* Public / Share Trip View */}
+            <Route
+              path="/trips/:tripId"
+              element={
+                <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                  <TripViewPage />
+                </StandardLayout>
+              }
+            />
+
+            {/* Trip Builder / Itinerary Planner (Protected) */}
+            <Route
+              path="/trips/:tripId/edit"
+              element={
+                <ProtectedRoute>
+                  <TripBuilderPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Dedicated Budget Analysis Route */}
+            <Route
+              path="/trips/:tripId/budget"
+              element={
+                <ProtectedRoute>
+                  <BudgetAnalysisPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Trip Copied Success Route */}
+            <Route
+              path="/trips/:tripId/copied"
+              element={<TripCopiedPage />}
+            />
+
+            {/* Explore Destinations (Public but inside layout) */}
+            <Route
+              path="/explore"
+              element={
+                <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                  <ExplorePage onOpenNewTrip={handleOpenNewTrip} />
+                </StandardLayout>
+              }
+            />
+
+            {/* User Profile & Preferences Route (Protected) */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                    <ProfilePage />
+                  </StandardLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Catch-all fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+
+          {/* Global New Trip Modal */}
+          <NewTripModal
+            isOpen={newTripModalOpen}
+            onClose={() => setNewTripModalOpen(false)}
           />
-          <Route
-            path="/dashboard"
-            element={<Navigate to="/" replace />}
-          />
-
-          {/* Public / Share Trip View */}
-          <Route
-            path="/trips/:tripId"
-            element={
-              <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
-                <TripViewPage />
-              </StandardLayout>
-            }
-          />
-
-          {/* Trip Builder / Itinerary Planner (Custom full-screen sidebar layout) */}
-          <Route
-            path="/trips/:tripId/edit"
-            element={<TripBuilderPage />}
-          />
-
-          {/* Explore Destinations */}
-          <Route
-            path="/explore"
-            element={
-              <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
-                <ExplorePage onOpenNewTrip={handleOpenNewTrip} />
-              </StandardLayout>
-            }
-          />
-
-          {/* Catch-all fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-
-        {/* Global New Trip Modal */}
-        <NewTripModal
-          isOpen={newTripModalOpen}
-          onClose={() => setNewTripModalOpen(false)}
-        />
-      </Router>
-    </TripProvider>
+        </Router>
+      </TripProvider>
+    </AuthProvider>
   );
 }
 

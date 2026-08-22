@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTrip } from '../../context/TripContext';
-import { Search, Bell, Settings, Plus, Compass, Calendar, LayoutDashboard, Menu, X, Globe, IndianRupee } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Search, Bell, Settings, Plus, Compass, Calendar, LayoutDashboard, Menu, X, Globe, IndianRupee, LogOut } from 'lucide-react';
 
 export default function Navbar({ onOpenNewTrip }) {
   const { user, searchQuery, setSearchQuery, currency, toggleCurrency } = useTrip();
+  const { logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -82,6 +84,16 @@ export default function Navbar({ onOpenNewTrip }) {
             }`}
           >
             Explore
+          </Link>
+          <Link
+            to="/profile"
+            className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
+              isActive('/profile')
+                ? 'text-[#00236f] border-b-2 border-[#00236f] pb-0.5'
+                : 'text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] px-2 rounded-t'
+            }`}
+          >
+            Profile
           </Link>
         </nav>
 
@@ -164,6 +176,15 @@ export default function Navbar({ onOpenNewTrip }) {
                     className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-[#5c3800] hover:bg-[#f3f4f5]"
                   >
                     <Plus className="w-4 h-4" /> Plan a New Trip
+                  </button>
+                  <button
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      logout();
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 border-t border-[#edeeef] mt-1 pt-2"
+                  >
+                    <LogOut className="w-4 h-4" /> Logout
                   </button>
                 </div>
               )}

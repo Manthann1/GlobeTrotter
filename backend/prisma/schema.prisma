@@ -1,5 +1,7 @@
-// GlobeTrotter Prisma Schema
+// GlobeTrotter Prisma Schema — Full 12-Feature Database
 // PostgreSQL (PERN Stack)
+// Supports: Auth, Dashboard, Trips CRUD, Itinerary Builder, City/Activity Search,
+//           Budget Breakdown, Calendar/Timeline, Shared Itineraries, Profile/Settings, Admin Analytics
 
 generator client {
   provider = "prisma-client-js"
@@ -10,75 +12,164 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ─────────────────────────────────────────────────────────────
+// 1. USER — Auth, Profile, Settings, Admin
+// ─────────────────────────────────────────────────────────────
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  name         String   @db.VarChar(100)
-  email        String   @unique @db.VarChar(255)
-  passwordHash String   @map("password_hash") @db.VarChar(255)
-  profilePhoto String?  @map("profile_photo") @db.Text
-  languagePref String   @default("en") @map("language_pref") @db.VarChar(10)
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String   @db.VarChar(100)
+  email         String   @unique @db.VarChar(255)
+  passwordHash  String   @map("password_hash") @db.VarChar(255)
+  phone         String?  @db.VarChar(20)
+  bio           String?  @db.Text
+  profilePhoto  String?  @map("profile_photo") @db.Text
+  currencyPref  String   @default("INR") @map("currency_pref") @db.VarChar(10)
+  languagePref  String   @default("en") @map("language_pref") @db.VarChar(10)
+  isAdmin       Boolean  @default(false) @map("is_admin")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  trips Trip[]
+  trips              Trip[]
+  savedCities        SavedCity[]
+  passwordResetTokens PasswordResetToken[]
 
+  @@index([email])
   @@map("users")
 }
 
+// ─────────────────────────────────────────────────────────────
+// 2. PASSWORD RESET — Forgot Password flow
+// ─────────────────────────────────────────────────────────────
+model PasswordResetToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String   @unique @db.VarChar(255)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+// ─────────────────────────────────────────────────────────────
+// 3. TRIP — Create, List, View, Edit, Delete, Clone, Share
+// ─────────────────────────────────────────────────────────────
+enum TripStatus {
+  DRAFT
+  PLANNED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
 model Trip {
-  id          String   @id @default(uuid()) @db.Uuid
-  userId      String   @map("user_id") @db.Uuid
-  name        String   @db.VarChar(200)
-  startDate   DateTime @map("start_date") @db.Date
-  endDate     DateTime @map("end_date") @db.Date
-  description String?  @db.Text
-  coverPhoto  String?  @map("cover_photo") @db.Text
-  isPublic    Boolean  @default(false) @map("is_public")
-  shareToken  String?  @unique @map("share_token") @db.VarChar(100)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  id           String     @id @default(uuid()) @db.Uuid
+  userId       String     @map("user_id") @db.Uuid
+  name         String     @db.VarChar(200)
+  startDate    DateTime   @map("start_date") @db.Date
+  endDate      DateTime   @map("end_date") @db.Date
+  description  String?    @db.Text
+  coverPhoto   String?    @map("cover_photo") @db.Text
+  totalBudget  Decimal?   @map("total_budget") @db.Decimal(12, 2)
+  status       TripStatus @default(DRAFT)
+  isPublic     Boolean    @default(false) @map("is_public")
+  shareToken   String?    @unique @map("share_token") @db.VarChar(100)
+  copiedFromId String?    @map("copied_from_id") @db.Uuid
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  copiedFrom  Trip?        @relation("TripClones", fields: [copiedFromId], references: [id], onDelete: SetNull)
+  clones      Trip[]       @relation("TripClones")
   stops       Stop[]
   budget      Budget?
   sharedLinks SharedLink[]
 
+  @@index([userId])
+  @@index([status])
+  @@index([startDate])
+  @@index([isPublic])
   @@map("trips")
 }
 
+// ─────────────────────────────────────────────────────────────
+// 4. CITY — Search, Filter by Region/Country, Popularity
+// ─────────────────────────────────────────────────────────────
 model City {
   id              String  @id @default(uuid()) @db.Uuid
   name            String  @db.VarChar(100)
+  state           String? @db.VarChar(100)
   country         String  @db.VarChar(100)
+  region          String? @db.VarChar(50)
+  description     String? @db.Text
   costIndex       Decimal @default(1.00) @map("cost_index") @db.Decimal(5, 2)
   popularityScore Decimal @default(0.00) @map("popularity_score") @db.Decimal(5, 2)
+  latitude        Decimal? @db.Decimal(10, 7)
+  longitude       Decimal? @db.Decimal(10, 7)
+  currency        String  @default("INR") @db.VarChar(10)
   imageUrl        String? @map("image_url") @db.Text
 
   activities Activity[]
   stops      Stop[]
+  savedBy    SavedCity[]
 
   @@unique([name, country])
   @@index([country])
+  @@index([region])
   @@index([name])
+  @@index([popularityScore])
   @@map("cities")
 }
 
+// ─────────────────────────────────────────────────────────────
+// 5. SAVED CITY — User favorites / saved destinations
+// ─────────────────────────────────────────────────────────────
+model SavedCity {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  cityId    String   @map("city_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  city City @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cityId])
+  @@map("saved_cities")
+}
+
+// ─────────────────────────────────────────────────────────────
+// 6. ACTIVITY — Browse, Filter, Search by category/cost/duration
+// ─────────────────────────────────────────────────────────────
 model Activity {
   id           String  @id @default(uuid()) @db.Uuid
   cityId       String  @map("city_id") @db.Uuid
   name         String  @db.VarChar(200)
   category     String  @db.VarChar(50)
   cost         Decimal @default(0.00) @db.Decimal(10, 2)
+  currency     String  @default("INR") @db.VarChar(10)
   durationMins Int     @default(60) @map("duration_mins")
   description  String? @db.Text
   imageUrl     String? @map("image_url") @db.Text
+  rating       Decimal? @db.Decimal(3, 2)
+  tags         Json    @default("[]")
 
   city           City           @relation(fields: [cityId], references: [id], onDelete: Cascade)
   tripActivities TripActivity[]
 
   @@index([cityId, category])
   @@index([category])
+  @@index([cost])
+  @@index([rating])
   @@map("activities")
 }
 
+// ─────────────────────────────────────────────────────────────
+// 7. STOP — Cities within a trip, with arrival/departure & ordering
+// ─────────────────────────────────────────────────────────────
 model Stop {
   id            String   @id @default(uuid()) @db.Uuid
   tripId        String   @map("trip_id") @db.Uuid
@@ -86,15 +177,20 @@ model Stop {
   arrivalDate   DateTime @map("arrival_date") @db.Date
   departureDate DateTime @map("departure_date") @db.Date
   sortOrder     Int      @default(0) @map("sort_order")
+  notes         String?  @db.Text
 
   trip           Trip           @relation(fields: [tripId], references: [id], onDelete: Cascade)
   city           City           @relation(fields: [cityId], references: [id], onDelete: Restrict)
   tripActivities TripActivity[]
 
   @@index([tripId, sortOrder])
+  @@index([cityId])
   @@map("stops")
 }
 
+// ─────────────────────────────────────────────────────────────
+// 8. TRIP ACTIVITY — Scheduled activities within stops (with snapshots)
+// ─────────────────────────────────────────────────────────────
 model TripActivity {
   id               String    @id @default(uuid()) @db.Uuid
   stopId           String    @map("stop_id") @db.Uuid
@@ -105,14 +201,19 @@ model TripActivity {
   scheduledDate    DateTime? @map("scheduled_date") @db.Date
   timeSlot         String?   @map("time_slot") @db.VarChar(50)
   sortOrder        Int       @default(0) @map("sort_order")
+  notes            String?   @db.Text
 
   stop     Stop      @relation(fields: [stopId], references: [id], onDelete: Cascade)
   activity Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
 
   @@index([stopId, sortOrder])
+  @@index([scheduledDate])
   @@map("trip_activities")
 }
 
+// ─────────────────────────────────────────────────────────────
+// 9. BUDGET — Per-trip budget settings with category caps
+// ─────────────────────────────────────────────────────────────
 model Budget {
   id           String   @id @default(uuid()) @db.Uuid
   tripId       String   @unique @map("trip_id") @db.Uuid
@@ -124,6 +225,9 @@ model Budget {
   @@map("budgets")
 }
 
+// ─────────────────────────────────────────────────────────────
+// 10. SHARED LINK — Public share URLs with view tracking
+// ─────────────────────────────────────────────────────────────
 model SharedLink {
   id         String   @id @default(uuid()) @db.Uuid
   tripId     String   @map("trip_id") @db.Uuid
@@ -134,5 +238,6 @@ model SharedLink {
   trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
 
   @@index([shareToken])
+  @@index([tripId])
   @@map("shared_links")
 }

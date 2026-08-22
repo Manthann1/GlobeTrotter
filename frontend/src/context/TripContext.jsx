@@ -1,27 +1,45 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api, getStoredData, setStoredData } from '../services/api';
-import { INITIAL_TRIPS, CITIES_DATA, INITIAL_USER } from '../data/mockData';
+import { api } from '../services/api';
+import { useAuth } from './AuthContext';
 import confetti from 'canvas-confetti';
 
 const TripContext = createContext();
 
 export function TripProvider({ children }) {
-  const [trips, setTrips] = useState(() => getStoredData('globetrotter_trips_v2', INITIAL_TRIPS));
-  const [cities, setCities] = useState(() => getStoredData('globetrotter_cities_v2', CITIES_DATA));
-  const [user, setUser] = useState(() => getStoredData('globetrotter_user_v2', INITIAL_USER));
+  const { user, isAuthenticated } = useAuth();
+  
+  const [trips, setTrips] = useState([]);
+  const [cities, setCities] = useState([]);
   const [currency, setCurrency] = useState(() => localStorage.getItem('globetrotter_currency') || 'INR');
   const [searchQuery, setSearchQuery] = useState('');
   const [toasts, setToasts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  // Sync with local storage
+  // Fetch initial data
   useEffect(() => {
-    setStoredData('globetrotter_trips_v2', trips);
-  }, [trips]);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const citiesData = await api.getCities();
+        setCities(citiesData.data || []);
+        
+        if (isAuthenticated) {
+          const tripsData = await api.getTrips();
+          setTrips(tripsData.data || []);
+        } else {
+          // If not authenticated, we could just clear trips or load public ones
+          const publicTrips = await api.getTrips(); // Our backend might return public trips if no token
+          setTrips(publicTrips.data || []);
+        }
+      } catch (err) {
+        console.error("Failed to load initial data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  useEffect(() => {
-    setStoredData('globetrotter_user_v2', user);
-  }, [user]);
+    fetchData();
+  }, [isAuthenticated]);
 
   useEffect(() => {
     localStorage.setItem('globetrotter_currency', currency);
@@ -33,7 +51,6 @@ export function TripProvider({ children }) {
     if (currency === 'INR') {
       return `₹${num.toLocaleString('en-IN')}`;
     }
-    // Approx USD conversion (1 USD ≈ 85 INR)
     const usd = Math.round(num / 85);
     return `$${usd.toLocaleString('en-US')}`;
   };
@@ -85,121 +102,77 @@ export function TripProvider({ children }) {
     return trips.find((t) => t.id === id || t.shareToken === id) || null;
   };
 
-  const createTrip = (tripData) => {
-    const newTrip = {
-      id: `trip-${Date.now()}`,
-      userId: user.id,
-      name: tripData.name || 'New India Adventure',
-      subtitle: tripData.destination || 'Incredible India',
-      startDate: tripData.startDate || new Date().toISOString().slice(0, 10),
-      endDate: tripData.endDate || new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
-      status: 'upcoming',
-      isPublic: true,
-      shareToken: `trip-${Date.now()}`,
-      coverPhoto: tripData.coverPhoto || 'https://images.unsplash.com/photo-1603262110263-fb010d6e59d4?auto=format&fit=crop&w=1600&q=85',
-      description: tripData.description || 'A custom planned travel itinerary on GlobeTrotter.',
-      author: {
-        name: user.name,
-        photo: user.profilePhoto,
-      },
-      budget: {
-        totalBudget: Number(tripData.totalBudget || 50000),
-        dailyCap: Number(tripData.dailyCap || 5000),
-        categoryBreakdown: { lodging: 0, food: 0, activities: 0, transport: 0 },
-      },
-      stops: tripData.initialCity ? [
-        {
-          id: `stop-${Date.now()}`,
-          cityId: tripData.initialCity.id || 'c-custom',
-          cityName: tripData.initialCity.name || tripData.destination,
-          state: tripData.initialCity.state || '',
-          country: tripData.initialCity.country || 'India',
-          arrivalDate: tripData.startDate || new Date().toISOString().slice(0, 10),
-          departureDate: tripData.endDate || new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10),
-          sortOrder: 0,
-          estCost: 0,
-          activities: tripData.initialCity.activities ? tripData.initialCity.activities.slice(0, 2).map((a, idx) => ({
-            ...a,
-            id: `act-${Date.now()}-${idx}`,
-            day: idx + 1,
-            dayTitle: `Day ${idx + 1}: ${a.name}`,
-            sortOrder: idx
-          })) : []
-        }
-      ] : [],
-    };
-
-    setTrips((prev) => [newTrip, ...prev]);
-    setUser((prev) => ({
-      ...prev,
-      stats: {
-        ...prev.stats,
-        totalTrips: (prev.stats?.totalTrips || 0) + 1,
-        upcomingTrips: (prev.stats?.upcomingTrips || 0) + 1,
-      }
-    }));
-
-    showToast(`🎉 "${newTrip.name}" created successfully!`);
-    return newTrip;
-  };
-
-  const updateTrip = (id, updatedFields) => {
-    setTrips((prev) =>
-      prev.map((t) => {
-        if (t.id === id) {
-          const merged = { ...t, ...updatedFields };
-          return merged;
-        }
-        return t;
-      })
-    );
-    showToast('Trip updated');
-  };
-
-  const deleteTrip = (id) => {
-    setTrips((prev) => prev.filter((t) => t.id !== id));
-    showToast('Trip deleted', 'info');
-  };
-
-  const copyTripToAccount = (tripToCopy) => {
-    const clonedTrip = {
-      ...tripToCopy,
-      id: `trip-copy-${Date.now()}`,
-      userId: user.id,
-      name: `${tripToCopy.name} (My Copy)`,
-      status: 'upcoming',
-      author: {
-        name: user.name,
-        photo: user.profilePhoto,
-      },
-      shareToken: `copy-${Date.now()}`,
-    };
-
-    setTrips((prev) => [clonedTrip, ...prev]);
-    setUser((prev) => ({
-      ...prev,
-      stats: {
-        ...prev.stats,
-        totalTrips: (prev.stats?.totalTrips || 0) + 1,
-        upcomingTrips: (prev.stats?.upcomingTrips || 0) + 1,
-      }
-    }));
-
-    // Trigger celebration confetti
-    try {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    } catch {
-      // ignore
+  const createTrip = async (tripData) => {
+    if (!isAuthenticated) {
+      showToast("Please login to create a trip", "error");
+      return null;
     }
 
-    showToast(`✈️ Trip "${tripToCopy.name}" copied to your account!`);
-    return clonedTrip;
+    try {
+      // Use the actual API to create the trip
+      const res = await api.createTrip(tripData);
+      const newTrip = res.data;
+      
+      setTrips((prev) => [newTrip, ...prev]);
+      showToast(`🎉 "${newTrip.name}" created successfully!`);
+      return newTrip;
+    } catch (err) {
+      console.error("Failed to create trip", err);
+      showToast("Failed to create trip", "error");
+      return null;
+    }
   };
 
+  const updateTrip = async (id, updatedFields) => {
+    try {
+      await api.updateTrip(id, updatedFields);
+      setTrips((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, ...updatedFields } : t))
+      );
+      showToast('Trip updated');
+    } catch (err) {
+      console.error("Failed to update trip", err);
+      showToast("Failed to update trip", "error");
+    }
+  };
+
+  const deleteTrip = async (id) => {
+    try {
+      await api.deleteTrip(id);
+      setTrips((prev) => prev.filter((t) => t.id !== id));
+      showToast('Trip deleted', 'info');
+    } catch (err) {
+      console.error("Failed to delete trip", err);
+      showToast("Failed to delete trip", "error");
+    }
+  };
+
+  // For copying, we should probably add an API route, but for now we simulate locally or call createTrip again.
+  const copyTripToAccount = async (tripToCopy) => {
+    if (!isAuthenticated) return null;
+    
+    // In a full implementation, we'd call an API endpoint like /api/trips/:id/copy
+    // For now we'll do a basic createTrip with copied data
+    const cloneData = {
+      name: `${tripToCopy.name} (My Copy)`,
+      startDate: tripToCopy.startDate,
+      endDate: tripToCopy.endDate,
+      totalBudget: tripToCopy.totalBudget,
+      status: 'DRAFT',
+      isPublic: false
+    };
+
+    const newTrip = await createTrip(cloneData);
+    
+    try {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    } catch {
+      // Ignore confetti error
+    } return newTrip;
+  };
+
+  // Mocking stop/activity additions locally for immediate UI response, 
+  // normally these would also be API calls (e.g. POST /api/trips/:id/stops)
   const addStopToTrip = (tripId, city) => {
     setTrips((prev) =>
       prev.map((t) => {
@@ -207,26 +180,16 @@ export function TripProvider({ children }) {
           const stops = t.stops || [];
           const newStop = {
             id: `stop-${Date.now()}`,
-            cityId: city.id || 'c-custom',
+            cityId: city.id,
             cityName: city.name,
-            state: city.state || '',
+            state: city.state,
             country: city.country,
             arrivalDate: t.endDate || new Date().toISOString().slice(0, 10),
             departureDate: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
             sortOrder: stops.length,
-            estCost: 0,
-            activities: (city.activities || []).slice(0, 2).map((a, idx) => ({
-              ...a,
-              id: `ta-${Date.now()}-${idx}`,
-              day: stops.length + 1,
-              dayTitle: `Day ${stops.length + 1}: ${a.name}`,
-              sortOrder: idx
-            }))
+            activities: []
           };
-          return {
-            ...t,
-            stops: [...stops, newStop],
-          };
+          return { ...t, stops: [...stops, newStop] };
         }
         return t;
       })
@@ -238,15 +201,11 @@ export function TripProvider({ children }) {
     setTrips((prev) =>
       prev.map((t) => {
         if (t.id === tripId) {
-          return {
-            ...t,
-            stops: (t.stops || []).filter((s) => s.id !== stopId),
-          };
+          return { ...t, stops: (t.stops || []).filter((s) => s.id !== stopId) };
         }
         return t;
       })
     );
-    showToast('Stop removed', 'info');
   };
 
   const reorderStops = (tripId, fromIndex, toIndex) => {
@@ -256,10 +215,7 @@ export function TripProvider({ children }) {
           const stops = [...(t.stops || [])];
           const [moved] = stops.splice(fromIndex, 1);
           stops.splice(toIndex, 0, moved);
-          return {
-            ...t,
-            stops: stops.map((s, idx) => ({ ...s, sortOrder: idx })),
-          };
+          return { ...t, stops: stops.map((s, idx) => ({ ...s, sortOrder: idx })) };
         }
         return t;
       })
@@ -278,17 +234,11 @@ export function TripProvider({ children }) {
                 name: activityData.name || 'Custom Experience',
                 category: activityData.category || 'Sightseeing',
                 cost: Number(activityData.cost || 0),
-                timeSlot: activityData.timeSlot || '12:00',
-                description: activityData.description || 'Custom activity',
-                imageUrl: activityData.imageUrl || 'https://images.unsplash.com/photo-1603262110263-fb010d6e59d4?auto=format&fit=crop&w=800&q=80',
-                day: activityData.day || 1,
                 dayTitle: activityData.dayTitle || `Day 1: ${activityData.name}`,
                 sortOrder: acts.length,
+                ...activityData
               };
-              return {
-                ...stop,
-                activities: [...acts, newAct],
-              };
+              return { ...stop, activities: [...acts, newAct] };
             }
             return stop;
           });
@@ -306,10 +256,7 @@ export function TripProvider({ children }) {
         if (t.id === tripId) {
           const updatedStops = (t.stops || []).map((stop) => {
             if (stop.id === stopId) {
-              return {
-                ...stop,
-                activities: (stop.activities || []).filter((a) => a.id !== activityId),
-              };
+              return { ...stop, activities: (stop.activities || []).filter((a) => a.id !== activityId) };
             }
             return stop;
           });
@@ -318,7 +265,6 @@ export function TripProvider({ children }) {
         return t;
       })
     );
-    showToast('Activity removed', 'info');
   };
 
   return (
@@ -347,6 +293,7 @@ export function TripProvider({ children }) {
         addActivityToStop,
         removeActivityFromStop,
         calculateTripTotals,
+        loading
       }}
     >
       {children}

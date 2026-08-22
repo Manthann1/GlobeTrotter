@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Compass } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -15,75 +14,100 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setIsLoading(true);
-    
+    setLoading(true);
+
     try {
-      await login(email, password);
-      navigate('/');
+      const result = await login(email, password);
+      if (result.success) {
+        navigate('/'); // Redirect to dashboard
+      } else {
+        setError(result.message || 'Failed to log in');
+      }
     } catch (err) {
-      setError(err.message || 'Failed to login. Please check your credentials.');
+      setError('An unexpected error occurred.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f9fa] p-4 font-['Inter']">
-      <div className="flex flex-col items-center mb-8">
-        <Compass className="w-12 h-12 text-[#00236f] mb-2" />
-        <h1 className="text-3xl font-bold font-['Montserrat'] text-[#00236f]">GlobeTrotter</h1>
-      </div>
-      
-      <div className="w-full max-w-md bg-white rounded-xl shadow-sm border border-[#e1e3e4] p-8">
-        <h2 className="text-2xl font-semibold text-[#191c1d] mb-6 text-center font-['Montserrat']">Welcome Back</h2>
-        
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm mb-4">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-[#444651] mb-1">Email or Username</label>
-            <input
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#f3f4f5] border border-[#c5c5d3] rounded-lg px-4 py-2.5 focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] outline-none text-[#191c1d] placeholder:text-[#757682]"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[#f3f4f5]">
+      {/* Login Card Container */}
+      <main className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden" data-purpose="login-card">
+        <div className="p-8 sm:p-12">
           
-          <div>
-            <label className="block text-sm font-medium text-[#444651] mb-1">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#f3f4f5] border border-[#c5c5d3] rounded-lg px-4 py-2.5 focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] outline-none text-[#191c1d] placeholder:text-[#757682]"
-              placeholder="Enter your password"
-              required
-            />
+          {/* Header Section */}
+          <div className="text-center mb-8">
+            <div className="mx-auto h-24 w-24 rounded-full bg-[#e7e8e9] border-4 border-white shadow-sm flex items-center justify-center mb-4 overflow-hidden" data-purpose="profile-photo-placeholder">
+              <svg className="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold font-['Montserrat'] text-[#191c1d] tracking-tight">Welcome Back</h1>
+            <p className="text-sm text-[#757682] font-['Inter'] mt-2">Please login to your account</p>
           </div>
-          
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-[#00236f] text-white hover:bg-[#1e3a8a] rounded-lg py-3 text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-70 mt-6"
-          >
-            {isLoading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-        
-        <div className="mt-6 text-center text-sm text-[#444651]">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-[#00236f] font-semibold hover:underline">
-            Register here
-          </Link>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-xl text-sm text-center">
+              {error}
+            </div>
+          )}
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-6" data-purpose="login-form">
+            {/* Email Field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-[#191c1d] mb-1 font-['Inter']">Email Address</label>
+              <input 
+                id="email" 
+                name="email" 
+                type="email" 
+                required 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none block w-full px-4 py-3 border border-[#c5c5d3] rounded-xl shadow-sm placeholder-[#757682] focus:outline-none focus:ring-2 focus:ring-[#00236f] focus:border-[#00236f] sm:text-sm font-['Inter'] transition-colors duration-200" 
+                placeholder="Enter your email" 
+              />
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-[#191c1d] mb-1 font-['Inter']">Password</label>
+              <input 
+                id="password" 
+                name="password" 
+                type="password" 
+                required 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="appearance-none block w-full px-4 py-3 border border-[#c5c5d3] rounded-xl shadow-sm placeholder-[#757682] focus:outline-none focus:ring-2 focus:ring-[#00236f] focus:border-[#00236f] sm:text-sm font-['Inter'] transition-colors duration-200" 
+                placeholder="••••••••" 
+              />
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-2">
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-semibold text-white bg-[#00236f] hover:bg-[#1e3a8a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#00236f] transition-colors duration-200"
+              >
+                {loading ? 'Logging in...' : 'Login'}
+              </button>
+            </div>
+          </form>
+
+          {/* Sign up link */}
+          <div className="mt-6 text-center">
+            <p className="text-sm text-[#757682] font-['Inter']">
+              Don't have an account?{' '}
+              <Link to="/register" className="font-medium text-[#00236f] hover:text-[#1e3a8a] transition-colors">
+                Sign up here
+              </Link>
+            </p>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
