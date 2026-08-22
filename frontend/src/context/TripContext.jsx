@@ -5,9 +5,59 @@ import confetti from 'canvas-confetti';
 
 const TripContext = createContext();
 
+/**
+ * Normalizes raw backend trip data (including deep relations) for UI consumers
+ */
+const normalizeTrip = (rawTrip) => {
+  if (!rawTrip) return null;
+
+  const stops = (rawTrip.stops || []).map((stop, stopIdx) => {
+    const activities = (stop.tripActivities || stop.activities || []).map((act, actIdx) => ({
+      id: act.id,
+      activityId: act.activityId,
+      name: act.nameSnapshot || act.name || 'Experience',
+      category: act.categorySnapshot || act.category || 'Sightseeing',
+      cost: Number(act.costSnapshot ?? act.cost ?? 0),
+      timeSlot: act.timeSlot || '10:00',
+      scheduledDate: act.scheduledDate || null,
+      day: act.day || (actIdx + 1),
+      dayTitle: act.dayTitle || `Day ${actIdx + 1}: ${act.nameSnapshot || act.name || 'Experience'}`,
+      description: act.notes || act.description || act.activity?.description || `${act.categorySnapshot || act.category || 'Sightseeing'} experience`,
+      imageUrl: act.activity?.imageUrl || act.imageUrl || null,
+      sortOrder: act.sortOrder ?? actIdx,
+    }));
+
+    return {
+      ...stop,
+      cityName: stop.city?.name || stop.cityName || (stop.city ? `${stop.city.name}` : 'Destination'),
+      state: stop.city?.state || stop.state || null,
+      country: stop.city?.country || stop.country || 'India',
+      arrivalDate: stop.arrivalDate
+        ? (typeof stop.arrivalDate === 'string' ? stop.arrivalDate.slice(0, 10) : new Date(stop.arrivalDate).toISOString().slice(0, 10))
+        : '',
+      departureDate: stop.departureDate
+        ? (typeof stop.departureDate === 'string' ? stop.departureDate.slice(0, 10) : new Date(stop.departureDate).toISOString().slice(0, 10))
+        : '',
+      sortOrder: stop.sortOrder ?? stopIdx,
+      activities,
+    };
+  });
+
+  return {
+    ...rawTrip,
+    startDate: rawTrip.startDate
+      ? (typeof rawTrip.startDate === 'string' ? rawTrip.startDate.slice(0, 10) : new Date(rawTrip.startDate).toISOString().slice(0, 10))
+      : '',
+    endDate: rawTrip.endDate
+      ? (typeof rawTrip.endDate === 'string' ? rawTrip.endDate.slice(0, 10) : new Date(rawTrip.endDate).toISOString().slice(0, 10))
+      : '',
+    stops,
+  };
+};
+
 export function TripProvider({ children }) {
   const { user, isAuthenticated } = useAuth();
-  
+
   const [trips, setTrips] = useState([]);
   const [cities, setCities] = useState([]);
   const [currency, setCurrency] = useState(() => localStorage.getItem('globetrotter_currency') || 'INR');
@@ -21,15 +71,34 @@ export function TripProvider({ children }) {
       setLoading(true);
       try {
         const citiesData = await api.getCities();
-        setCities(citiesData.data || []);
-        
+        setCities(citiesData.data || citiesData || []);
+
         if (isAuthenticated) {
           const tripsData = await api.getTrips();
-          setTrips(tripsData.data || []);
+          const rawTrips = tripsData.data?.trips || tripsData.data || tripsData || [];
+          const incoming = Array.isArray(rawTrips) ? rawTrips.map(normalizeTrip) : [];
+          setTrips((prev) =>
+            incoming.map((inTrip) => {
+              const existing = prev.find((p) => p.id === inTrip.id);
+              if (existing && existing.stops?.length > 0 && (!inTrip.stops || inTrip.stops.length === 0)) {
+                return { ...inTrip, stops: existing.stops };
+              }
+              return inTrip;
+            })
+          );
         } else {
-          // If not authenticated, we could just clear trips or load public ones
-          const publicTrips = await api.getTrips(); // Our backend might return public trips if no token
-          setTrips(publicTrips.data || []);
+          const publicTrips = await api.getTrips();
+          const rawTrips = publicTrips.data?.trips || publicTrips.data || publicTrips || [];
+          const incoming = Array.isArray(rawTrips) ? rawTrips.map(normalizeTrip) : [];
+          setTrips((prev) =>
+            incoming.map((inTrip) => {
+              const existing = prev.find((p) => p.id === inTrip.id);
+              if (existing && existing.stops?.length > 0 && (!inTrip.stops || inTrip.stops.length === 0)) {
+                return { ...inTrip, stops: existing.stops };
+              }
+              return inTrip;
+            })
+          );
         }
       } catch (err) {
         console.error("Failed to load initial data:", err);
@@ -98,6 +167,43 @@ export function TripProvider({ children }) {
     return { totalSpent: total, breakdown };
   };
 
+  /**
+   * Deep fetch trip details with all stops, cities, and activities from database
+   */
+  const fetchTripDetails = async (tripId) => {
+    try {
+      let res;
+      try {
+        res = await api.getTripById(tripId);
+      } catch (err) {
+        // Fallback for public shared trip links / share tokens without JWT
+        res = await api.getTripByShareToken(tripId);
+      }
+
+      const tripData = res.data?.trip || res.data || res;
+      if (tripData) {
+        const normalized = normalizeTrip(tripData);
+        setTrips((prev) => {
+          const exists = prev.some(
+            (t) => t.id === normalized.id || (normalized.shareToken && t.shareToken === normalized.shareToken)
+          );
+          if (exists) {
+            return prev.map((t) =>
+              t.id === normalized.id || (normalized.shareToken && t.shareToken === normalized.shareToken)
+                ? normalized
+                : t
+            );
+          }
+          return [normalized, ...prev];
+        });
+        return normalized;
+      }
+    } catch (err) {
+      console.error(`Failed to fetch details for trip ${tripId}:`, err);
+    }
+    return null;
+  };
+
   const getTrip = (id) => {
     return trips.find((t) => t.id === id || t.shareToken === id) || null;
   };
@@ -109,10 +215,10 @@ export function TripProvider({ children }) {
     }
 
     try {
-      // Use the actual API to create the trip
       const res = await api.createTrip(tripData);
-      const newTrip = res.data;
-      
+      const rawTrip = res.data?.trip || res.data || res;
+      const newTrip = normalizeTrip(rawTrip);
+
       setTrips((prev) => [newTrip, ...prev]);
       showToast(`🎉 "${newTrip.name}" created successfully!`);
       return newTrip;
@@ -125,9 +231,10 @@ export function TripProvider({ children }) {
 
   const updateTrip = async (id, updatedFields) => {
     try {
-      await api.updateTrip(id, updatedFields);
+      const res = await api.updateTrip(id, updatedFields);
+      const rawTrip = res.data?.trip || res.data || updatedFields;
       setTrips((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, ...updatedFields } : t))
+        prev.map((t) => (t.id === id ? { ...t, ...normalizeTrip(rawTrip) } : t))
       );
       showToast('Trip updated');
     } catch (err) {
@@ -147,65 +254,103 @@ export function TripProvider({ children }) {
     }
   };
 
-  // For copying, we should probably add an API route, but for now we simulate locally or call createTrip again.
   const copyTripToAccount = async (tripToCopy) => {
     if (!isAuthenticated) return null;
-    
-    // In a full implementation, we'd call an API endpoint like /api/trips/:id/copy
-    // For now we'll do a basic createTrip with copied data
+
     const cloneData = {
       name: `${tripToCopy.name} (My Copy)`,
       startDate: tripToCopy.startDate,
       endDate: tripToCopy.endDate,
       totalBudget: tripToCopy.totalBudget,
       status: 'DRAFT',
-      isPublic: false
+      isPublic: false,
     };
 
     const newTrip = await createTrip(cloneData);
-    
+
     try {
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     } catch {
       // Ignore confetti error
-    } return newTrip;
+    }
+    return newTrip;
   };
 
-  // Mocking stop/activity additions locally for immediate UI response, 
-  // normally these would also be API calls (e.g. POST /api/trips/:id/stops)
-  const addStopToTrip = (tripId, city) => {
-    setTrips((prev) =>
-      prev.map((t) => {
-        if (t.id === tripId) {
-          const stops = t.stops || [];
-          const newStop = {
-            id: `stop-${Date.now()}`,
-            cityId: city.id,
-            cityName: city.name,
-            state: city.state,
-            country: city.country,
-            arrivalDate: t.endDate || new Date().toISOString().slice(0, 10),
-            departureDate: new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
-            sortOrder: stops.length,
-            activities: []
-          };
-          return { ...t, stops: [...stops, newStop] };
-        }
-        return t;
-      })
-    );
-    showToast(`📍 Added ${city.name} to itinerary`);
+  /**
+   * Persist a Stop to backend database via POST /api/trips/:tripId/stops
+   */
+  const addStopToTrip = async (tripId, city) => {
+    try {
+      const targetTrip = trips.find((t) => t.id === tripId);
+      const stopsCount = targetTrip?.stops?.length || 0;
+      const arrivalDate = city.arrivalDate || targetTrip?.endDate || new Date().toISOString().slice(0, 10);
+      const departureDate = city.departureDate || new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+
+      const stopPayload = {
+        cityId: city.id,
+        arrivalDate,
+        departureDate,
+        sortOrder: stopsCount,
+        notes: city.notes || null,
+      };
+
+      const res = await api.addStop(tripId, stopPayload);
+      const rawStop = res.data?.stop || res.stop || res;
+
+      const normalizedStop = {
+        ...rawStop,
+        cityId: city.id,
+        cityName: rawStop.city?.name || city.name,
+        state: rawStop.city?.state || city.state || null,
+        country: rawStop.city?.country || city.country || 'India',
+        arrivalDate: rawStop.arrivalDate
+          ? (typeof rawStop.arrivalDate === 'string' ? rawStop.arrivalDate.slice(0, 10) : new Date(rawStop.arrivalDate).toISOString().slice(0, 10))
+          : arrivalDate,
+        departureDate: rawStop.departureDate
+          ? (typeof rawStop.departureDate === 'string' ? rawStop.departureDate.slice(0, 10) : new Date(rawStop.departureDate).toISOString().slice(0, 10))
+          : departureDate,
+        sortOrder: rawStop.sortOrder ?? stopsCount,
+        activities: rawStop.tripActivities || rawStop.activities || [],
+      };
+
+      setTrips((prev) =>
+        prev.map((t) => {
+          if (t.id === tripId) {
+            const currentStops = t.stops || [];
+            return { ...t, stops: [...currentStops, normalizedStop] };
+          }
+          return t;
+        })
+      );
+
+      showToast(`📍 Added ${city.name || normalizedStop.cityName} to itinerary`);
+      return normalizedStop;
+    } catch (err) {
+      console.error("Failed to add stop to trip:", err);
+      showToast("Failed to add stop to itinerary", "error");
+      return null;
+    }
   };
 
-  const removeStopFromTrip = (tripId, stopId) => {
-    setTrips((prev) =>
-      prev.map((t) => {
-        if (t.id === tripId) {
-          return { ...t, stops: (t.stops || []).filter((s) => s.id !== stopId) };
-        }
-        return t;
-      })
-    );
+  /**
+   * Delete a Stop from backend database via DELETE /api/stops/:stopId
+   */
+  const removeStopFromTrip = async (tripId, stopId) => {
+    try {
+      await api.deleteStop(stopId);
+      setTrips((prev) =>
+        prev.map((t) => {
+          if (t.id === tripId) {
+            return { ...t, stops: (t.stops || []).filter((s) => s.id !== stopId) };
+          }
+          return t;
+        })
+      );
+      showToast('Stop removed from itinerary', 'info');
+    } catch (err) {
+      console.error("Failed to delete stop:", err);
+      showToast("Failed to remove stop", "error");
+    }
   };
 
   const reorderStops = (tripId, fromIndex, toIndex) => {
@@ -222,49 +367,95 @@ export function TripProvider({ children }) {
     );
   };
 
-  const addActivityToStop = (tripId, stopId, activityData) => {
-    setTrips((prev) =>
-      prev.map((t) => {
-        if (t.id === tripId) {
-          const updatedStops = (t.stops || []).map((stop) => {
-            if (stop.id === stopId) {
-              const acts = stop.activities || [];
-              const newAct = {
-                id: `act-${Date.now()}`,
-                name: activityData.name || 'Custom Experience',
-                category: activityData.category || 'Sightseeing',
-                cost: Number(activityData.cost || 0),
-                dayTitle: activityData.dayTitle || `Day 1: ${activityData.name}`,
-                sortOrder: acts.length,
-                ...activityData
-              };
-              return { ...stop, activities: [...acts, newAct] };
-            }
-            return stop;
-          });
-          return { ...t, stops: updatedStops };
-        }
-        return t;
-      })
-    );
-    showToast(`✨ Added "${activityData.name}"`);
+  /**
+   * Persist a TripActivity to backend database via POST /api/stops/:stopId/activities
+   */
+  const addActivityToStop = async (tripId, stopId, activityData) => {
+    try {
+      const targetTrip = trips.find((t) => t.id === tripId);
+      const targetStop = targetTrip?.stops?.find((s) => s.id === stopId);
+      const actsCount = targetStop?.activities?.length || 0;
+
+      const payload = {
+        activityId: activityData.activityId || null,
+        name: activityData.name || activityData.nameSnapshot || 'Experience',
+        category: activityData.category || activityData.categorySnapshot || 'Sightseeing',
+        cost: Number(activityData.cost ?? activityData.costSnapshot ?? 0),
+        timeSlot: activityData.timeSlot || '10:00',
+        scheduledDate: activityData.scheduledDate || null,
+        sortOrder: activityData.sortOrder ?? actsCount,
+        notes: activityData.notes || activityData.description || null,
+      };
+
+      const res = await api.addTripActivity(stopId, payload);
+      const rawAct = res.data?.tripActivity || res.tripActivity || res;
+
+      const normalizedAct = {
+        ...rawAct,
+        id: rawAct.id,
+        activityId: rawAct.activityId,
+        name: rawAct.nameSnapshot || rawAct.name || activityData.name,
+        category: rawAct.categorySnapshot || rawAct.category || activityData.category,
+        cost: Number(rawAct.costSnapshot ?? rawAct.cost ?? activityData.cost ?? 0),
+        timeSlot: rawAct.timeSlot || activityData.timeSlot || '10:00',
+        scheduledDate: rawAct.scheduledDate || activityData.scheduledDate || null,
+        day: activityData.day || (actsCount + 1),
+        dayTitle: activityData.dayTitle || `Day ${activityData.day || actsCount + 1}: ${rawAct.nameSnapshot || rawAct.name || activityData.name}`,
+        description: rawAct.notes || activityData.description || `${rawAct.categorySnapshot || activityData.category || 'Sightseeing'} experience`,
+        imageUrl: rawAct.activity?.imageUrl || activityData.imageUrl || null,
+        sortOrder: rawAct.sortOrder ?? actsCount,
+      };
+
+      setTrips((prev) =>
+        prev.map((t) => {
+          if (t.id === tripId) {
+            const updatedStops = (t.stops || []).map((stop) => {
+              if (stop.id === stopId) {
+                const currentActs = stop.activities || [];
+                return { ...stop, activities: [...currentActs, normalizedAct] };
+              }
+              return stop;
+            });
+            return { ...t, stops: updatedStops };
+          }
+          return t;
+        })
+      );
+
+      showToast(`✨ Added "${normalizedAct.name}"`);
+      return normalizedAct;
+    } catch (err) {
+      console.error("Failed to add activity to stop:", err);
+      showToast("Failed to add experience", "error");
+      return null;
+    }
   };
 
-  const removeActivityFromStop = (tripId, stopId, activityId) => {
-    setTrips((prev) =>
-      prev.map((t) => {
-        if (t.id === tripId) {
-          const updatedStops = (t.stops || []).map((stop) => {
-            if (stop.id === stopId) {
-              return { ...stop, activities: (stop.activities || []).filter((a) => a.id !== activityId) };
-            }
-            return stop;
-          });
-          return { ...t, stops: updatedStops };
-        }
-        return t;
-      })
-    );
+  /**
+   * Delete a TripActivity from backend database via DELETE /api/trip-activities/:activityId
+   */
+  const removeActivityFromStop = async (tripId, stopId, activityId) => {
+    try {
+      await api.deleteTripActivity(activityId);
+      setTrips((prev) =>
+        prev.map((t) => {
+          if (t.id === tripId) {
+            const updatedStops = (t.stops || []).map((stop) => {
+              if (stop.id === stopId) {
+                return { ...stop, activities: (stop.activities || []).filter((a) => a.id !== activityId) };
+              }
+              return stop;
+            });
+            return { ...t, stops: updatedStops };
+          }
+          return t;
+        })
+      );
+      showToast('Activity removed', 'info');
+    } catch (err) {
+      console.error("Failed to delete trip activity:", err);
+      showToast("Failed to remove experience", "error");
+    }
   };
 
   return (
@@ -283,6 +474,7 @@ export function TripProvider({ children }) {
         showToast,
         removeToast,
         getTrip,
+        fetchTripDetails,
         createTrip,
         updateTrip,
         deleteTrip,
@@ -293,7 +485,7 @@ export function TripProvider({ children }) {
         addActivityToStop,
         removeActivityFromStop,
         calculateTripTotals,
-        loading
+        loading,
       }}
     >
       {children}

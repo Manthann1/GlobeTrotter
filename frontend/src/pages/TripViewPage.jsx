@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTrip } from '../context/TripContext';
 import { CATEGORY_COLORS } from '../data/mockData';
@@ -22,16 +22,33 @@ import {
 
 export default function TripViewPage() {
   const { tripId } = useParams();
-  const { getTrip, copyTripToAccount, calculateTripTotals, formatPrice, showToast } = useTrip();
+  const { getTrip, fetchTripDetails, copyTripToAccount, calculateTripTotals, formatPrice, showToast, loading } = useTrip();
   const navigate = useNavigate();
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [mapActive, setMapActive] = useState(false);
+  const [fetching, setFetching] = useState(false);
 
-  // Retrieve trip or fallback to featured Rajasthan trip
-  const trip = getTrip(tripId) || getTrip('trip-royal-rajasthan');
+  // Retrieve trip
+  const trip = getTrip(tripId);
+
+  useEffect(() => {
+    if (tripId && (!trip || !trip.stops || trip.stops.length === 0)) {
+      setFetching(true);
+      fetchTripDetails(tripId).finally(() => setFetching(false));
+    }
+  }, [tripId]);
 
   if (!trip) {
+    if (loading || fetching) {
+      return (
+        <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-10 h-10 border-4 border-[#00236f] border-t-transparent rounded-full animate-spin mb-4"></div>
+          <p className="text-sm font-semibold font-['Inter'] text-[#444651]">Loading journey details...</p>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
         <h2 className="text-2xl font-bold font-['Montserrat'] text-[#00236f] mb-2">Trip Not Found</h2>
@@ -45,6 +62,7 @@ export default function TripViewPage() {
       </div>
     );
   }
+
 
   const { totalSpent, breakdown } = calculateTripTotals(trip);
   const totalBudget = trip.budget?.totalBudget || 85000;
