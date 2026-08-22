@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import prisma from '../db.js';
+import { getUserById } from '../services/auth.service.js';
 import { errorResponse } from '../utils/apiResponse.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'globetrotter_super_secure_jwt_secret_dev_key_2026';
@@ -37,27 +37,8 @@ export const authenticateToken = async (req, res, next) => {
       });
     }
 
-    const userId = decoded.userId || decoded.id;
-    if (!userId) {
-      return errorResponse(res, {
-        statusCode: 403,
-        message: 'Invalid token payload.',
-      });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      return errorResponse(res, {
-        statusCode: 404,
-        message: 'User not found.',
-      });
-    }
-
-    const { passwordHash, ...sanitizedUser } = user;
-    req.user = sanitizedUser;
+    const user = await getUserById(decoded.userId);
+    req.user = user;
     next();
   } catch (error) {
     next(error);
