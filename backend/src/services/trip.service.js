@@ -70,16 +70,16 @@ export const getPublicTrips = async () => {
   return trips;
 };
 
-/**
- * Get a single trip by ID for a user (including stops & budget)
- */
 export const getTripById = async (userId, tripId) => {
   const trip = await prisma.trip.findFirst({
     where: {
-      id: tripId,
-      userId,
+      OR: [
+        { id: tripId },
+        { shareToken: tripId }
+      ]
     },
     include: {
+      user: { select: { id: true, name: true, profilePhoto: true } },
       stops: {
         orderBy: { sortOrder: 'asc' },
         include: {

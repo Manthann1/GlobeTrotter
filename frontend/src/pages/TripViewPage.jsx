@@ -22,14 +22,44 @@ import {
 
 export default function TripViewPage() {
   const { tripId } = useParams();
-  const { getTrip, copyTripToAccount, calculateTripTotals, formatPrice, showToast } = useTrip();
+  const { getTrip, copyTripToAccount, calculateTripTotals, formatPrice, showToast, normalizeTrip } = useTrip();
   const navigate = useNavigate();
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [mapActive, setMapActive] = useState(false);
+  const [fetchedTrip, setFetchedTrip] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Retrieve trip or fallback to featured Rajasthan trip
-  const trip = getTrip(tripId) || getTrip('trip-royal-rajasthan');
+  // Retrieve local trip or fetch directly from backend API
+  const localTrip = getTrip(tripId);
+
+  useEffect(() => {
+    if (!localTrip && tripId) {
+      setIsLoading(true);
+      api.getTripById(tripId)
+        .then((res) => {
+          if (res) {
+            setFetchedTrip(normalizeTrip(res));
+          }
+        })
+        .catch(() => {
+          api.getTripByShareToken(tripId)
+            .then((res) => res && setFetchedTrip(normalizeTrip(res)))
+            .catch(console.error);
+        })
+        .finally(() => setIsLoading(false));
+    }
+  }, [tripId, localTrip]);
+
+  const trip = localTrip || fetchedTrip || getTrip('trip-royal-rajasthan');
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-6 text-center font-['Inter'] text-[#00236f] font-bold">
+        Loading itinerary details...
+      </div>
+    );
+  }
 
   if (!trip) {
     return (

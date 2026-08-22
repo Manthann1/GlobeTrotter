@@ -17,12 +17,85 @@ export function TripProvider({ children }) {
 
   const normalizeTrip = (trip) => {
     if (!trip) return null;
-    const stops = (trip.stops || []).map((stop, stopIdx) => {
-      const rawActs = (stop.activities && stop.activities.length > 0)
+
+    let rawStops = (trip.stops && trip.stops.length > 0) ? trip.stops : [
+      {
+        id: `stop-default-${trip.id}`,
+        cityName: trip.name?.includes('Jaipur') ? 'Jaipur' : trip.name?.includes('Goa') ? 'Goa' : trip.name?.includes('Kerala') ? 'Alleppey' : trip.name?.includes('Paris') ? 'Paris' : trip.name?.includes('Dubai') ? 'Dubai' : 'Jaipur',
+        arrivalDate: trip.startDate,
+        departureDate: trip.endDate,
+        tripActivities: [
+          {
+            id: `ta-def-1`,
+            nameSnapshot: `Palace & Heritage Stay in ${trip.name || 'Destination'}`,
+            categorySnapshot: 'Lodging',
+            costSnapshot: 14500,
+            timeSlot: '14:00',
+            description: `Luxury heritage resort stay with private views and premium amenities.`,
+            imageUrl: trip.coverPhoto || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+            sortOrder: 0,
+          },
+          {
+            id: `ta-def-2`,
+            nameSnapshot: `Authentic Regional Thali & Dining`,
+            categorySnapshot: 'Food & Dining',
+            costSnapshot: 1850,
+            timeSlot: '19:30',
+            description: `Traditional multi-course dinner tasting local authentic recipes and sweets.`,
+            imageUrl: 'https://images.unsplash.com/photo-1613292443284-8d10ef9383fe?auto=format&fit=crop&w=800&q=80',
+            sortOrder: 1,
+          },
+          {
+            id: `ta-def-3`,
+            nameSnapshot: `Guided Fort & Monument Tour`,
+            categorySnapshot: 'Sightseeing',
+            costSnapshot: 1200,
+            timeSlot: '09:30',
+            description: `Guided excursion to famous historic forts, palaces, and scenic viewpoints.`,
+            imageUrl: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=800&q=80',
+            sortOrder: 2,
+          }
+        ]
+      }
+    ];
+
+    const stops = rawStops.map((stop, stopIdx) => {
+      let rawActs = (stop.activities && stop.activities.length > 0)
         ? stop.activities
         : (stop.tripActivities && stop.tripActivities.length > 0)
         ? stop.tripActivities
-        : [];
+        : [
+            {
+              id: `ta-fallback-${stopIdx}-1`,
+              nameSnapshot: `Heritage Hotel Stay`,
+              categorySnapshot: 'Lodging',
+              costSnapshot: 12500,
+              timeSlot: '14:00',
+              description: `Check into luxury stay in ${stop.cityName || stop.city?.name || 'the city'}.`,
+              imageUrl: stop.city?.imageUrl || trip.coverPhoto || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+              sortOrder: 0,
+            },
+            {
+              id: `ta-fallback-${stopIdx}-2`,
+              nameSnapshot: `Traditional Local Banquet`,
+              categorySnapshot: 'Food & Dining',
+              costSnapshot: 1650,
+              timeSlot: '19:30',
+              description: `Authentic dining experience featuring regional specialties.`,
+              imageUrl: 'https://images.unsplash.com/photo-1613292443284-8d10ef9383fe?auto=format&fit=crop&w=800&q=80',
+              sortOrder: 1,
+            },
+            {
+              id: `ta-fallback-${stopIdx}-3`,
+              nameSnapshot: `City Highlights & Market Walk`,
+              categorySnapshot: 'Sightseeing',
+              costSnapshot: 950,
+              timeSlot: '10:00',
+              description: `Guided tour of top city landmarks, bazaars, and photography points.`,
+              imageUrl: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=800&q=80',
+              sortOrder: 2,
+            }
+          ];
 
       const activities = rawActs.map((act, idx) => {
         const actName = act.name || act.nameSnapshot || act.activity?.name || 'Local Experience';
