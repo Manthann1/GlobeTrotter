@@ -107,3 +107,45 @@ export const deleteTrip = async (userId, tripId) => {
 
   return { id: tripId };
 };
+
+/**
+ * Get a public trip by its shareToken
+ */
+export const getTripByShareToken = async (shareToken) => {
+  const trip = await prisma.trip.findFirst({
+    where: {
+      shareToken,
+      isPublic: true,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          profilePhoto: true,
+        },
+      },
+      stops: {
+        orderBy: { sortOrder: 'asc' },
+        include: {
+          city: true,
+          tripActivities: {
+            orderBy: { sortOrder: 'asc' },
+            include: {
+              activity: true,
+            },
+          },
+        },
+      },
+      budget: true,
+    },
+  });
+
+  if (!trip) {
+    const error = new Error('Public trip not found or link has expired');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return trip;
+};
