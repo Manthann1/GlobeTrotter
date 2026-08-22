@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTrip } from '../../context/TripContext';
-import { X, Copy, Check, Share2, Globe, Mail, MessageCircle } from 'lucide-react';
+import { X, Copy, Check, Share2, Globe, Mail, MessageCircle, FileText, Download } from 'lucide-react';
 
 export default function ShareModal({ isOpen, onClose, trip }) {
   const { showToast } = useTrip();
@@ -109,6 +109,28 @@ export default function ShareModal({ isOpen, onClose, trip }) {
                 <span>WhatsApp</span>
               </a>
             </div>
+          </div>
+
+          {/* Export PDF Option */}
+          <div className="p-4 bg-[#00236f]/5 border border-[#00236f]/20 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-[#00236f] text-white flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold font-['Montserrat'] text-[#00236f]">Export PDF Document</h4>
+                <p className="text-[11px] text-[#444651]">Save full itinerary timeline & budget as PDF</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                onClose();
+                setTimeout(() => window.print(), 300);
+              }}
+              className="px-3 py-2 bg-[#00236f] hover:bg-[#1e3a8a] text-white rounded-lg text-xs font-bold font-['Inter'] uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm shrink-0"
+            >
+              <Download className="w-3.5 h-3.5" /> Save PDF
+            </button>
           </div>
 
           {/* Info note */}

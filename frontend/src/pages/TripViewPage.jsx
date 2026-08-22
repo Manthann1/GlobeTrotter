@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTrip } from '../context/TripContext';
 import { CATEGORY_COLORS } from '../data/mockData';
 import ShareModal from '../components/modals/ShareModal';
+import { api } from '../services/api';
 import {
   Share2,
   Link as LinkIcon,
@@ -13,11 +14,15 @@ import {
   DollarSign,
   ArrowLeft,
   Edit,
+  Edit3,
   PieChart,
   Map as MapIcon,
   User,
   Sparkles,
   IndianRupee,
+  Download,
+  FileText,
+  Printer,
 } from 'lucide-react';
 
 export default function TripViewPage() {
@@ -165,7 +170,7 @@ export default function TripViewPage() {
   return (
     <div className="bg-[#f8f9fa] text-[#191c1d] font-['Inter'] antialiased min-h-screen pb-24">
       {/* Top Bar for View Mode */}
-      <div className="max-w-[1280px] mx-auto px-4 md:px-10 pt-4 flex justify-between items-center">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-10 pt-4 flex justify-between items-center no-print">
         <Link
           to="/"
           className="inline-flex items-center gap-2 text-xs font-bold font-['Inter'] text-[#00236f] uppercase tracking-wider hover:underline"
@@ -217,18 +222,25 @@ export default function TripViewPage() {
           </div>
 
         {/* Floating Share Actions on Hero (Top Right) */}
-        <div className="absolute top-6 right-6 flex gap-2">
+        <div className="absolute top-6 right-6 flex gap-2 no-print">
+          <button
+            onClick={() => window.print()}
+            title="Download / Export as PDF"
+            className="h-10 px-4 bg-[#00236f] hover:bg-[#1e3a8a] text-white backdrop-blur-md rounded-full flex items-center gap-1.5 text-xs font-bold font-['Inter'] uppercase tracking-wider transition-all shadow-md cursor-pointer"
+          >
+            <Download className="w-4 h-4" /> Export PDF
+          </button>
           <button
             onClick={handleCopyLink}
             title="Copy Public Link"
-            className="w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all shadow-md"
+            className="w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all shadow-md cursor-pointer"
           >
             <LinkIcon className="w-4 h-4" />
           </button>
           <button
             onClick={() => setShareModalOpen(true)}
             title="Share Itinerary"
-            className="w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all shadow-md"
+            className="w-10 h-10 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all shadow-md cursor-pointer"
           >
             <Share2 className="w-4 h-4" />
           </button>
@@ -401,13 +413,21 @@ export default function TripViewPage() {
                   {formatPrice(totalSpent)}
                 </span>
               </div>
+
+              {/* PDF Download Button in Sidebar */}
+              <button
+                onClick={() => window.print()}
+                className="w-full mt-4 py-3 bg-[#00236f] hover:bg-[#1e3a8a] text-white rounded-xl text-xs font-bold font-['Inter'] uppercase tracking-wider flex items-center justify-center gap-2 transition-all shadow-md no-print cursor-pointer"
+              >
+                <FileText className="w-4 h-4" /> Download PDF Itinerary
+              </button>
             </div>
           </div>
 
           {/* Map Route Widget */}
           <div
             onClick={() => setMapActive(!mapActive)}
-            className="bg-white border border-[#c5c5d3] rounded-2xl h-64 shadow-sm overflow-hidden relative group cursor-pointer"
+            className="bg-white border border-[#c5c5d3] rounded-2xl h-64 shadow-sm overflow-hidden relative group cursor-pointer no-print"
           >
             <img
               src="https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80"
@@ -430,10 +450,10 @@ export default function TripViewPage() {
       </main>
 
       {/* Sticky Floating Action Button (CTA) in Bottom Right */}
-      <div className="fixed bottom-6 right-6 z-40">
+      <div className="fixed bottom-6 right-6 z-40 no-print">
         <button
           onClick={handleCopyTrip}
-          className="bg-[#FF5722] hover:bg-[#E64A19] text-white px-6 py-4 rounded-full shadow-2xl hover:shadow-orange-500/30 hover:-translate-y-1 active:translate-y-0 transition-all flex items-center gap-2.5 font-['Montserrat'] text-sm font-bold tracking-tight"
+          className="bg-[#FF5722] hover:bg-[#E64A19] text-white px-6 py-4 rounded-full shadow-2xl hover:shadow-orange-500/30 hover:-translate-y-1 active:translate-y-0 transition-all flex items-center gap-2.5 font-['Montserrat'] text-sm font-bold tracking-tight cursor-pointer"
         >
           <Copy className="w-5 h-5" />
           Copy Trip to My Account
