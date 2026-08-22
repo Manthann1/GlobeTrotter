@@ -2,11 +2,11 @@
   "name": "globetrotter-backend",
   "version": "1.0.0",
   "description": "GlobeTrotter Backend API & Database Service",
-  "main": "src/index.js",
+  "main": "src/server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js",
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
@@ -23,7 +23,9 @@
     "travel-planner",
     "pern",
     "postgresql",
-    "prisma"
+    "prisma",
+    "express",
+    "nodejs"
   ],
   "author": "",
   "license": "ISC",
