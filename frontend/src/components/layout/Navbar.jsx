@@ -92,7 +92,7 @@ export default function Navbar({ onOpenNewTrip }) {
           >
             Community
           </Link>
-          {user?.role === 'ADMIN' && (
+          {(user?.isAdmin || user?.role === 'ADMIN') && (
             <Link
               to="/admin"
               className={`h-full flex items-center px-1 font-['Inter'] text-xs font-bold uppercase tracking-wider transition-colors ${
@@ -107,13 +107,6 @@ export default function Navbar({ onOpenNewTrip }) {
         </nav>
 
         <div className="flex items-center gap-2.5">
-          <button
-            onClick={toggleCurrency}
-            title="Currency: Rs. (Rupees)"
-            className="flex items-center gap-1 px-2.5 py-1 bg-[#f3f4f5] border border-[#c5c5d3] rounded-full text-xs font-bold font-['JetBrains Mono'] text-[#00236f]"
-          >
-            Rs.
-          </button>
           {user ? (
             <>
               <button
@@ -136,12 +129,12 @@ export default function Navbar({ onOpenNewTrip }) {
                 <div className="relative ml-1">
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="flex items-center rounded-full ring-2 ring-transparent hover:ring-[#00236f] transition-all"
+                    className="w-9 h-9 rounded-full overflow-hidden shrink-0 border-2 border-[#00236f]/30 hover:border-[#00236f] transition-all shadow-2xs focus:outline-none"
                   >
                     <img
                       src={user.profilePhoto || "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80"}
                       alt={user.name}
-                      className="w-8 h-8 rounded-full border border-[#c5c5d3] object-cover"
+                      className="w-full h-full object-cover rounded-full"
                     />
                   </button>
 
@@ -225,12 +218,6 @@ export default function Navbar({ onOpenNewTrip }) {
               className="w-full pl-9 pr-4 py-2 bg-[#f3f4f5] border border-[#c5c5d3] rounded-lg text-sm"
             />
           </form>
-          <div className="flex justify-between items-center px-2 py-1">
-            <span className="text-xs font-bold text-[#444651]">Currency</span>
-            <span className="px-3 py-1 bg-[#f3f4f5] border border-[#c5c5d3] rounded-full text-xs font-bold text-[#00236f]">
-              Rs.
-            </span>
-          </div>
           {user ? (
             <>
               <Link

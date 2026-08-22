@@ -451,8 +451,8 @@ async function main() {
     data: {
       userId: demoUser.id,
       name: 'Royal Rajasthan Heritage Tour',
-      startDate: new Date('2026-10-15'),
-      endDate: new Date('2026-10-25'),
+      startDate: new Date('2026-08-15'),
+      endDate: new Date('2026-08-25'),
       description: 'A 10-day luxury journey through the Pink City of Jaipur and the Lake City of Udaipur — exploring grand forts, ornate havelis, sunset boat cruises, and royal Rajasthani thali feasts.',
       coverPhoto: 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=1200&q=80',
       totalBudget: 85000,
@@ -482,8 +482,8 @@ async function main() {
     data: {
       tripId: rajasthanTrip.id,
       cityId: cityMap['Jaipur'].id,
-      arrivalDate: new Date('2026-10-15'),
-      departureDate: new Date('2026-10-20'),
+      arrivalDate: new Date('2026-08-15'),
+      departureDate: new Date('2026-08-20'),
       sortOrder: 0,
       notes: 'Main base: Samode Haveli. Book Amber Fort VIP tour in advance.',
     },
@@ -493,8 +493,8 @@ async function main() {
     data: {
       tripId: rajasthanTrip.id,
       cityId: cityMap['Udaipur'].id,
-      arrivalDate: new Date('2026-10-20'),
-      departureDate: new Date('2026-10-25'),
+      arrivalDate: new Date('2026-08-20'),
+      departureDate: new Date('2026-08-25'),
       sortOrder: 1,
       notes: 'Taj Fateh Prakash Palace booked. Lake Pichola boat pre-booked for Oct 21 sunset.',
     },
@@ -780,6 +780,38 @@ async function main() {
   console.log(`   ✅ Trip 6: "${euroTrip.name}" (completed) — 2 stops`);
 
   // ────────────────────────────────
+  
+  const user3 = await prisma.user.create({
+    data: { name: 'Priya Patel', email: 'priya@globetrotter.in', passwordHash: 'hashed_password' }
+  });
+  const user4 = await prisma.user.create({
+    data: { name: 'Rohan Gupta', email: 'rohan@globetrotter.in', passwordHash: 'hashed_password' }
+  });
+  
+  await prisma.trip.create({
+    data: {
+      userId: user3.id,
+      name: 'Spiritual Retreat in Varanasi',
+      startDate: new Date('2026-09-01'),
+      endDate: new Date('2026-09-05'),
+      description: 'A 5-day journey through the ancient ghats.',
+      coverPhoto: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Varanasi%2C_India%2C_Ghats%2C_Cremation_ceremony_in_progress.jpg/960px-Varanasi%2C_India%2C_Ghats%2C_Cremation_ceremony_in_progress.jpg',
+      isPublic: true
+    }
+  });
+  
+  await prisma.trip.create({
+    data: {
+      userId: user4.id,
+      name: 'Dubai Luxury Escape',
+      startDate: new Date('2026-11-01'),
+      endDate: new Date('2026-11-08'),
+      description: 'Shopping and skyscrapers in the UAE.',
+      coverPhoto: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/c7/Burj_Khalifa_2021.jpg/960px-Burj_Khalifa_2021.jpg',
+      isPublic: true
+    }
+  });
+
   // 6. Create shared links
   // ────────────────────────────────
   console.log('\n🔗 Creating shared links...');

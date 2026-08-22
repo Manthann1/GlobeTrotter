@@ -459,11 +459,11 @@ export const INITIAL_TRIPS = [
     userId: 'u-101-aarav',
     name: 'Royal Rajasthan Heritage Tour',
     subtitle: 'Jaipur & Udaipur',
-    startDate: '2024-10-15',
-    endDate: '2024-10-25',
+    startDate: '2026-08-15',
+    endDate: '2026-08-25',
     status: 'upcoming',
     isPublic: true,
-    shareToken: 'rajasthan-royal-2024',
+    shareToken: 'rajasthan-royal-2026',
     coverPhoto: 'https://images.unsplash.com/photo-1603262110263-fb010d6e59d4?auto=format&fit=crop&w=1600&q=85',
     description: 'An unforgettable 10-day royal journey through the magnificent forts, mirror palaces, lake boat cruises, and royal dining of Rajasthan.',
     author: {
@@ -471,7 +471,7 @@ export const INITIAL_TRIPS = [
       photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
     },
     budget: {
-      totalBudget: 85000.00, // in INR
+      totalBudget: 85000.00,
       dailyCap: 8500.00,
       categoryBreakdown: {
         lodging: 46500.00,
@@ -487,10 +487,10 @@ export const INITIAL_TRIPS = [
         cityName: 'Jaipur',
         state: 'Rajasthan',
         country: 'India',
-        arrivalDate: '2024-10-15',
-        departureDate: '2024-10-19',
+        arrivalDate: '2026-08-15',
+        departureDate: '2026-08-19',
         sortOrder: 0,
-        estCost: 22350.00,
+        estCost: 21950.00,
         activities: [
           {
             id: 'ta-j1',
@@ -548,8 +548,8 @@ export const INITIAL_TRIPS = [
         cityName: 'Udaipur',
         state: 'Rajasthan',
         country: 'India',
-        arrivalDate: '2024-10-20',
-        departureDate: '2024-10-25',
+        arrivalDate: '2026-08-20',
+        departureDate: '2026-08-25',
         sortOrder: 1,
         estCost: 33550.00,
         activities: [
@@ -606,15 +606,100 @@ export const INITIAL_TRIPS = [
     ]
   },
   {
+    id: 'trip-varanasi-retreat',
+    userId: 'u-101-aarav',
+    name: 'Spiritual Retreat in Varanasi',
+    subtitle: 'Varanasi, UP',
+    startDate: '2026-09-01',
+    endDate: '2026-09-06',
+    status: 'upcoming',
+    isPublic: true,
+    shareToken: 'varanasi-spiritual-2026',
+    coverPhoto: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80',
+    description: 'A 5-day spiritual journey featuring sunrise rowboat rides on the Ganges, Kashi Vishwanath temple walk, and evening Ganga Aarti.',
+    author: {
+      name: 'Aarav Sharma',
+      photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+    },
+    budget: {
+      totalBudget: 28000.00,
+      dailyCap: 5500.00,
+      categoryBreakdown: { lodging: 18000.00, food: 4500.00, activities: 3500.00, transport: 0.00 }
+    },
+    stops: [
+      {
+        id: 'stop-varanasi-1',
+        cityId: 'c-varanasi',
+        cityName: 'Varanasi',
+        state: 'Uttar Pradesh',
+        country: 'India',
+        arrivalDate: '2026-09-01',
+        departureDate: '2026-09-06',
+        sortOrder: 0,
+        estCost: 26000.00,
+        activities: [
+          {
+            id: 'ta-v1',
+            day: 1,
+            dayTitle: 'Day 1: Ganga Ghats Check-in',
+            name: 'Ghatside Heritage Hotel Stay',
+            category: 'Lodging',
+            cost: 16000.00,
+            timeSlot: '13:00',
+            description: 'Boutique stay overlooking the sacred waters of river Ganges.',
+            imageUrl: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80',
+            sortOrder: 0
+          },
+          {
+            id: 'ta-v2',
+            day: 1,
+            dayTitle: 'Day 1: Ganga Ghats Check-in',
+            name: 'Dashashwamedh Ghat Grand Ganga Aarti',
+            category: 'Spiritual',
+            cost: 500.00,
+            timeSlot: '18:30',
+            description: 'Witness priests perform the mesmerizing fire and chant ritual at sunset.',
+            imageUrl: 'https://images.unsplash.com/photo-1571536802807-30451e3955d8?auto=format&fit=crop&w=800&q=80',
+            sortOrder: 1
+          },
+          {
+            id: 'ta-v3',
+            day: 2,
+            dayTitle: 'Day 2: Sunrise & Old Kashi Lanes',
+            name: 'Subah-e-Banaras Sunrise Boat Ride',
+            category: 'Spiritual',
+            cost: 800.00,
+            timeSlot: '05:30',
+            description: 'Rowboat ride past morning bathers and ancient ghats in early twilight.',
+            imageUrl: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80',
+            sortOrder: 2
+          },
+          {
+            id: 'ta-v4',
+            day: 2,
+            dayTitle: 'Day 2: Sunrise & Old Kashi Lanes',
+            name: 'Banarasi Street Food & Tamatar Chaat Trail',
+            category: 'Food & Dining',
+            cost: 650.00,
+            timeSlot: '17:00',
+            description: 'Sample kachoris, tamatar chaat, thandai, and creamy malaiyo.',
+            imageUrl: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80',
+            sortOrder: 3
+          }
+        ]
+      }
+    ]
+  },
+  {
     id: 'trip-kerala-backwaters',
     userId: 'u-101-aarav',
     name: 'Kerala Backwaters & Tea Hills',
     subtitle: 'Munnar & Alleppey',
-    startDate: '2024-11-10',
-    endDate: '2024-11-18',
+    startDate: '2026-10-10',
+    endDate: '2026-10-18',
     status: 'upcoming',
     isPublic: true,
-    shareToken: 'kerala-backwaters-2024',
+    shareToken: 'kerala-backwaters-2026',
     coverPhoto: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1600&q=85',
     description: 'A tranquil 8-day tropical retreat through misty Munnar tea plantations, spices, luxury houseboat stay, and Ayurvedic rejuvenation.',
     author: {
@@ -638,8 +723,8 @@ export const INITIAL_TRIPS = [
         cityName: 'Alleppey & Munnar',
         state: 'Kerala',
         country: 'India',
-        arrivalDate: '2024-11-10',
-        departureDate: '2024-11-18',
+        arrivalDate: '2026-10-10',
+        departureDate: '2026-10-18',
         sortOrder: 0,
         estCost: 16350.00,
         activities: [
@@ -688,11 +773,11 @@ export const INITIAL_TRIPS = [
     userId: 'u-101-aarav',
     name: 'Goa Coastal Getaway',
     subtitle: 'North & South Goa',
-    startDate: '2024-12-20',
-    endDate: '2024-12-26',
+    startDate: '2026-11-20',
+    endDate: '2026-11-26',
     status: 'upcoming',
     isPublic: true,
-    shareToken: 'goa-coastal-2024',
+    shareToken: 'goa-coastal-2026',
     coverPhoto: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1600&q=85',
     description: 'Sun, sand, water sports, Latin Quarter heritage villas, and beach sunset feasts.',
     author: {
@@ -716,8 +801,8 @@ export const INITIAL_TRIPS = [
         cityName: 'Goa',
         state: 'Goa',
         country: 'India',
-        arrivalDate: '2024-12-20',
-        departureDate: '2024-12-26',
+        arrivalDate: '2026-11-20',
+        departureDate: '2026-11-26',
         sortOrder: 0,
         estCost: 15200.00,
         activities: [
@@ -762,76 +847,114 @@ export const INITIAL_TRIPS = [
     ]
   },
   {
-    id: 'trip-varanasi-spiritual',
-    userId: 'u-101-aarav',
-    name: 'Varanasi Ghats & Ganga Aarti',
-    subtitle: 'Varanasi, UP',
-    startDate: '2023-11-04',
-    endDate: '2023-11-08',
-    status: 'past',
-    dateLabel: 'Nov 2023',
+    id: 'trip-amritsar-heritage',
+    userId: 'u-102-ananya',
+    name: 'Golden Temple & Amritsar Food Trail',
+    subtitle: 'Amritsar, Punjab',
+    startDate: '2026-09-10',
+    endDate: '2026-09-14',
+    status: 'upcoming',
     isPublic: true,
-    shareToken: 'varanasi-spiritual-2023',
-    coverPhoto: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?auto=format&fit=crop&w=800&q=80',
-    description: 'Mystical sunrise boat rides on Ganga, evening Aarti ceremonies, and street food.',
+    shareToken: 'amritsar-golden-2026',
+    coverPhoto: 'https://images.unsplash.com/photo-1514222709107-a180c68d72b4?auto=format&fit=crop&w=1600&q=85',
+    description: 'Experience spiritual peace at Sri Harmandir Sahib, Wagah border ceremony, and world-renowned Punjabi kulcha.',
     author: {
-      name: 'Aarav Sharma',
-      photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+      name: 'Ananya Sharma',
+      photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
     },
     budget: {
-      totalBudget: 22000.00,
-      dailyCap: 4500.00,
-      categoryBreakdown: { lodging: 12000.00, food: 3500.00, activities: 2000.00, transport: 0.00 }
+      totalBudget: 24000.00,
+      dailyCap: 4800.00,
+      categoryBreakdown: { lodging: 12000.00, food: 4500.00, activities: 2500.00, transport: 0.00 }
     },
-    stops: []
+    stops: [
+      {
+        id: 'stop-amritsar',
+        cityId: 'c-amritsar',
+        cityName: 'Amritsar',
+        state: 'Punjab',
+        country: 'India',
+        arrivalDate: '2026-09-10',
+        departureDate: '2026-09-14',
+        sortOrder: 0,
+        estCost: 19000.00,
+        activities: [
+          {
+            id: 'ta-a1',
+            day: 1,
+            dayTitle: 'Day 1: Golden Temple Night Visit',
+            name: 'Sri Harmandir Sahib Night Darshan',
+            category: 'Spiritual',
+            cost: 0.00,
+            timeSlot: '21:00',
+            description: 'Peaceful night walk around the illuminated holy sarovar lake.',
+            imageUrl: 'https://images.unsplash.com/photo-1514222709107-a180c68d72b4?auto=format&fit=crop&w=800&q=80',
+            sortOrder: 0
+          },
+          {
+            id: 'ta-a2',
+            day: 2,
+            dayTitle: 'Day 2: Amritsari Kulcha & Wagah Border',
+            name: 'Kulcha Land Amritsari Naan & Lassi Breakfast',
+            category: 'Food & Dining',
+            cost: 450.00,
+            timeSlot: '09:00',
+            description: 'Butter-loaded stuffed kulcha with spicy chole and tall glass of sweet lassi.',
+            imageUrl: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=800&q=80',
+            sortOrder: 1
+          }
+        ]
+      }
+    ]
   },
   {
-    id: 'trip-ladakh-expedition',
-    userId: 'u-101-aarav',
-    name: 'Leh-Ladakh High Passes',
-    subtitle: 'Pangong & Nubra Valley',
-    startDate: '2023-06-12',
-    endDate: '2023-06-22',
-    status: 'past',
-    dateLabel: 'June 2023',
+    id: 'trip-mysore-palace',
+    userId: 'u-103-kabir',
+    name: 'Mysore Royal Heritage & Silk Trail',
+    subtitle: 'Mysore, Karnataka',
+    startDate: '2026-10-01',
+    endDate: '2026-10-05',
+    status: 'upcoming',
     isPublic: true,
-    shareToken: 'ladakh-expedition-2023',
-    coverPhoto: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=800&q=80',
-    description: 'High-altitude passes, azure Pangong Lake, and cliffside monasteries.',
+    shareToken: 'mysore-palace-2026',
+    coverPhoto: 'https://images.unsplash.com/photo-1600100397608-f010e62eb868?auto=format&fit=crop&w=1600&q=85',
+    description: 'Explore the illuminated Mysuru Palace, Chamundi Hill temple, and taste legendary Mysore Pak.',
     author: {
-      name: 'Aarav Sharma',
-      photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+      name: 'Kabir Mehta',
+      photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
     },
     budget: {
-      totalBudget: 65000.00,
-      dailyCap: 6500.00,
-      categoryBreakdown: { lodging: 28000.00, food: 12000.00, activities: 15000.00, transport: 0.00 }
+      totalBudget: 32000.00,
+      dailyCap: 6000.00,
+      categoryBreakdown: { lodging: 16000.00, food: 5500.00, activities: 4500.00, transport: 0.00 }
     },
-    stops: []
-  },
-  {
-    id: 'trip-european-summer',
-    userId: 'u-101-aarav',
-    name: 'European Summer (Paris & Rome)',
-    subtitle: 'France & Italy',
-    startDate: '2023-05-15',
-    endDate: '2023-05-30',
-    status: 'past',
-    dateLabel: 'May 2023',
-    isPublic: true,
-    shareToken: 'european-summer-intl',
-    coverPhoto: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80',
-    description: 'An international summer exploration across Paris and Rome.',
-    author: {
-      name: 'Aarav Sharma',
-      photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
-    },
-    budget: {
-      totalBudget: 240000.00,
-      dailyCap: 16000.00,
-      categoryBreakdown: { lodging: 120000.00, food: 50000.00, activities: 45000.00, transport: 0.00 }
-    },
-    stops: []
+    stops: [
+      {
+        id: 'stop-mysore',
+        cityId: 'c-mysore',
+        cityName: 'Mysore',
+        state: 'Karnataka',
+        country: 'India',
+        arrivalDate: '2026-10-01',
+        departureDate: '2026-10-05',
+        sortOrder: 0,
+        estCost: 26000.00,
+        activities: [
+          {
+            id: 'ta-m1',
+            day: 1,
+            dayTitle: 'Day 1: Mysuru Palace Illumination',
+            name: 'Grand Mysore Palace Guided Tour',
+            category: 'Culture & History',
+            cost: 850.00,
+            timeSlot: '11:00',
+            description: 'Tour the royal durbar halls, silver doors, and peacock court of Wodeyar dynasty.',
+            imageUrl: 'https://images.unsplash.com/photo-1600100397608-f010e62eb868?auto=format&fit=crop&w=800&q=80',
+            sortOrder: 0
+          }
+        ]
+      }
+    ]
   }
 ];
 

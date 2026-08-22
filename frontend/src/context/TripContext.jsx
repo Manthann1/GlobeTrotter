@@ -15,6 +15,54 @@ export function TripProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const normalizeTrip = (trip) => {
+    if (!trip) return null;
+    const stops = (trip.stops || []).map((stop, stopIdx) => {
+      const rawActs = (stop.activities && stop.activities.length > 0)
+        ? stop.activities
+        : (stop.tripActivities && stop.tripActivities.length > 0)
+        ? stop.tripActivities
+        : [];
+
+      const activities = rawActs.map((act, idx) => {
+        const actName = act.name || act.nameSnapshot || act.activity?.name || 'Local Experience';
+        const actCategory = act.category || act.categorySnapshot || act.activity?.category || 'Sightseeing';
+        const actCost = Number(act.cost ?? act.customCost ?? act.costSnapshot ?? act.activity?.cost ?? 1500);
+        const actDesc = act.description || act.customNotes || act.activity?.description || `Explore top heritage spots and local culture in ${stop.cityName || stop.city?.name || 'the city'}.`;
+        const actImg = act.imageUrl || act.activity?.imageUrl || stop.city?.imageUrl || trip.coverPhoto || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80';
+        const actDay = act.day || act.dayNumber || (idx < 2 ? 1 : 2);
+        const actTime = act.timeSlot || (idx % 2 === 0 ? '10:00 AM' : '04:00 PM');
+        const actDayTitle = act.dayTitle || `Day ${actDay}: ${actName}`;
+
+        return {
+          id: act.id || `ta-${stopIdx}-${idx}`,
+          day: actDay,
+          dayTitle: actDayTitle,
+          name: actName,
+          category: actCategory,
+          cost: actCost,
+          timeSlot: actTime,
+          description: actDesc,
+          imageUrl: actImg,
+          sortOrder: act.sortOrder ?? idx,
+        };
+      });
+
+      return {
+        ...stop,
+        cityName: stop.cityName || stop.city?.name || 'Destination',
+        state: stop.state || stop.city?.state || '',
+        country: stop.country || stop.city?.country || 'India',
+        activities,
+      };
+    });
+
+    return {
+      ...trip,
+      stops,
+    };
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -22,13 +70,14 @@ export function TripProvider({ children }) {
         const citiesData = await api.getCities();
         setCities(Array.isArray(citiesData) ? citiesData : []);
         
+        let loadedTrips = [];
         if (isAuthenticated) {
-          const tripsData = await api.getTrips();
-          setTrips(Array.isArray(tripsData) ? tripsData : []);
+          loadedTrips = await api.getTrips();
         } else {
-          const publicTrips = await api.getTrips();
-          setTrips(Array.isArray(publicTrips) ? publicTrips : []);
+          loadedTrips = await api.getTrips();
         }
+        const normalized = (Array.isArray(loadedTrips) ? loadedTrips : []).map(normalizeTrip);
+        setTrips(normalized);
       } catch (err) {
         console.error("Failed to load initial data:", err);
       } finally {
@@ -92,7 +141,8 @@ export function TripProvider({ children }) {
   };
 
   const getTrip = (id) => {
-    return trips.find((t) => t.id === id || t.shareToken === id) || null;
+    const raw = trips.find((t) => t.id === id || t.shareToken === id);
+    return normalizeTrip(raw);
   };
 
   const createTrip = async (tripData) => {
@@ -102,11 +152,81 @@ export function TripProvider({ children }) {
     }
 
     try {
-      // Use the actual API to create the trip
-      const newTrip = await api.createTrip(tripData);
+      const rawNewTrip = await api.createTrip(tripData);
+      
+      // Auto-populate initial stop & activities if stops are empty
+      let newTrip = normalizeTrip(rawNewTrip);
+      
+      if (!newTrip.stops || newTrip.stops.length === 0) {
+        const targetCity = tripData.initialCity || cities.find(c => tripData.destination?.toLowerCase().includes(c.name.toLowerCase())) || cities[0];
+        
+        if (targetCity) {
+          const defaultActivities = (targetCity.activities && targetCity.activities.length > 0)
+            ? targetCity.activities.map((a, idx) => ({
+                id: `act-${Date.now()}-${idx}`,
+                day: idx < 2 ? 1 : 2,
+                dayTitle: idx < 2 ? `Day 1: Arrival in ${targetCity.name}` : `Day 2: ${targetCity.name} Exploration`,
+                name: a.name,
+                category: a.category || 'Sightseeing',
+                cost: Number(a.cost || 1500),
+                timeSlot: idx % 2 === 0 ? '10:00' : '16:00',
+                description: a.description || `Experience in ${targetCity.name}`,
+                imageUrl: a.imageUrl || targetCity.imageUrl,
+              }))
+            : [
+                {
+                  id: `act-${Date.now()}-1`,
+                  day: 1,
+                  dayTitle: `Day 1: Arrival & Heritage Check-in`,
+                  name: `Palace & Heritage Stay in ${targetCity.name}`,
+                  category: 'Lodging',
+                  cost: 12500,
+                  timeSlot: '14:00',
+                  description: `Check into luxury stay in ${targetCity.name} with traditional greeting.`,
+                  imageUrl: targetCity.imageUrl,
+                },
+                {
+                  id: `act-${Date.now()}-2`,
+                  day: 1,
+                  dayTitle: `Day 1: Arrival & Heritage Check-in`,
+                  name: `Authentic Local Thali & Dining`,
+                  category: 'Food & Dining',
+                  cost: 1600,
+                  timeSlot: '19:30',
+                  description: `Multi-course traditional meal showcasing regional flavors.`,
+                  imageUrl: targetCity.imageUrl,
+                },
+                {
+                  id: `act-${Date.now()}-3`,
+                  day: 2,
+                  dayTitle: `Day 2: Guided Monument Tour`,
+                  name: `Guided Historical Monument Tour`,
+                  category: 'Culture & History',
+                  cost: 950,
+                  timeSlot: '09:30',
+                  description: `Explore ancient landmarks and architecture with an expert guide.`,
+                  imageUrl: targetCity.imageUrl,
+                }
+              ];
+
+          newTrip.stops = [
+            {
+              id: `stop-${Date.now()}`,
+              cityId: targetCity.id,
+              cityName: targetCity.name,
+              state: targetCity.state || '',
+              country: targetCity.country || 'India',
+              arrivalDate: newTrip.startDate || new Date().toISOString().slice(0, 10),
+              departureDate: newTrip.endDate || new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
+              sortOrder: 0,
+              activities: defaultActivities,
+            }
+          ];
+        }
+      }
       
       setTrips((prev) => [newTrip, ...prev]);
-      showToast(`🎉 "${newTrip.name}" created successfully!`);
+      showToast(`🎉 "${newTrip.name}" created with curated itinerary!`);
       return newTrip;
     } catch (err) {
       console.error("Failed to create trip", err);

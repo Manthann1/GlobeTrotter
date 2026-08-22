@@ -53,11 +53,11 @@ function AdminRoute({ children }) {
   const { isAuthenticated, user, loading } = useAuth();
   
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return <div className="min-h-screen flex items-center justify-center font-['Inter'] text-sm text-[#00236f]">Loading...</div>;
   }
   
-  if (!isAuthenticated || user?.role !== 'ADMIN') {
-    return <Navigate to="/" replace />;
+  if (!isAuthenticated || (!user?.isAdmin && user?.role !== 'ADMIN')) {
+    return <Navigate to="/dashboard" replace />;
   }
   
   return children;

@@ -10,7 +10,8 @@ const COLORS = ['bg-[#00236f]', 'bg-[#006c49]', 'bg-[#ef9900]', 'bg-[#FF5722]'];
 export default function CalendarPage() {
   const { trips } = useTrip();
   const navigate = useNavigate();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  // Default to August 2026 to showcase Aarav's upcoming itineraries
+  const [currentDate, setCurrentDate] = useState(() => new Date(2026, 7, 1));
   
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
@@ -23,6 +24,10 @@ export default function CalendarPage() {
   
   const nextMonth = () => {
     setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
+  };
+
+  const setMonthYear = (monthIdx, year = 2026) => {
+    setCurrentDate(new Date(year, monthIdx, 1));
   };
 
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -66,19 +71,44 @@ export default function CalendarPage() {
         />
       </div>
 
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="font-['Montserrat'] text-2xl font-bold text-[#191c1d]">Calendar View</h1>
-        
-        <div className="flex items-center gap-4 bg-white border border-[#e1e3e4] rounded-lg p-2">
-          <button onClick={prevMonth} className="p-1 hover:bg-[#f3f4f5] rounded-md transition-colors">
-            <ChevronLeft className="w-5 h-5 text-[#444651]" />
-          </button>
-          <span className="font-['Montserrat'] font-semibold text-[#191c1d] min-w-[120px] text-center">
-            {monthName} {currentYear}
-          </span>
-          <button onClick={nextMonth} className="p-1 hover:bg-[#f3f4f5] rounded-md transition-colors">
-            <ChevronRight className="w-5 h-5 text-[#444651]" />
-          </button>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="font-['Montserrat'] text-2xl md:text-3xl font-bold text-[#00236f]">Trip Calendar</h1>
+          <p className="text-xs text-[#757682] font-['Inter'] mt-0.5">Managing Aarav's upcoming travel dates & hotel stays</p>
+        </div>
+
+        {/* Quick Month Jump Shortcuts */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+          {[
+            { label: 'Aug 2026', m: 7 },
+            { label: 'Sep 2026', m: 8 },
+            { label: 'Oct 2026', m: 9 },
+            { label: 'Nov 2026', m: 10 },
+          ].map((btn) => (
+            <button
+              key={btn.label}
+              onClick={() => setMonthYear(btn.m)}
+              className={`px-3 py-1.5 rounded-full text-xs font-bold font-['Inter'] uppercase tracking-wider transition-all border ${
+                currentMonth === btn.m && currentYear === 2026
+                  ? 'bg-[#00236f] text-white border-[#00236f] shadow-xs'
+                  : 'bg-white text-[#444651] border-[#c5c5d3] hover:border-[#00236f]'
+              }`}
+            >
+              {btn.label}
+            </button>
+          ))}
+
+          <div className="flex items-center gap-2 bg-white border border-[#c5c5d3] rounded-full p-1 ml-2">
+            <button onClick={prevMonth} className="p-1 hover:bg-[#f3f4f5] rounded-full transition-colors">
+              <ChevronLeft className="w-4 h-4 text-[#444651]" />
+            </button>
+            <span className="font-['Montserrat'] font-bold text-xs text-[#00236f] min-w-[100px] text-center uppercase tracking-wider">
+              {monthName} {currentYear}
+            </span>
+            <button onClick={nextMonth} className="p-1 hover:bg-[#f3f4f5] rounded-full transition-colors">
+              <ChevronRight className="w-4 h-4 text-[#444651]" />
+            </button>
+          </div>
         </div>
       </div>
 

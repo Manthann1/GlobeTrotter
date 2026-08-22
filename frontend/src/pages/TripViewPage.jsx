@@ -59,7 +59,7 @@ export default function TripViewPage() {
       if (acts.length === 0) {
         timelineDays.push({
           dayNum: dayCounter++,
-          title: `Day ${stopIdx + 1}: Exploration in ${stop.cityName}`,
+          title: `Day ${stopIdx + 1}: Exploration in ${stop.cityName || 'Destination'}`,
           stop,
           activities: [],
         });
@@ -73,9 +73,15 @@ export default function TripViewPage() {
 
         Object.keys(dayGroups).forEach((dKey) => {
           const groupActs = dayGroups[dKey];
+          const currDayNum = dayCounter++;
+          const rawTitle = groupActs[0]?.dayTitle;
+          const cleanTitle = (rawTitle && !rawTitle.includes('undefined'))
+            ? rawTitle
+            : `Day ${currDayNum}: ${stop.cityName || 'Destination'} Highlights`;
+
           timelineDays.push({
-            dayNum: dayCounter++,
-            title: groupActs[0]?.dayTitle || `Day ${dayCounter - 1}: ${stop.cityName}`,
+            dayNum: currDayNum,
+            title: cleanTitle,
             stop,
             activities: groupActs,
           });
@@ -219,17 +225,19 @@ export default function TripViewPage() {
                     </div>
                   ) : (
                     dayItem.activities.map((act) => {
-                      const style = CATEGORY_COLORS[act.category] || CATEGORY_COLORS['Activity'];
+                      const style = CATEGORY_COLORS[act.category] || CATEGORY_COLORS['Culture & History'] || { border: 'border-l-[#00236f]', badgeBg: 'bg-[#00236f]/10', badgeText: 'text-[#00236f]', label: act.category || 'Sightseeing' };
+                      const actImg = act.imageUrl || dayItem.stop?.city?.imageUrl || trip.coverPhoto || 'https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=800&q=80';
+
                       return (
                         <div
                           key={act.id}
-                          className={`bg-white border border-[#c5c5d3] rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border-l-4 ${style.border}`}
+                          className={`bg-white border border-[#c5c5d3] rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow border-l-4 ${style.border || 'border-l-[#00236f]'}`}
                         >
                           <div className="flex flex-col md:flex-row gap-4">
                             {/* Thumbnail */}
                             <div className="w-full md:w-48 h-32 rounded-lg overflow-hidden shrink-0 bg-[#e1e3e4]">
                               <img
-                                src={act.imageUrl || trip.coverPhoto}
+                                src={actImg}
                                 alt={act.name}
                                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                               />
@@ -242,23 +250,23 @@ export default function TripViewPage() {
                                   <h4 className="text-base font-bold font-['Montserrat'] text-[#191c1d]">
                                     {act.name}
                                   </h4>
-                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-['Inter'] uppercase tracking-wider shrink-0 ${style.badgeBg} ${style.badgeText}`}>
-                                    {style.label}
+                                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-['Inter'] uppercase tracking-wider shrink-0 ${style.badgeBg || 'bg-[#00236f]/10'} ${style.badgeText || 'text-[#00236f]'}`}>
+                                    {act.category || 'Experience'}
                                   </span>
                                 </div>
                                 <p className="text-xs font-['Inter'] text-[#444651] leading-relaxed mb-3">
-                                  {act.description}
+                                  {act.description || 'Authentic regional experience with local guide and priority admission.'}
                                 </p>
                               </div>
 
                               <div className="flex items-center justify-between pt-2 border-t border-[#edeeef] text-xs">
                                 <div className="flex items-center gap-1.5 text-[#757682]">
-                                  <Clock className="w-3.5 h-3.5" />
+                                  <Clock className="w-3.5 h-3.5 text-[#00236f]" />
                                   <span className="font-['JetBrains Mono'] font-semibold">
-                                    {act.timeSlot || 'Flexible'}
+                                    {act.timeSlot || '10:00 AM'}
                                   </span>
                                 </div>
-                                <div className="font-['JetBrains Mono'] font-bold text-[#00236f] text-sm">
+                                <div className="font-['JetBrains Mono'] font-bold text-[#00236f] text-sm bg-[#00236f]/10 px-2.5 py-0.5 rounded-full">
                                   {formatPrice(act.cost)}
                                 </div>
                               </div>

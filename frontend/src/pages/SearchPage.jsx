@@ -78,7 +78,7 @@ export default function SearchPage() {
   };
 
   const renderPriceLevel = (level) => {
-    return '$'.repeat(level || 1);
+    return '₹'.repeat(level || 2);
   };
 
   return (
