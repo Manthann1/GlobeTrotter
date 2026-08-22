@@ -81,5 +81,27 @@ export const api = {
   async getCityActivities(cityId) {
     const res = await apiClient.get(`/cities/${cityId}/activities`);
     return res.data;
+  },
+
+  // Stops
+  async addStop(tripId, stopData) {
+    const res = await apiClient.post(`/trips/${tripId}/stops`, stopData);
+    return res.data;
+  },
+
+  async deleteStop(stopId) {
+    await apiClient.delete(`/stops/${stopId}`);
+    return true;
+  },
+
+  // Trip Activities
+  async addTripActivity(stopId, activityData) {
+    const res = await apiClient.post(`/stops/${stopId}/activities`, activityData);
+    return res.data;
+  },
+
+  async deleteTripActivity(activityId) {
+    await apiClient.delete(`/trip-activities/${activityId}`);
+    return true;
   }
 };
