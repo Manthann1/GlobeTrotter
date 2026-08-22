@@ -1,5 +1,15 @@
 {
+  "name": "globetrotter-root",
+  "version": "1.0.0",
+  "description": "GlobeTrotter - Master Travel Planning Platform (PERN Stack)",
+  "scripts": {
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "db:start": "npm run db:start-local --prefix backend",
+    "db:seed": "npm run db:seed --prefix backend",
+    "db:studio": "npm run db:studio --prefix backend"
+  },
   "dependencies": {
-    "pg": "^8.23.0"
+    "pg": "^8.13.3"
   }
 }
