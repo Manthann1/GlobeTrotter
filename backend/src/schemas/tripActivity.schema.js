@@ -28,3 +28,14 @@ export const createTripActivitySchema = z
       path: ['name'],
     }
   );
+
+export const updateTripActivitySchema = z.object({
+  nameSnapshot: z.string().trim().optional(),
+  categorySnapshot: z.string().trim().optional(),
+  costSnapshot: z.coerce.number().min(0, 'Cost cannot be negative').optional(),
+  scheduledDate: z.coerce.date({ invalid_type_error: 'Invalid scheduled date format' }).optional().nullable(),
+  timeSlot: z.string().trim().optional().nullable(),
+  sortOrder: z.number().int().min(0, 'Sort order must be a non-negative integer').optional(),
+  notes: z.string().trim().optional().nullable(),
+});
+

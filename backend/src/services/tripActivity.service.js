@@ -66,6 +66,17 @@ export const addActivityToStop = async (
     throw error;
   }
 
+  if (scheduledDate) {
+    const sched = new Date(scheduledDate).getTime();
+    const arr = new Date(stop.arrivalDate).getTime();
+    const dep = new Date(stop.departureDate).getTime();
+    if (sched < arr || sched > dep) {
+      const error = new Error(`Scheduled date must fall within stop's date range (${stop.arrivalDate.toISOString().split('T')[0]} to ${stop.departureDate.toISOString().split('T')[0]})`);
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
   // 4. Create TripActivity in database
   const tripActivity = await prisma.tripActivity.create({
     data: {
@@ -85,6 +96,63 @@ export const addActivityToStop = async (
   });
 
   return tripActivity;
+};
+
+/**
+ * Update an existing TripActivity
+ */
+export const updateTripActivity = async (userId, activityId, updateData) => {
+  const existingActivity = await prisma.tripActivity.findUnique({
+    where: { id: activityId },
+    include: {
+      stop: {
+        include: {
+          trip: true,
+        },
+      },
+    },
+  });
+
+  if (!existingActivity) {
+    const error = new Error('Trip activity not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (existingActivity.stop.trip.userId !== userId) {
+    const error = new Error('Unauthorized to update this trip activity');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  if (updateData.scheduledDate) {
+    const sched = new Date(updateData.scheduledDate).getTime();
+    const arr = new Date(existingActivity.stop.arrivalDate).getTime();
+    const dep = new Date(existingActivity.stop.departureDate).getTime();
+    if (sched < arr || sched > dep) {
+      const error = new Error(`Scheduled date must fall within stop's date range (${existingActivity.stop.arrivalDate.toISOString().split('T')[0]} to ${existingActivity.stop.departureDate.toISOString().split('T')[0]})`);
+      error.statusCode = 400;
+      throw error;
+    }
+  }
+
+  const updatedActivity = await prisma.tripActivity.update({
+    where: { id: activityId },
+    data: {
+      ...(updateData.nameSnapshot && { nameSnapshot: updateData.nameSnapshot }),
+      ...(updateData.categorySnapshot && { categorySnapshot: updateData.categorySnapshot }),
+      ...(updateData.costSnapshot !== undefined && { costSnapshot: Number(updateData.costSnapshot) }),
+      ...(updateData.scheduledDate !== undefined && { scheduledDate: updateData.scheduledDate ? new Date(updateData.scheduledDate) : null }),
+      ...(updateData.timeSlot !== undefined && { timeSlot: updateData.timeSlot }),
+      ...(updateData.sortOrder !== undefined && { sortOrder: updateData.sortOrder }),
+      ...(updateData.notes !== undefined && { notes: updateData.notes }),
+    },
+    include: {
+      activity: true,
+    },
+  });
+
+  return updatedActivity;
 };
 
 /**
@@ -123,3 +191,4 @@ export const deleteTripActivity = async (userId, activityId) => {
 
   return { id: activityId };
 };
+

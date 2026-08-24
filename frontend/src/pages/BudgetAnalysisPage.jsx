@@ -25,8 +25,23 @@ export default function BudgetAnalysisPage() {
   const { getTrip, calculateTripTotals, formatPrice, currency } = useTrip();
   const navigate = useNavigate();
   const [shareModalOpen, setShareModalOpen] = React.useState(false);
+  const [liveBudget, setLiveBudget] = React.useState(null);
 
   const trip = getTrip(tripId) || getTrip('trip-royal-rajasthan');
+
+  React.useEffect(() => {
+    if (tripId) {
+      import('../services/api').then(({ api }) => {
+        api.getTripBudget(tripId)
+          .then((data) => {
+            if (data && data.totalCost !== undefined) {
+              setLiveBudget(data);
+            }
+          })
+          .catch(console.error);
+      });
+    }
+  }, [tripId]);
 
   if (!trip) {
     return (
@@ -41,21 +56,31 @@ export default function BudgetAnalysisPage() {
     );
   }
 
-  const { totalSpent, breakdown } = calculateTripTotals(trip);
+  const { totalSpent: calcSpent, breakdown: calcBreakdown } = calculateTripTotals(trip);
+
+  const totalSpent = liveBudget ? liveBudget.totalCost : calcSpent;
   const totalBudget = trip.budget?.totalBudget || 85000;
   const utilizationPercent = Math.min(100, Math.round((totalSpent / totalBudget) * 100)) || 0;
   const isUnderBudget = totalSpent <= totalBudget;
 
-  const totalDays = 10;
-  const dailyAverage = Math.round(totalSpent / totalDays) || 6850;
-  const dailyCap = trip.budget?.dailyCap || 8500;
+  const totalDays = liveBudget?.totalDays || 10;
+  const dailyAverage = liveBudget?.perDayAverage || Math.round(totalSpent / totalDays) || 6850;
+  const dailyCap = liveBudget?.dailyCap || trip.budget?.dailyCap || 8500;
   const percentBelowCap = Math.max(0, Math.round(((dailyCap - dailyAverage) / dailyCap) * 100));
 
   // Category percentages
+  const breakdown = liveBudget?.categories ? {
+    lodging: liveBudget.categories.find(c => c.category?.toLowerCase().includes('lodg'))?.totalCost || calcBreakdown.lodging,
+    food: liveBudget.categories.find(c => c.category?.toLowerCase().includes('food'))?.totalCost || calcBreakdown.food,
+    activities: liveBudget.categories.find(c => c.category?.toLowerCase().includes('act') || c.category?.toLowerCase().includes('sight') || c.category?.toLowerCase().includes('cult'))?.totalCost || calcBreakdown.activities,
+    transport: liveBudget.categories.find(c => c.category?.toLowerCase().includes('trans'))?.totalCost || calcBreakdown.transport,
+  } : calcBreakdown;
+
   const lodgingPercent = totalSpent ? Math.round((breakdown.lodging / totalSpent) * 100) : 45;
   const foodPercent = totalSpent ? Math.round((breakdown.food / totalSpent) * 100) : 25;
   const activitiesPercent = totalSpent ? Math.round((breakdown.activities / totalSpent) * 100) : 18;
   const transportPercent = totalSpent ? Math.round((breakdown.transport / totalSpent) * 100) : 12;
+
 
   // Mock Indian daily spending for the past 7 days
   const dailyData = [

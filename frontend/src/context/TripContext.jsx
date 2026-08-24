@@ -346,25 +346,25 @@ export function TripProvider({ children }) {
   const copyTripToAccount = async (tripToCopy) => {
     if (!isAuthenticated) return null;
     
-    // In a full implementation, we'd call an API endpoint like /api/trips/:id/copy
-    // For now we'll do a basic createTrip with copied data
-    const cloneData = {
-      name: `${tripToCopy.name} (My Copy)`,
-      startDate: tripToCopy.startDate,
-      endDate: tripToCopy.endDate,
-      totalBudget: tripToCopy.totalBudget,
-      status: 'DRAFT',
-      isPublic: false
-    };
-
-    const newTrip = await createTrip(cloneData);
-    
     try {
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    } catch {
-      // Ignore confetti error
-    } return newTrip;
+      const shareToken = tripToCopy.shareToken || tripToCopy.id;
+      const res = await api.copyPublicTrip(shareToken);
+      const clonedTrip = normalizeTrip(res);
+      setTrips((prev) => [clonedTrip, ...prev]);
+      try {
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      } catch {
+        // Ignore confetti error
+      }
+      showToast(`🎉 Copied "${tripToCopy.name}" to your account!`);
+      return clonedTrip;
+    } catch (err) {
+      console.error("Failed to copy trip via API", err);
+      showToast(err.response?.data?.message || "Failed to copy trip to your account", "error");
+      return null;
+    }
   };
+
 
   // Mocking stop/activity additions locally for immediate UI response, 
   // normally these would also be API calls (e.g. POST /api/trips/:id/stops)

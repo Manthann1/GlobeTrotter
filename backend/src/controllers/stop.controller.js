@@ -1,4 +1,4 @@
-import { createStopSchema } from '../schemas/stop.schema.js';
+import { createStopSchema, updateStopSchema } from '../schemas/stop.schema.js';
 import * as stopService from '../services/stop.service.js';
 import { successResponse, errorResponse } from '../utils/apiResponse.js';
 
@@ -31,6 +31,34 @@ export const addStop = async (req, res, next) => {
 };
 
 /**
+ * Update/reorder a stop
+ */
+export const updateStop = async (req, res, next) => {
+  try {
+    const stopId = req.params.stopId || req.params.id;
+    const parseResult = updateStopSchema.safeParse(req.body);
+
+    if (!parseResult.success) {
+      return errorResponse(res, {
+        statusCode: 400,
+        message: 'Validation failed',
+        errors: parseResult.error.flatten().fieldErrors,
+      });
+    }
+
+    const stop = await stopService.updateStop(req.user.id, stopId, parseResult.data);
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: 'Stop updated successfully',
+      data: { stop },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Delete a stop
  */
 export const deleteStop = async (req, res, next) => {
@@ -47,3 +75,4 @@ export const deleteStop = async (req, res, next) => {
     next(error);
   }
 };
+

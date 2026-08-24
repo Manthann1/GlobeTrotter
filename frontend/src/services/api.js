@@ -101,6 +101,64 @@ export const api = {
 
   async getCityActivities(cityId) {
     const res = await apiClient.get(`/cities/${cityId}/activities`);
+    return res.data?.data?.activities || res.data || [];
+  },
+
+  async searchActivities(params = {}) {
+    const res = await apiClient.get('/activities', { params });
+    return res.data?.data?.activities || res.data || [];
+  },
+
+  // Stops & Activities Management
+  async addStop(tripId, stopData) {
+    const res = await apiClient.post(`/trips/${tripId}/stops`, stopData);
+    return res.data?.data?.stop || res.data;
+  },
+
+  async updateStop(stopId, stopData) {
+    const res = await apiClient.patch(`/stops/${stopId}`, stopData);
+    return res.data?.data?.stop || res.data;
+  },
+
+  async deleteStop(stopId) {
+    const res = await apiClient.delete(`/stops/${stopId}`);
     return res.data;
+  },
+
+  async addActivityToStop(stopId, activityData) {
+    const res = await apiClient.post(`/stops/${stopId}/activities`, activityData);
+    return res.data?.data?.tripActivity || res.data;
+  },
+
+  async updateActivity(activityId, activityData) {
+    const res = await apiClient.patch(`/trip-activities/${activityId}`, activityData);
+    return res.data?.data?.tripActivity || res.data;
+  },
+
+  async deleteActivity(activityId) {
+    const res = await apiClient.delete(`/trip-activities/${activityId}`);
+    return res.data;
+  },
+
+  // Budget & Sharing
+  async getTripBudget(tripId) {
+    const res = await apiClient.get(`/trips/${tripId}/budget`);
+    return res.data?.data || res.data;
+  },
+
+  async shareTrip(tripId) {
+    const res = await apiClient.post(`/trips/${tripId}/share`);
+    return res.data?.data || res.data;
+  },
+
+  async getPublicTrip(shareToken) {
+    const res = await apiClient.get(`/public/trips/${shareToken}`);
+    return res.data?.data?.trip || res.data;
+  },
+
+  async copyPublicTrip(shareToken) {
+    const res = await apiClient.post(`/public/trips/${shareToken}/copy`);
+    return res.data?.data?.trip || res.data;
   }
 };
+

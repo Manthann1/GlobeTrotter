@@ -12,3 +12,24 @@ export const createStopSchema = z
     message: 'Departure date must be on or after arrival date',
     path: ['departureDate'],
   });
+
+export const updateStopSchema = z
+  .object({
+    arrivalDate: z.coerce.date({ invalid_type_error: 'Invalid arrival date format' }).optional(),
+    departureDate: z.coerce.date({ invalid_type_error: 'Invalid departure date format' }).optional(),
+    sortOrder: z.number().int().min(0, 'Sort order must be a non-negative integer').optional(),
+    notes: z.string().trim().optional().nullable(),
+  })
+  .refine(
+    (data) => {
+      if (data.arrivalDate && data.departureDate) {
+        return data.departureDate >= data.arrivalDate;
+      }
+      return true;
+    },
+    {
+      message: 'Departure date must be on or after arrival date',
+      path: ['departureDate'],
+    }
+  );
+

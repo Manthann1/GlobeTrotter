@@ -152,3 +152,56 @@ export const getTripByShareToken = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * Get aggregated budget breakdown for a trip
+ */
+export const getTripBudget = async (req, res, next) => {
+  try {
+    const budgetData = await tripService.getTripBudgetAggregation(req.params.id);
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: 'Trip budget retrieved successfully',
+      data: budgetData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Generate share token and share trip
+ */
+export const shareTrip = async (req, res, next) => {
+  try {
+    const shareData = await tripService.shareTrip(req.user.id, req.params.id);
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: 'Trip shared successfully',
+      data: shareData,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Deep copy a shared trip into current user's account
+ */
+export const copyTrip = async (req, res, next) => {
+  try {
+    const shareToken = req.params.shareToken || req.params.token;
+    const clonedTrip = await tripService.copyTripTransaction(req.user.id, shareToken);
+
+    return successResponse(res, {
+      statusCode: 201,
+      message: 'Trip cloned successfully',
+      data: { trip: mapTripActivities(clonedTrip) },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
