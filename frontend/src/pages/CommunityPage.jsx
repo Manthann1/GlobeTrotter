@@ -72,7 +72,7 @@ export default function CommunityPage() {
           <div className="text-center py-12 text-[#757682] font-['Inter']">No public trips found.</div>
         ) : (
           filteredTrips.map(trip => {
-            const authorName = trip.user?.name || trip.author?.name || trip.userName || 'Aarav Sharma';
+            const authorName = trip.user?.name || trip.author?.name || trip.userName || 'GlobeTrotter Explorer';
             const authorPhoto = trip.user?.profilePhoto || trip.author?.photo || trip.userPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=00236f&color=fff`;
             const rawDate = trip.createdAt || trip.startDate || '2026-08-15';
             const formattedDate = (() => {

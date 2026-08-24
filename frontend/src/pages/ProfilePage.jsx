@@ -24,11 +24,11 @@ export default function ProfilePage() {
   const fileInputRef = useRef(null);
   
   const [editForm, setEditForm] = useState({
-    name: user?.name || 'Aarav Sharma',
-    email: user?.email || 'aarav@globetrotter.in',
-    location: user?.location || 'Mumbai, India',
-    phone: user?.phone || '+91 98201 23456',
-    bio: user?.bio || 'Travel photographer & heritage explorer based in Mumbai.',
+    name: user?.name || 'Explorer',
+    email: user?.email || 'explorer@globetrotter.in',
+    location: user?.location || 'India',
+    phone: user?.phone || '+91 98765 43210',
+    bio: user?.bio || 'Passionate traveler exploring incredible destinations.',
     profilePhoto: user?.profilePhoto || user?.avatarUrl || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80'
   });
 

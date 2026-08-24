@@ -56,9 +56,6 @@ export const getTrips = async (req, res, next) => {
       trips = await tripService.getPublicTrips();
     } else {
       trips = await tripService.getUserTrips(req.user.id);
-      if (!trips || trips.length === 0) {
-        trips = await tripService.getPublicTrips();
-      }
     }
 
     const formattedTrips = trips.map(mapTripActivities);

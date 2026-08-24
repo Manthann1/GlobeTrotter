@@ -19,6 +19,7 @@ import CalendarPage from './pages/CalendarPage';
 import AdminPage from './pages/AdminPage';
 import CommunityPage from './pages/CommunityPage';
 import SearchPage from './pages/SearchPage';
+import CreateTripPage from './pages/CreateTripPage';
 import NewTripModal from './components/modals/NewTripModal';
 import ToastContainer from './components/ui/Toast';
 
@@ -198,6 +199,16 @@ function App() {
                 <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
                   <CommunityPage />
                 </StandardLayout>
+              }
+            />
+            <Route
+              path="/create-trip"
+              element={
+                <ProtectedRoute>
+                  <StandardLayout onOpenNewTrip={handleOpenNewTrip}>
+                    <CreateTripPage />
+                  </StandardLayout>
+                </ProtectedRoute>
               }
             />
             <Route

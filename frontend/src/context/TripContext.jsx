@@ -235,76 +235,100 @@ export function TripProvider({ children }) {
     }
 
     try {
-      const rawNewTrip = await api.createTrip(tripData);
-      
-      // Auto-populate initial stop & activities if stops are empty
+      const payload = {
+        name: tripData.name || `${tripData.destination || tripData.cityName || 'Incredible India'} Getaway`,
+        startDate: tripData.startDate || new Date().toISOString().slice(0, 10),
+        endDate: tripData.endDate || new Date(Date.now() + 6 * 86400000).toISOString().slice(0, 10),
+        description: tripData.description || `Exploring ${tripData.destination || 'India'}`,
+        coverPhoto: tripData.coverPhoto || 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=1200&q=80',
+      };
+
+      const rawNewTrip = await api.createTrip(payload);
       let newTrip = normalizeTrip(rawNewTrip);
-      
-      if (!newTrip.stops || newTrip.stops.length === 0) {
-        const targetCity = tripData.initialCity || cities.find(c => tripData.destination?.toLowerCase().includes(c.name.toLowerCase())) || cities[0];
-        
-        if (targetCity) {
-          const defaultActivities = (targetCity.activities && targetCity.activities.length > 0)
-            ? targetCity.activities.map((a, idx) => ({
-                id: `act-${Date.now()}-${idx}`,
-                day: idx < 2 ? 1 : 2,
-                dayTitle: idx < 2 ? `Day 1: Arrival in ${targetCity.name}` : `Day 2: ${targetCity.name} Exploration`,
-                name: a.name,
-                category: a.category || 'Sightseeing',
-                cost: Number(a.cost || 1500),
-                timeSlot: idx % 2 === 0 ? '10:00' : '16:00',
-                description: a.description || `Experience in ${targetCity.name}`,
-                imageUrl: a.imageUrl || targetCity.imageUrl,
-              }))
-            : [
-                {
-                  id: `act-${Date.now()}-1`,
-                  day: 1,
-                  dayTitle: `Day 1: Arrival & Heritage Check-in`,
-                  name: `Palace & Heritage Stay in ${targetCity.name}`,
-                  category: 'Lodging',
-                  cost: 12500,
-                  timeSlot: '14:00',
-                  description: `Check into luxury stay in ${targetCity.name} with traditional greeting.`,
-                  imageUrl: targetCity.imageUrl,
-                },
-                {
-                  id: `act-${Date.now()}-2`,
-                  day: 1,
-                  dayTitle: `Day 1: Arrival & Heritage Check-in`,
-                  name: `Authentic Local Thali & Dining`,
-                  category: 'Food & Dining',
-                  cost: 1600,
-                  timeSlot: '19:30',
-                  description: `Multi-course traditional meal showcasing regional flavors.`,
-                  imageUrl: targetCity.imageUrl,
-                },
-                {
-                  id: `act-${Date.now()}-3`,
-                  day: 2,
-                  dayTitle: `Day 2: Guided Monument Tour`,
-                  name: `Guided Historical Monument Tour`,
-                  category: 'Culture & History',
-                  cost: 950,
-                  timeSlot: '09:30',
-                  description: `Explore ancient landmarks and architecture with an expert guide.`,
-                  imageUrl: targetCity.imageUrl,
+
+      // Auto-create initial stop in backend DB if needed
+      const targetCity = tripData.initialCity || cities.find(c => tripData.destination?.toLowerCase().includes(c.name.toLowerCase())) || cities[0];
+
+      if (targetCity && newTrip.id) {
+        try {
+          const stopRes = await api.addStop(newTrip.id, {
+            cityId: targetCity.id,
+            arrivalDate: payload.startDate,
+            departureDate: payload.endDate,
+            notes: `Explore ${targetCity.name}`,
+          });
+
+          const createdStop = stopRes;
+
+          // Add activities to DB if custom activities were passed or city has defaults
+          const actsToAdd = (tripData.customActivities && tripData.customActivities.length > 0)
+            ? tripData.customActivities
+            : (targetCity.activities || []).slice(0, 3);
+
+          const addedActivities = [];
+          const isValidUuid = (str) => typeof str === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(str);
+
+          if (createdStop && createdStop.id && actsToAdd.length > 0) {
+            for (let idx = 0; idx < actsToAdd.length; idx++) {
+              const act = actsToAdd[idx];
+              try {
+                const actPayload = {
+                  nameSnapshot: act.name || `Experience in ${targetCity.name}`,
+                  categorySnapshot: act.category || 'Sightseeing',
+                  scheduledDate: payload.startDate,
+                  timeSlot: idx % 2 === 0 ? '10:00' : '16:00',
+                  costSnapshot: Number(act.cost || 1500),
+                  notes: act.description || `Activity in ${targetCity.name}`,
+                };
+
+                if (isValidUuid(act.id)) {
+                  actPayload.activityId = act.id;
                 }
-              ];
+
+                const addedAct = await api.addActivityToStop(createdStop.id, actPayload);
+                addedActivities.push({
+                  ...addedAct,
+                  id: addedAct.id,
+                  name: act.name || addedAct.activity?.name || `Experience in ${targetCity.name}`,
+                  category: act.category || addedAct.activity?.category || 'Sightseeing',
+                  cost: Number(addedAct.costSnapshot || act.cost || 1500),
+                  timeSlot: addedAct.timeSlot || '10:00',
+                  description: act.description || `Experience in ${targetCity.name}`,
+                  imageUrl: act.imageUrl || targetCity.imageUrl,
+                });
+              } catch (e) {
+                console.warn("Failed adding activity to stop", e);
+              }
+            }
+          }
 
           newTrip.stops = [
             {
-              id: `stop-${Date.now()}`,
+              id: createdStop.id,
               cityId: targetCity.id,
               cityName: targetCity.name,
               state: targetCity.state || '',
               country: targetCity.country || 'India',
-              arrivalDate: newTrip.startDate || new Date().toISOString().slice(0, 10),
-              departureDate: newTrip.endDate || new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10),
+              arrivalDate: payload.startDate,
+              departureDate: payload.endDate,
               sortOrder: 0,
-              activities: defaultActivities,
+              activities: addedActivities.length > 0 ? addedActivities : [
+                {
+                  id: `act-${Date.now()}-1`,
+                  day: 1,
+                  dayTitle: `Day 1: Arrival in ${targetCity.name}`,
+                  name: `Sightseeing & Heritage Walk in ${targetCity.name}`,
+                  category: 'Sightseeing',
+                  cost: 1500,
+                  timeSlot: '10:00',
+                  description: `Explore the vibrant streets and monuments of ${targetCity.name}.`,
+                  imageUrl: targetCity.imageUrl,
+                }
+              ],
             }
           ];
+        } catch (stopErr) {
+          console.warn("Could not save initial stop to DB:", stopErr);
         }
       }
       
@@ -313,7 +337,7 @@ export function TripProvider({ children }) {
       return newTrip;
     } catch (err) {
       console.error("Failed to create trip", err);
-      showToast("Failed to create trip", "error");
+      showToast("Failed to create trip: " + (err.response?.data?.message || err.message), "error");
       return null;
     }
   };

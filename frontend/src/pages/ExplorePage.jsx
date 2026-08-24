@@ -189,7 +189,7 @@ export default function ExplorePage({ onOpenNewTrip }) {
                   
                   <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/20 text-xs font-['Inter']">
                     <span className="text-[#ffddb8] font-bold">
-                      By {trip.user?.name || trip.author?.name || 'Aarav Sharma'}
+                      By {trip.user?.name || trip.author?.name || 'Explorer'}
                     </span>
                     <span className="text-white font-semibold bg-white/20 px-2 py-0.5 rounded-full text-[10px]">
                       View Itinerary →

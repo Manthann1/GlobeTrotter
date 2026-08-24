@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useTrip } from '../context/TripContext';
+import { useAuth } from '../context/AuthContext';
 import SearchFilterToolbar from '../components/ui/SearchFilterToolbar';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -9,9 +10,10 @@ const COLORS = ['bg-[#00236f]', 'bg-[#006c49]', 'bg-[#ef9900]', 'bg-[#FF5722]'];
 
 export default function CalendarPage() {
   const { trips } = useTrip();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  // Default to August 2026 to showcase Aarav's upcoming itineraries
-  const [currentDate, setCurrentDate] = useState(() => new Date(2026, 7, 1));
+  // Default to current date or August 2026
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
@@ -88,7 +90,7 @@ export default function CalendarPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="font-['Montserrat'] text-2xl md:text-3xl font-bold text-[#00236f]">Trip Calendar</h1>
-          <p className="text-xs text-[#757682] font-['Inter'] mt-0.5">Managing Aarav's upcoming travel dates & hotel stays</p>
+          <p className="text-xs text-[#757682] font-['Inter'] mt-0.5">Managing {user?.name ? `${user.name.split(' ')[0]}'s` : 'your'} upcoming travel dates & hotel stays</p>
         </div>
 
         {/* Quick Month Jump Shortcuts */}

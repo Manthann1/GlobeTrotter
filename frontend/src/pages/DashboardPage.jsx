@@ -106,18 +106,30 @@ export default function DashboardPage({ onOpenNewTrip }) {
           </div>
 
           {/* Trip Cards List */}
-          {upcomingTrips.map((trip) => {
-            const { totalSpent } = calculateTripTotals(trip);
-            const totalBudget = trip.budget?.totalBudget || 50000;
-            const spentPercent = Math.min(100, Math.round((totalSpent / totalBudget) * 100)) || 0;
-            const inBudget = totalSpent <= totalBudget;
+          {upcomingTrips.length === 0 ? (
+            <div className="bg-white border border-[#c5c5d3] rounded-2xl p-8 text-center font-['Inter'] space-y-3 shadow-xs">
+              <p className="text-sm font-bold text-[#191c1d]">No upcoming trips scheduled.</p>
+              <p className="text-xs text-[#757682]">Start planning your next Indian or global getaway now!</p>
+              <button
+                onClick={onOpenNewTrip}
+                className="px-6 py-2.5 bg-[#00236f] text-white rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#1e3a8a] transition-all shadow-md"
+              >
+                Plan a New Journey
+              </button>
+            </div>
+          ) : (
+            upcomingTrips.map((trip) => {
+              const { totalSpent } = calculateTripTotals(trip);
+              const totalBudget = trip.budget?.totalBudget || 50000;
+              const spentPercent = Math.min(100, Math.round((totalSpent / totalBudget) * 100)) || 0;
+              const inBudget = totalSpent <= totalBudget;
 
-            const formatDate = (dateInput) => {
-              if (!dateInput) return '';
-              let str = String(dateInput).trim();
-              if (str.includes('T')) {
-                str = str.split('T')[0];
-              }
+              const formatDate = (dateInput) => {
+                if (!dateInput) return '';
+                let str = String(dateInput).trim();
+                if (str.includes('T')) {
+                  str = str.split('T')[0];
+                }
               const parts = str.split('-');
               if (parts.length === 3) {
                 const year = parseInt(parts[0], 10);
@@ -216,7 +228,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
                 </div>
               </div>
             );
-          })}
+          }))}
 
           {/* Create New Trip Action Button Area (Dashed Box) */}
           <button

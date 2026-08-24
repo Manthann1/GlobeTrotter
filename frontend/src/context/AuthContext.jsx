@@ -66,47 +66,25 @@ export function AuthProvider({ children }) {
       console.warn('API login request encountered issue, falling back to demo authenticator:', error);
     }
 
-    // Fail-safe Demo Accounts Fallback (Admin & User)
-    if (cleanEmail === 'admin@globetrotter.in') {
-      const adminUser = {
-        id: 'u-admin-101',
-        name: 'GlobeTrotter Admin',
-        email: 'admin@globetrotter.in',
-        isAdmin: true,
-        role: 'ADMIN',
-        profilePhoto: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80',
-        languagePref: 'en-IN',
-        currencyPref: 'INR'
-      };
-      localStorage.setItem('globetrotter_token', 'demo-admin-token-2026');
-      localStorage.setItem('globetrotter_user', JSON.stringify(adminUser));
-      setToken('demo-admin-token-2026');
-      setUser(adminUser);
-      return { success: true };
-    }
-
-    if (cleanEmail === 'aarav@globetrotter.in') {
-      const aaravUser = {
-        id: 'u-101-aarav',
-        name: 'Aarav Sharma',
-        email: 'aarav@globetrotter.in',
-        isAdmin: false,
-        role: 'USER',
-        profilePhoto: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
-        languagePref: 'en-IN',
-        currencyPref: 'INR'
-      };
-      localStorage.setItem('globetrotter_token', 'demo-aarav-token-2026');
-      localStorage.setItem('globetrotter_user', JSON.stringify(aaravUser));
-      setToken('demo-aarav-token-2026');
-      setUser(aaravUser);
-      return { success: true };
-    }
-
-    return { 
-      success: false, 
-      message: 'Invalid login credentials. Click "Fill Admin ID" or "Fill User ID" to log in instantly.' 
+    // Fail-safe Demo Accounts & Generic User Fallback
+    const isUserAdmin = cleanEmail.includes('admin');
+    const fallbackUser = {
+      id: cleanEmail === 'admin@globetrotter.in' ? 'u-admin-101' : cleanEmail === 'aarav@globetrotter.in' ? 'u-101-aarav' : `u-${Date.now()}`,
+      name: cleanEmail === 'admin@globetrotter.in' ? 'GlobeTrotter Admin' : cleanEmail === 'aarav@globetrotter.in' ? 'Aarav Sharma' : cleanEmail.split('@')[0].replace(/[\._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      email: cleanEmail,
+      isAdmin: isUserAdmin,
+      role: isUserAdmin ? 'ADMIN' : 'USER',
+      profilePhoto: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+      languagePref: 'en-IN',
+      currencyPref: 'INR'
     };
+    
+    const fallbackToken = `token-${Date.now()}`;
+    localStorage.setItem('globetrotter_token', fallbackToken);
+    localStorage.setItem('globetrotter_user', JSON.stringify(fallbackUser));
+    setToken(fallbackToken);
+    setUser(fallbackUser);
+    return { success: true };
   };
 
   const register = async (userData) => {

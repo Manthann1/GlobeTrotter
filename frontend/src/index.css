@@ -161,15 +161,52 @@
 
 /* Glassmorphism & UI animations */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glass-panel-dark {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .dark-glass {
   background: rgba(0, 35, 111, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #00236f 0%, #3b82f6 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-vibrant {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-bg-hero {
+  background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, rgba(244, 63, 94, 0.05) 50%, rgba(255, 255, 255, 0) 100%),
+              radial-gradient(circle at 90% 80%, rgba(245, 158, 11, 0.12) 0%, rgba(0, 35, 111, 0.08) 60%, rgba(255, 255, 255, 0) 100%);
+}
+
+.glow-blue {
+  box-shadow: 0 8px 32px 0 rgba(59, 130, 246, 0.25);
+}
+
+.glow-amber {
+  box-shadow: 0 8px 32px 0 rgba(245, 158, 11, 0.25);
+}
+
+.glow-purple {
+  box-shadow: 0 8px 32px 0 rgba(168, 85, 247, 0.25);
 }
 
 /* Custom subtle scrollbar */
@@ -203,17 +240,36 @@
   transition: box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .stop-card:hover {
-  box-shadow: 0 12px 28px -4px rgba(0, 35, 111, 0.08);
-  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -6px rgba(0, 35, 111, 0.12);
+  transform: translateY(-3px);
 }
 
 .activity-card {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .activity-card:hover {
   border-color: #00236f;
   background-color: #ffffff;
-  transform: translateX(2px);
+  transform: translateX(4px);
+  box-shadow: 0 8px 20px -4px rgba(0, 35, 111, 0.08);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(8px) rotate(-1deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 7s ease-in-out infinite;
 }
 
 @keyframes pulse-slow {
@@ -243,3 +299,4 @@
     break-inside: avoid;
   }
 }
+
