@@ -4,7 +4,14 @@ import { api } from '../services/api';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const u = localStorage.getItem('globetrotter_user');
+      return u ? JSON.parse(u) : null;
+    } catch {
+      return null;
+    }
+  });
   const [token, setToken] = useState(localStorage.getItem('globetrotter_token'));
   const [loading, setLoading] = useState(true);
 
@@ -43,6 +50,8 @@ export function AuthProvider({ children }) {
             }
           }
         }
+      } else {
+        setUser(null);
       }
       setLoading(false);
     };
@@ -165,7 +174,12 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {loading ? (
+        <div className="min-h-screen bg-[#f8f9fa] flex flex-col items-center justify-center font-['Inter']">
+          <div className="w-10 h-10 border-4 border-[#00236f]/20 border-t-[#00236f] rounded-full animate-spin mb-3"></div>
+          <p className="text-xs font-bold uppercase tracking-wider text-[#00236f]">Loading GlobeTrotter...</p>
+        </div>
+      ) : children}
     </AuthContext.Provider>
   );
 }
