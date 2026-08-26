@@ -62,11 +62,22 @@ export function AuthProvider({ children }) {
         setUser(userData);
         return { success: true };
       }
+      return {
+        success: false,
+        message: response?.message || 'Login failed'
+      };
     } catch (error) {
-      console.warn('API login request encountered issue, falling back to demo authenticator:', error);
+      console.warn('API login request encountered issue:', error);
+      // If the backend API responded with an error (e.g., 401 Invalid Credentials, 400 Bad Request, 404), return the actual error!
+      if (error.response) {
+        return {
+          success: false,
+          message: error.response?.data?.message || error.response?.data?.error || 'Invalid credentials'
+        };
+      }
     }
 
-    // Fail-safe Demo Accounts & Generic User Fallback
+    // Fail-safe Demo Accounts (Only if network/backend is unreachable)
     const isUserAdmin = cleanEmail.includes('admin');
     const fallbackUser = {
       id: cleanEmail === 'admin@globetrotter.in' ? 'u-admin-101' : cleanEmail === 'aarav@globetrotter.in' ? 'u-101-aarav' : `u-${Date.now()}`,
