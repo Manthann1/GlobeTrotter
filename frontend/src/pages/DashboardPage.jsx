@@ -27,8 +27,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
     })
     .map(t => ({...t, status: 'past', subtitle: t.stops?.map(s => s.cityName || s.city?.name).filter(Boolean).join(', ') || 'India Getaway'}));
 
-  // Fail-safe past trips list if empty
-  const displayPastTrips = pastTrips.length > 0 ? pastTrips : trips.slice(0, 3).map(t => ({...t, dateLabel: 'Completed'}));
+  const displayPastTrips = pastTrips;
 
   return (
     <div className="flex-grow w-full px-4 md:px-10 max-w-[1280px] mx-auto py-8">

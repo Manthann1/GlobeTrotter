@@ -144,22 +144,29 @@ export function TripProvider({ children }) {
         const citiesData = await api.getCities();
         setCities(Array.isArray(citiesData) && citiesData.length > 0 ? citiesData : CITIES_DATA);
         
-        let loadedTrips = [];
-        try {
-          loadedTrips = await api.getTrips();
-        } catch {
-          loadedTrips = await api.getPublicTrips();
+        let loadedTrips = null;
+        if (isAuthenticated) {
+          try {
+            loadedTrips = await api.getTrips();
+          } catch (err) {
+            console.error("Failed to fetch user trips:", err);
+          }
         }
 
-        if (!Array.isArray(loadedTrips) || loadedTrips.length === 0) {
-          loadedTrips = await api.getPublicTrips();
+        if (Array.isArray(loadedTrips)) {
+          // User is authenticated: use their real database trips (even if empty array)
+          setTrips(loadedTrips.map(normalizeTrip));
+        } else {
+          // Guest mode or network error: load public/sample trips for browsing
+          try {
+            const publicTrips = await api.getPublicTrips();
+            setTrips(Array.isArray(publicTrips) && publicTrips.length > 0 
+              ? publicTrips.map(normalizeTrip) 
+              : INITIAL_TRIPS.map(normalizeTrip));
+          } catch {
+            setTrips(INITIAL_TRIPS.map(normalizeTrip));
+          }
         }
-
-        let normalized = (Array.isArray(loadedTrips) ? loadedTrips : []).map(normalizeTrip);
-        if (normalized.length === 0) {
-          normalized = INITIAL_TRIPS.map(normalizeTrip);
-        }
-        setTrips(normalized);
       } catch (err) {
         console.error("Failed to load initial data:", err);
         setTrips(INITIAL_TRIPS.map(normalizeTrip));
