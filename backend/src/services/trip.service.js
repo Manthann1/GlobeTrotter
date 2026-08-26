@@ -111,6 +111,12 @@ export const updateTrip = async (userId, tripId, updateData) => {
   // Ensure the trip exists and belongs to the user
   const existingTrip = await getTripById(userId, tripId);
 
+  if (userId && existingTrip.userId !== userId) {
+    const error = new Error('Forbidden. You do not have permission to modify this trip.');
+    error.statusCode = 403;
+    throw error;
+  }
+
   // Validate date relationship if updating partial dates
   const newStartDate = updateData.startDate ?? existingTrip.startDate;
   const newEndDate = updateData.endDate ?? existingTrip.endDate;
@@ -125,7 +131,7 @@ export const updateTrip = async (userId, tripId, updateData) => {
   const { id, userId: _ignoredUserId, ...safeUpdateData } = updateData;
 
   const updatedTrip = await prisma.trip.update({
-    where: { id: tripId },
+    where: { id: existingTrip.id },
     data: safeUpdateData,
   });
 
@@ -137,10 +143,16 @@ export const updateTrip = async (userId, tripId, updateData) => {
  */
 export const deleteTrip = async (userId, tripId) => {
   // Ensure the trip exists and belongs to the user
-  await getTripById(userId, tripId);
+  const existingTrip = await getTripById(userId, tripId);
+
+  if (userId && existingTrip.userId !== userId) {
+    const error = new Error('Forbidden. You do not have permission to delete this trip.');
+    error.statusCode = 403;
+    throw error;
+  }
 
   await prisma.trip.delete({
-    where: { id: tripId },
+    where: { id: existingTrip.id },
   });
 
   return { id: tripId };

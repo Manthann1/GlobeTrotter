@@ -35,6 +35,12 @@ export const addStopToTrip = async (userId, tripId, { cityId, arrivalDate, depar
   // 1. Verify that the trip exists and belongs to the authenticated user
   const trip = await getTripById(userId, tripId);
 
+  if (userId && trip.userId !== userId) {
+    const error = new Error('Forbidden. You do not have permission to modify this trip.');
+    error.statusCode = 403;
+    throw error;
+  }
+
   // Check date overlap
   await checkStopOverlap(tripId, arrivalDate, departureDate);
 

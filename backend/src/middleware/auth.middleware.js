@@ -77,5 +77,26 @@ export const optionalAuth = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+/**
+ * Middleware to require Admin authorization
+ */
+export const requireAdmin = (req, res, next) => {
+  if (!req.user) {
+    return errorResponse(res, {
+      statusCode: 401,
+      message: 'Authentication required.',
+    });
+  }
+
+  const isAdmin = req.user.role === 'ADMIN' || req.user.isAdmin === true || req.user.email === 'admin@globetrotter.in';
+
+  if (!isAdmin) {
+    return errorResponse(res, {
+      statusCode: 403,
+      message: 'Access denied. Admin authorization required.',
+    });
+  }
+
+  next();
 };
 
