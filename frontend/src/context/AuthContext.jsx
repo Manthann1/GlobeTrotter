@@ -33,17 +33,26 @@ export function AuthProvider({ children }) {
             logout();
           }
         } else {
+          // Instantly load stored user from localStorage so page renders immediately
+          if (storedUser) {
+            try {
+              setUser(JSON.parse(storedUser));
+            } catch {
+              // Ignore parse error
+            }
+          }
           try {
             const userData = await api.getUser();
             if (userData) {
               setUser(userData);
               localStorage.setItem('globetrotter_user', JSON.stringify(userData));
-            } else {
-              logout();
             }
           } catch (error) {
-            console.error("Session verification failed:", error);
-            logout();
+            console.warn("Session verification warning:", error);
+            // Only log out if server explicitly returned 401 Unauthorized or 403 Forbidden
+            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+              logout();
+            }
           }
         }
       } else {
