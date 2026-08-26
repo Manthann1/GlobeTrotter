@@ -10,6 +10,14 @@
 
 ---
 
+## 🌐 Live Application Deployment
+
+- 🚀 **Live Website (Frontend)**: [https://globe-trotter-swart.vercel.app](https://globe-trotter-swart.vercel.app)
+- ⚡ **Backend API Server**: [https://globetrotter-backend-qxfk.onrender.com](https://globetrotter-backend-qxfk.onrender.com)
+- 🗄️ **Database Host**: Supabase PostgreSQL (Managed Transaction & Session Pooler)
+
+---
+
 ## 📌 Table of Contents
 
 - [✨ Key Features](#-key-features)

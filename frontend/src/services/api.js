@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const rawUrl = import.meta.env.VITE_API_URL || '/api';
+const defaultBackendUrl = 'https://globetrotter-backend-qxfk.onrender.com/api';
+const rawUrl = import.meta.env.VITE_API_URL || defaultBackendUrl;
 const API_BASE_URL = (rawUrl !== '/api' && !rawUrl.endsWith('/api'))
   ? `${rawUrl.replace(/\/+$/, '')}/api`
   : rawUrl;
