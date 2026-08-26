@@ -77,6 +77,8 @@ export const optionalAuth = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
 /**
  * Middleware to require Admin authorization
  */
