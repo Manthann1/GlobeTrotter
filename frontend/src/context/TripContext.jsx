@@ -153,11 +153,17 @@ export function TripProvider({ children }) {
           }
         }
 
+        const isDemoUser = !user || user?.email === 'aarav@globetrotter.in' || user?.email === 'admin@globetrotter.in';
+
         if (Array.isArray(loadedTrips)) {
-          // User is authenticated: use their real database trips (even if empty array)
-          setTrips(loadedTrips.map(normalizeTrip));
-        } else {
-          // Guest mode or network error: load public/sample trips for browsing
+          if (loadedTrips.length > 0) {
+            setTrips(loadedTrips.map(normalizeTrip));
+          } else if (isDemoUser) {
+            setTrips(INITIAL_TRIPS.map(normalizeTrip));
+          } else {
+            setTrips([]);
+          }
+        } else if (isDemoUser) {
           try {
             const publicTrips = await api.getPublicTrips();
             setTrips(Array.isArray(publicTrips) && publicTrips.length > 0 
@@ -166,17 +172,20 @@ export function TripProvider({ children }) {
           } catch {
             setTrips(INITIAL_TRIPS.map(normalizeTrip));
           }
+        } else {
+          setTrips([]);
         }
       } catch (err) {
         console.error("Failed to load initial data:", err);
-        setTrips(INITIAL_TRIPS.map(normalizeTrip));
+        const isDemoUser = !user || user?.email === 'aarav@globetrotter.in' || user?.email === 'admin@globetrotter.in';
+        setTrips(isDemoUser ? INITIAL_TRIPS.map(normalizeTrip) : []);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [isAuthenticated, user?.id]);
+  }, [isAuthenticated, user?.id, user?.email]);
 
   useEffect(() => {
     localStorage.setItem('globetrotter_currency', currency);

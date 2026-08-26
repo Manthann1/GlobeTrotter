@@ -15,14 +15,10 @@ export default function CommunityPage() {
       try {
         setIsLoading(true);
         const data = await api.getPublicTrips();
-        if (Array.isArray(data) && data.length > 0) {
-          setPublicTrips(data);
-        } else {
-          setPublicTrips(INITIAL_TRIPS.filter(t => t.isPublic !== false));
-        }
+        setPublicTrips(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error('Failed to fetch public trips, using mock fallback:', error);
-        setPublicTrips(INITIAL_TRIPS.filter(t => t.isPublic !== false));
+        console.error('Failed to fetch public trips:', error);
+        setPublicTrips([]);
       } finally {
         setIsLoading(false);
       }

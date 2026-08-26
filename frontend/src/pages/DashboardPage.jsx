@@ -29,6 +29,13 @@ export default function DashboardPage({ onOpenNewTrip }) {
 
   const displayPastTrips = pastTrips;
 
+  const totalSavings = (trips || []).reduce((acc, t) => {
+    const { totalSpent } = calculateTripTotals(t);
+    const budget = Number(t.totalBudget || 0);
+    const diff = budget > totalSpent ? (budget - totalSpent) : 0;
+    return acc + diff;
+  }, 0);
+
   return (
     <div className="flex-grow w-full px-4 md:px-10 max-w-[1280px] mx-auto py-8">
       <section className="mb-8">
@@ -79,7 +86,7 @@ export default function DashboardPage({ onOpenNewTrip }) {
               Estimated Budget Savings
             </span>
             <span className="text-2xl font-bold font-['JetBrains Mono'] text-[#5c3800]">
-              {formatPrice(user.stats?.budgetSavings || 38500)}
+              {formatPrice(totalSavings)}
             </span>
           </div>
         </div>

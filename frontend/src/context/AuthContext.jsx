@@ -79,25 +79,31 @@ export function AuthProvider({ children }) {
       }
     }
 
-    // Fail-safe Demo Accounts (Only if network/backend is unreachable)
-    const isUserAdmin = cleanEmail.includes('admin');
-    const fallbackUser = {
-      id: cleanEmail === 'admin@globetrotter.in' ? 'u-admin-101' : cleanEmail === 'aarav@globetrotter.in' ? 'u-101-aarav' : `u-${Date.now()}`,
-      name: cleanEmail === 'admin@globetrotter.in' ? 'GlobeTrotter Admin' : cleanEmail === 'aarav@globetrotter.in' ? 'Aarav Sharma' : cleanEmail.split('@')[0].replace(/[\._]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
-      email: cleanEmail,
-      isAdmin: isUserAdmin,
-      role: isUserAdmin ? 'ADMIN' : 'USER',
-      profilePhoto: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
-      languagePref: 'en-IN',
-      currencyPref: 'INR'
-    };
-    
-    const fallbackToken = `token-${Date.now()}`;
-    localStorage.setItem('globetrotter_token', fallbackToken);
-    localStorage.setItem('globetrotter_user', JSON.stringify(fallbackUser));
-    setToken(fallbackToken);
-    setUser(fallbackUser);
-    return { success: true };
+    // Fail-safe Demo Accounts (Only for aarav@globetrotter.in & admin@globetrotter.in if backend is unreachable)
+    if (cleanEmail === 'aarav@globetrotter.in' || cleanEmail === 'admin@globetrotter.in') {
+      const isUserAdmin = cleanEmail === 'admin@globetrotter.in';
+      const fallbackUser = {
+        id: isUserAdmin ? 'u-admin-101' : 'u-101-aarav',
+        name: isUserAdmin ? 'GlobeTrotter Admin' : 'Aarav Sharma',
+        email: cleanEmail,
+        isAdmin: isUserAdmin,
+        role: isUserAdmin ? 'ADMIN' : 'USER',
+        profilePhoto: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+        phone: '+91 98201 23456',
+        bio: 'Heritage explorer & travel enthusiast.',
+        languagePref: 'en-IN',
+        currencyPref: 'INR'
+      };
+      
+      const fallbackToken = `demo-${Date.now()}`;
+      localStorage.setItem('globetrotter_token', fallbackToken);
+      localStorage.setItem('globetrotter_user', JSON.stringify(fallbackUser));
+      setToken(fallbackToken);
+      setUser(fallbackUser);
+      return { success: true };
+    }
+
+    return { success: false, message: 'Invalid email or password' };
   };
 
   const register = async (userData) => {

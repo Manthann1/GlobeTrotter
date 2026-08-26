@@ -40,7 +40,7 @@ export default function ExplorePage({ onOpenNewTrip }) {
 
   // Filter public trips dynamically based on search query
   const filteredPublicTrips = useMemo(() => {
-    const list = publicTrips.length > 0 ? publicTrips : trips;
+    const list = Array.isArray(publicTrips) ? publicTrips : [];
     if (!searchTerm.trim()) return list;
 
     const q = searchTerm.toLowerCase();
