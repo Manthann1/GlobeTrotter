@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
       const storedUser = localStorage.getItem('globetrotter_user');
       
       if (storedToken) {
-        if (storedToken.startsWith('demo-')) {
+        if (storedToken.startsWith('demo-') || storedToken.startsWith('token-')) {
           if (storedUser) {
             try {
               setUser(JSON.parse(storedUser));
@@ -26,9 +26,12 @@ export function AuthProvider({ children }) {
         } else {
           try {
             const userData = await api.getUser();
-            setUser(userData);
+            if (userData) {
+              setUser(userData);
+              localStorage.setItem('globetrotter_user', JSON.stringify(userData));
+            }
           } catch (error) {
-            console.error("Failed to fetch user with token, checking stored user:", error);
+            console.error("Failed to fetch user with token:", error);
             if (storedUser) {
               try {
                 setUser(JSON.parse(storedUser));
@@ -68,7 +71,6 @@ export function AuthProvider({ children }) {
       };
     } catch (error) {
       console.warn('API login request encountered issue:', error);
-      // If the backend API responded with an error (e.g., 401 Invalid Credentials, 400 Bad Request, 404), return the actual error!
       if (error.response) {
         return {
           success: false,
@@ -105,6 +107,7 @@ export function AuthProvider({ children }) {
       if (response.success && response.data) {
         const { user: newUser, token: jwtToken } = response.data;
         localStorage.setItem('globetrotter_token', jwtToken);
+        localStorage.setItem('globetrotter_user', JSON.stringify(newUser));
         setToken(jwtToken);
         setUser(newUser);
         return { success: true };

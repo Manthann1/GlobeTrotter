@@ -24,7 +24,7 @@ export const generateToken = (payload) => {
 /**
  * Register a new user
  */
-export const registerUser = async ({ name, email, password, profilePhoto, languagePref }) => {
+export const registerUser = async ({ name, email, password, phone, bio, profilePhoto, languagePref }) => {
   const normalizedEmail = email.toLowerCase().trim();
 
   // Check if user already exists
@@ -48,6 +48,8 @@ export const registerUser = async ({ name, email, password, profilePhoto, langua
       name: name.trim(),
       email: normalizedEmail,
       passwordHash,
+      ...(phone && { phone }),
+      ...(bio && { bio }),
       ...(profilePhoto && { profilePhoto }),
       ...(languagePref && { languagePref }),
     },
