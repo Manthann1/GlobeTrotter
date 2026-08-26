@@ -11,7 +11,18 @@ export default function Navbar({ onOpenNewTrip }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'Welcome to GlobeTrotter! ✈️', message: 'Start planning your next Indian or global getaway.', time: 'Just now', unread: true },
+    { id: 2, title: 'Explore Destinations 🇮🇳', message: 'Discover 50+ curated spots across Rajasthan, Kerala & Ladakh.', time: '1h ago', unread: true },
+    { id: 3, title: 'Share & Collaborate 🔗', message: 'Generate share links to invite friends to your travel itinerary.', time: '1d ago', unread: false }
+  ]);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  const markAllRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  };
 
   const isActive = (path) => {
     if (path === '/' && location.pathname === '/') return true;
@@ -119,13 +130,65 @@ export default function Navbar({ onOpenNewTrip }) {
               </button>
 
               <div className="flex items-center gap-1">
-                <button
-                  title="Notifications"
-                  className="p-2 text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] rounded-full transition-colors relative"
-                >
-                  <span className="material-symbols-outlined text-[20px]">notifications</span>
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF5722] rounded-full ring-2 ring-white"></span>
-                </button>
+                <div className="relative">
+                  <button
+                    title="Notifications"
+                    onClick={() => {
+                      setNotifDropdownOpen(!notifDropdownOpen);
+                      setProfileDropdownOpen(false);
+                    }}
+                    className="p-2 text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] rounded-full transition-colors relative cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">notifications</span>
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF5722] rounded-full ring-2 ring-white"></span>
+                    )}
+                  </button>
+
+                  {notifDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-80 bg-white border border-[#c5c5d3] rounded-xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                      <div className="px-4 py-2 border-b border-[#edeeef] flex justify-between items-center">
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-sm font-bold text-[#191c1d]">Notifications</p>
+                          {unreadCount > 0 && (
+                            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#FF5722]/10 text-[#FF5722] rounded-full">
+                              {unreadCount} new
+                            </span>
+                          )}
+                        </div>
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={markAllRead}
+                            className="text-[11px] font-semibold text-[#00236f] hover:underline cursor-pointer"
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="max-h-72 overflow-y-auto divide-y divide-[#f3f4f5]">
+                        {notifications.map((n) => (
+                          <div
+                            key={n.id}
+                            onClick={() => {
+                              setNotifications(prev => prev.map(item => item.id === n.id ? { ...item, unread: false } : item));
+                            }}
+                            className={`p-3.5 hover:bg-[#f8f9fa] transition-colors cursor-pointer flex gap-3 ${
+                              n.unread ? 'bg-[#00236f]/5' : ''
+                            }`}
+                          >
+                            <div className="w-2 h-2 rounded-full bg-[#00236f] mt-1.5 shrink-0" style={{ opacity: n.unread ? 1 : 0 }} />
+                            <div className="flex-1">
+                              <p className="text-xs font-bold text-[#191c1d]">{n.title}</p>
+                              <p className="text-xs text-[#444651] mt-0.5 leading-relaxed">{n.message}</p>
+                              <span className="text-[10px] text-[#757682] mt-1 block">{n.time}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <div className="relative ml-1">
                   <button
