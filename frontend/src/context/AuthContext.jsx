@@ -22,13 +22,15 @@ export function AuthProvider({ children }) {
       const storedUser = localStorage.getItem('globetrotter_user');
       
       if (storedToken) {
-        if (storedToken.startsWith('demo-') || storedToken.startsWith('token-')) {
+        if (storedToken.startsWith('demo-')) {
           if (storedUser) {
             try {
               setUser(JSON.parse(storedUser));
             } catch {
-              setUser(null);
+              logout();
             }
+          } else {
+            logout();
           }
         } else {
           try {
@@ -36,18 +38,12 @@ export function AuthProvider({ children }) {
             if (userData) {
               setUser(userData);
               localStorage.setItem('globetrotter_user', JSON.stringify(userData));
-            }
-          } catch (error) {
-            console.error("Failed to fetch user with token:", error);
-            if (storedUser) {
-              try {
-                setUser(JSON.parse(storedUser));
-              } catch {
-                logout();
-              }
             } else {
               logout();
             }
+          } catch (error) {
+            console.error("Session verification failed:", error);
+            logout();
           }
         }
       } else {
