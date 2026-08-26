@@ -11,6 +11,7 @@ export default function Navbar({ onOpenNewTrip }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
   const [notifications, setNotifications] = useState([
     { id: 1, title: 'Welcome to GlobeTrotter! ✈️', message: 'Start planning your next Indian or global getaway.', time: 'Just now', unread: true },
