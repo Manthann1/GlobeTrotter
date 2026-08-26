@@ -133,31 +133,34 @@ export default function Navbar({ onOpenNewTrip }) {
                 <div className="relative">
                   <button
                     title="Notifications"
-                    onClick={() => {
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setNotifDropdownOpen(!notifDropdownOpen);
                       setProfileDropdownOpen(false);
                     }}
-                    className="p-2 text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] rounded-full transition-colors relative cursor-pointer"
+                    className="p-2.5 text-[#444651] hover:text-[#00236f] hover:bg-[#f3f4f5] rounded-full transition-colors relative cursor-pointer flex items-center justify-center"
                   >
-                    <span className="material-symbols-outlined text-[20px]">notifications</span>
+                    <Bell className="w-5 h-5 text-[#444651]" />
                     {unreadCount > 0 && (
-                      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#FF5722] rounded-full ring-2 ring-white"></span>
+                      <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[#FF5722] rounded-full ring-2 ring-white"></span>
                     )}
                   </button>
 
                   {notifDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-80 bg-white border border-[#c5c5d3] rounded-xl shadow-xl py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                      <div className="px-4 py-2 border-b border-[#edeeef] flex justify-between items-center">
+                    <div className="absolute right-0 mt-2 w-80 bg-white border border-[#c5c5d3] rounded-xl shadow-2xl py-2 z-[100] animate-in fade-in zoom-in-95 duration-150">
+                      <div className="px-4 py-2 border-b border-[#edeeef] flex justify-between items-center bg-[#f8f9fa]">
                         <div className="flex items-center gap-1.5">
                           <p className="text-sm font-bold text-[#191c1d]">Notifications</p>
                           {unreadCount > 0 && (
-                            <span className="px-1.5 py-0.5 text-[10px] font-bold bg-[#FF5722]/10 text-[#FF5722] rounded-full">
+                            <span className="px-2 py-0.5 text-[10px] font-bold bg-[#FF5722]/10 text-[#FF5722] rounded-full">
                               {unreadCount} new
                             </span>
                           )}
                         </div>
                         {unreadCount > 0 && (
                           <button
+                            type="button"
                             onClick={markAllRead}
                             className="text-[11px] font-semibold text-[#00236f] hover:underline cursor-pointer"
                           >
